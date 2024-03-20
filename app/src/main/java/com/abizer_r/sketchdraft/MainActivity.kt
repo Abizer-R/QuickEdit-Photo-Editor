@@ -41,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingCanvas
+import com.abizer_r.sketchdraft.ui.drawingCanvas.PathDetails
 import com.abizer_r.sketchdraft.ui.theme.SketchDraftTheme
 import kotlin.math.max
 import kotlin.math.min
@@ -55,6 +56,7 @@ class MainActivity : ComponentActivity() {
 
                 var opacity by remember { mutableStateOf(100) }
                 var strokeWidth by remember { mutableStateOf(2) }
+                val pathList = remember { mutableListOf<PathDetails>() }
 
                 val scaffoldState = rememberBottomSheetScaffoldState()
                 val dragHandleIconSize = 32
@@ -95,7 +97,11 @@ class MainActivity : ComponentActivity() {
                         DrawingCanvas(
                             modifier = Modifier.fillMaxSize(),
                             strokeWidth = strokeWidth.toFloat(),
-                            strokeOpacity = opacity.toFloat()
+                            strokeOpacity = opacity.toFloat(),
+                            pathList = pathList,
+                            addPathToList = { pathDetails ->
+                                pathList.add(pathDetails)
+                            }
                         )
                     }
                 }

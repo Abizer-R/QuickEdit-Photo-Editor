@@ -29,9 +29,11 @@ fun DrawingCanvas(
     modifier: Modifier,
     strokeWidth: Float,
     strokeOpacity: Float,
-    strokeColor: Color = Color.Blue
+    strokeColor: Color = Color.Blue,
+    pathList: List<PathDetails>,
+    addPathToList: (PathDetails) -> Unit
 ) {
-    val path by remember { mutableStateOf(Path()) }
+    var path = Path()
     var drawPathAction by remember { mutableStateOf<Any?>(null) }
     Canvas(
         modifier = modifier
@@ -46,14 +48,28 @@ fun DrawingCanvas(
                         drawPathAction = Offset(it.x, it.y) // this is just to trigger recomposition
                     }
 
-                    MotionEvent.ACTION_CANCEL -> {}
-                    MotionEvent.ACTION_UP -> {}
+                    MotionEvent.ACTION_CANCEL,
+                    MotionEvent.ACTION_UP -> {
+                        addPathToList(
+                            PathDetails(path, strokeWidth, strokeOpacity / 100f, strokeColor)
+                        )
+                        path = Path()
+                    }
                 }
                 true
             }
 
 
     ) {
+        pathList.forEach { pathDetails ->
+            drawPath(
+                path = pathDetails.path,
+                brush = SolidColor(pathDetails.color),
+                style = Stroke(width = pathDetails.width),
+                alpha = pathDetails.alpha
+            )
+        }
+
         drawPathAction?.let {
             drawPath(
                 path = path,
