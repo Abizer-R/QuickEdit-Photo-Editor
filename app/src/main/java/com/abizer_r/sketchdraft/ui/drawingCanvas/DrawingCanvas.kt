@@ -26,7 +26,10 @@ import kotlin.math.sqrt
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun DrawingCanvas(
-    modifier: Modifier
+    modifier: Modifier,
+    strokeWidth: Float,
+    strokeOpacity: Float,
+    strokeColor: Color = Color.Blue
 ) {
     val path by remember { mutableStateOf(Path()) }
     var drawPathAction by remember { mutableStateOf<Any?>(null) }
@@ -54,8 +57,9 @@ fun DrawingCanvas(
         drawPathAction?.let {
             drawPath(
                 path = path,
-                brush = SolidColor(Color.Blue),
-                style = Stroke(width = 5f)
+                brush = SolidColor(strokeColor),
+                style = Stroke(width = strokeWidth),
+                alpha = strokeOpacity / 100f
             )
         }
     }
