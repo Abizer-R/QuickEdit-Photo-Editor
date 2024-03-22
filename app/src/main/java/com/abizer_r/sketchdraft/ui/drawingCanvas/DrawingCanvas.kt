@@ -16,10 +16,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.asAndroidPath
+import androidx.compose.ui.graphics.drawscope.DrawStyle
+import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
+import com.abizer_r.sketchdraft.util.drawDefaultPath
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -62,19 +66,19 @@ fun DrawingCanvas(
 
     ) {
         pathList.forEach { pathDetails ->
-            drawPath(
+            drawDefaultPath(
                 path = pathDetails.path,
-                brush = SolidColor(pathDetails.color),
-                style = Stroke(width = pathDetails.width),
+                strokeColor = pathDetails.color,
+                strokeWidth = pathDetails.width,
                 alpha = pathDetails.alpha
             )
         }
 
         drawPathAction?.let {
-            drawPath(
+            drawDefaultPath(
                 path = path,
-                brush = SolidColor(strokeColor),
-                style = Stroke(width = strokeWidth),
+                strokeColor = strokeColor,
+                strokeWidth = strokeWidth,
                 alpha = strokeOpacity / 100f
             )
         }
