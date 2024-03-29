@@ -6,8 +6,20 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingState
+import com.abizer_r.sketchdraft.ui.drawingCanvas.PathDetails
+import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.ControllerBSState
 
 object DrawingUtils {
+
+    fun getDefaultControllerBsState(
+        colorList: ArrayList<Color>
+    ) = ControllerBSState(
+        strokeWidth = 8,
+        opacity = 100,
+        colorList = colorList,
+        selectedColorIndex = 0
+    )
 }
 
 fun DrawScope.drawDefaultPath(
@@ -26,3 +38,12 @@ fun DrawScope.drawDefaultPath(
         alpha = alpha
     )
 }
+
+fun DrawingState.getPathDetailsForPath(
+    path: Path
+) = PathDetails(
+    path = path,
+    width = strokeWidth.toFloat(),
+    alpha = opacity / 100f,
+    color = strokeColor
+)
