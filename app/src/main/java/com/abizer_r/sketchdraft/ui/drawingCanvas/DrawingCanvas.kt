@@ -54,7 +54,7 @@ fun DrawingCanvas(
 
 
     ) {
-        drawingState.pathDetailList.forEach { pathDetails ->
+        drawingState.pathDetailStack.forEach { pathDetails ->
             drawDefaultPath(
                 path = pathDetails.path,
                 strokeColor = pathDetails.color,

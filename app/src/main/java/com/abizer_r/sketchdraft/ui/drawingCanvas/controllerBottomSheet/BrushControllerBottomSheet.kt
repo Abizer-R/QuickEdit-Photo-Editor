@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -50,6 +51,27 @@ fun BrushControllerBottomSheet(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            Button(
+                enabled = controllerBsState.isUndoEnabled,
+                onClick = {
+                    onEvent(ControllerBSEvents.Undo)
+                }
+            ) {
+                Text(text = "Undo")
+            }
+
+            Button(
+                enabled = controllerBsState.isRedoEnabled,
+                onClick = { onEvent(ControllerBSEvents.Redo) }
+            ) {
+                Text(text = "Redo")
+            }
+        }
+        Spacer(modifier = Modifier.height(24.dp))
         BrushControllerOptionSlider(
             sliderLabel = "StrokeWidth",
             sliderValue = controllerBsState.strokeWidth,
@@ -213,7 +235,9 @@ fun PreviewControllerBS() {
                 opacity = 80,
                 strokeWidth = 6,
                 colorList = AppUtils.colorList,
-                selectedColorIndex = 0
+                selectedColorIndex = 0,
+                isUndoEnabled = true,
+                isRedoEnabled = true
             ),
             onEvent = {}
         )

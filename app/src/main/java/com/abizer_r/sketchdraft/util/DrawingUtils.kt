@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingState
 import com.abizer_r.sketchdraft.ui.drawingCanvas.PathDetails
 import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.ControllerBSState
+import java.util.Stack
 
 object DrawingUtils {
 
@@ -18,7 +19,9 @@ object DrawingUtils {
         strokeWidth = 8,
         opacity = 100,
         colorList = colorList,
-        selectedColorIndex = 0
+        selectedColorIndex = 0,
+        isUndoEnabled = false,
+        isRedoEnabled = false
     )
 }
 
@@ -46,4 +49,18 @@ fun DrawingState.getPathDetailsForPath(
     width = strokeWidth.toFloat(),
     alpha = opacity / 100f,
     color = strokeColor
+)
+
+fun DrawingState.makeDuplicate(
+    mStrokeWidth: Int? = null,
+    mStrokeColor: Color? = null,
+    mOpacity: Int? = null,
+    mPathDetailStack: Stack<PathDetails>? = null,
+    mRedoStack: Stack<PathDetails>? = null
+) = DrawingState(
+    strokeWidth = mStrokeWidth ?: strokeWidth,
+    strokeColor = mStrokeColor ?: strokeColor,
+    opacity = mOpacity ?: opacity,
+    pathDetailStack = mPathDetailStack ?: pathDetailStack,
+    redoStack = mRedoStack ?: redoStack
 )

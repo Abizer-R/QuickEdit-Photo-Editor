@@ -30,12 +30,15 @@ import androidx.compose.ui.unit.dp
 import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingCanvas
 import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingEvents
 import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingState
+import com.abizer_r.sketchdraft.ui.drawingCanvas.PathDetails
 import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.BrushControllerBottomSheet
 import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.ControllerBSEvents
 import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.getSelectedColor
 import com.abizer_r.sketchdraft.ui.theme.SketchDraftTheme
 import com.abizer_r.sketchdraft.util.AppUtils
 import com.abizer_r.sketchdraft.util.DrawingUtils
+import com.abizer_r.sketchdraft.util.makeDuplicate
+import java.util.Stack
 import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
@@ -66,7 +69,8 @@ fun MainScreen() {
                 strokeWidth = controllerBsState.strokeWidth,
                 opacity = controllerBsState.opacity,
                 strokeColor = controllerBsState.getSelectedColor(),
-                pathDetailList = arrayListOf()
+                pathDetailStack = Stack(),
+                redoStack = Stack()
             )
         )
     }
@@ -97,24 +101,55 @@ fun MainScreen() {
                             controllerBsState = controllerBsState.copy(
                                 opacity = it.opacity.roundToInt()
                             )
-                            drawingState = drawingState.copy(
-                                opacity = it.opacity.roundToInt()
+                            drawingState = drawingState.makeDuplicate(
+                                mOpacity = it.opacity.roundToInt()
                             )
                         }
                         is ControllerBSEvents.StrokeWidthChanged -> {
                             controllerBsState = controllerBsState.copy(
                                 strokeWidth = it.strokeWidth.roundToInt()
                             )
-                            drawingState = drawingState.copy(
-                                strokeWidth = it.strokeWidth.roundToInt()
+                            drawingState = drawingState.makeDuplicate(
+                                mStrokeWidth = it.strokeWidth.roundToInt()
                             )
                         }
                         is ControllerBSEvents.ColorSelected -> {
                             controllerBsState = controllerBsState.copy(
                                 selectedColorIndex = it.index
                             )
-                            drawingState = drawingState.copy(
-                                strokeColor = controllerBsState.getSelectedColor()
+                            drawingState = drawingState.makeDuplicate(
+                                mStrokeColor = controllerBsState.getSelectedColor()
+                            )
+                        }
+
+                        ControllerBSEvents.Undo -> {
+                            // creating new Stack, otherwise recomposition won't get triggered
+                            val mPathStack = Stack<PathDetails>()
+                            mPathStack.addAll(drawingState.pathDetailStack)
+                            val mRedoStack = drawingState.redoStack
+                            mRedoStack.push(mPathStack.pop())
+                            drawingState = drawingState.makeDuplicate(
+                                mPathDetailStack = mPathStack,
+                                mRedoStack = mRedoStack
+                            )
+                            controllerBsState = controllerBsState.copy(
+                                isUndoEnabled = mPathStack.isNotEmpty(),
+                                isRedoEnabled = mRedoStack.isNotEmpty()
+                            )
+                        }
+                        ControllerBSEvents.Redo -> {
+                            // creating new Stack, otherwise recomposition won't get triggered
+                            val mPathStack = Stack<PathDetails>()
+                            mPathStack.addAll(drawingState.pathDetailStack)
+                            val mRedoStack = drawingState.redoStack
+                            mPathStack.push(mRedoStack.pop())
+                            drawingState = drawingState.makeDuplicate(
+                                mPathDetailStack = mPathStack,
+                                mRedoStack = mRedoStack
+                            )
+                            controllerBsState = controllerBsState.copy(
+                                isUndoEnabled = mPathStack.isNotEmpty(),
+                                isRedoEnabled = mRedoStack.isNotEmpty()
                             )
                         }
                     }
@@ -134,10 +169,17 @@ fun MainScreen() {
                 onDrawingEvent = { drawingEvent ->
                     when (drawingEvent) {
                         is DrawingEvents.AddNewPath -> {
-                            val mPathList = drawingState.pathDetailList
-                            mPathList.add(drawingEvent.pathDetail)
+                            // creating new Stack, otherwise recomposition won't get triggered
+                            val mPathStack = Stack<PathDetails>()
+                            mPathStack.addAll(drawingState.pathDetailStack)
+                            mPathStack.push(drawingEvent.pathDetail)
                             drawingState = drawingState.copy(
-                                pathDetailList = mPathList
+                                pathDetailStack = mPathStack,
+                                redoStack = Stack()
+                            )
+                            controllerBsState = controllerBsState.copy(
+                                isUndoEnabled = true,
+                                isRedoEnabled = false
                             )
                         }
                     }
