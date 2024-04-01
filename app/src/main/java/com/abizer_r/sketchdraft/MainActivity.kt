@@ -6,122 +6,194 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.painter.ColorPainter
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingCanvas
+import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingEvents
+import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingState
 import com.abizer_r.sketchdraft.ui.drawingCanvas.PathDetails
 import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.BrushControllerBottomSheet
+import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.ControllerBSEvents
+import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.getSelectedColor
 import com.abizer_r.sketchdraft.ui.theme.SketchDraftTheme
 import com.abizer_r.sketchdraft.util.AppUtils
-import kotlin.math.max
-import kotlin.math.min
+import com.abizer_r.sketchdraft.util.DrawingUtils
+import com.abizer_r.sketchdraft.util.makeDuplicate
+import java.util.Stack
 import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             SketchDraftTheme {
-
-                val colorList = AppUtils.colorList
-                var opacity by remember { mutableStateOf(100) }
-                var strokeWidth by remember { mutableStateOf(6) }
-                var selectedColorIndex by remember { mutableStateOf(0) }
-                val pathList = remember { mutableListOf<PathDetails>() }
-
-                val scaffoldState = rememberBottomSheetScaffoldState()
-                val dragHandleIconSize = 32
-                BottomSheetScaffold(
-                    scaffoldState = scaffoldState,
-                    sheetDragHandle = {
-                        Image(
-                            modifier = Modifier
-                                .padding(top = 8.dp)
-                                .size(dragHandleIconSize.dp),
-                            imageVector = Icons.Outlined.KeyboardArrowUp,
-                            contentDescription = null,
-                            colorFilter = ColorFilter.tint(color = Color.White)
-                        )
-                    },
-                    sheetContent = {
-                        BrushControllerBottomSheet(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(24.dp),
-                            initialValueOpacity = opacity,
-                            onOpacityChanged = {
-                                opacity = it.roundToInt()
-                            },
-                            initialValueStrokeWidth = strokeWidth,
-                            onStrokeWidthChanged = {
-                                strokeWidth = it.roundToInt()
-                            },
-                            selectedColorIndex = selectedColorIndex,
-                            colorList = AppUtils.colorList,
-                            onColorIdxChanged = { idx ->
-                                selectedColorIndex = idx
-                            }
-                        )
-                    }
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(it)
-                            .background(MaterialTheme.colorScheme.background)
-                    ) {
-                        DrawingCanvas(
-                            modifier = Modifier.fillMaxSize(),
-                            strokeWidth = strokeWidth.toFloat(),
-                            strokeOpacity = opacity.toFloat(),
-                            strokeColor = colorList[selectedColorIndex],
-                            pathList = pathList,
-                            addPathToList = { pathDetails ->
-                                pathList.add(pathDetails)
-                            }
-                        )
-                    }
-                }
+                MainScreen()
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainScreen() {
+    var controllerBsState by remember {
+        mutableStateOf(
+            DrawingUtils.getDefaultControllerBsState(
+                colorList = AppUtils.colorList
+            )
+        )
+    }
+
+    var drawingState by remember {
+        mutableStateOf(
+            DrawingState(
+                strokeWidth = controllerBsState.strokeWidth,
+                opacity = controllerBsState.opacity,
+                strokeColor = controllerBsState.getSelectedColor(),
+                pathDetailStack = Stack(),
+                redoStack = Stack()
+            )
+        )
+    }
+
+    val scaffoldState = rememberBottomSheetScaffoldState()
+    val dragHandleIconSize = 32
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        sheetDragHandle = {
+            Image(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .size(dragHandleIconSize.dp),
+                imageVector = Icons.Outlined.KeyboardArrowUp,
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(color = Color.White)
+            )
+        },
+        sheetContent = {
+            BrushControllerBottomSheet(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                controllerBsState = controllerBsState,
+                onEvent = {
+                    when (it) {
+                        is ControllerBSEvents.OpacityChanged -> {
+                            controllerBsState = controllerBsState.copy(
+                                opacity = it.opacity.roundToInt()
+                            )
+                            drawingState = drawingState.makeDuplicate(
+                                mOpacity = it.opacity.roundToInt()
+                            )
+                        }
+                        is ControllerBSEvents.StrokeWidthChanged -> {
+                            controllerBsState = controllerBsState.copy(
+                                strokeWidth = it.strokeWidth.roundToInt()
+                            )
+                            drawingState = drawingState.makeDuplicate(
+                                mStrokeWidth = it.strokeWidth.roundToInt()
+                            )
+                        }
+                        is ControllerBSEvents.ColorSelected -> {
+                            controllerBsState = controllerBsState.copy(
+                                selectedColorIndex = it.index
+                            )
+                            drawingState = drawingState.makeDuplicate(
+                                mStrokeColor = controllerBsState.getSelectedColor()
+                            )
+                        }
+
+                        ControllerBSEvents.Undo -> {
+                            // creating new Stack, otherwise recomposition won't get triggered
+                            val mPathStack = Stack<PathDetails>()
+                            mPathStack.addAll(drawingState.pathDetailStack)
+                            val mRedoStack = drawingState.redoStack
+                            mRedoStack.push(mPathStack.pop())
+                            drawingState = drawingState.makeDuplicate(
+                                mPathDetailStack = mPathStack,
+                                mRedoStack = mRedoStack
+                            )
+                            controllerBsState = controllerBsState.copy(
+                                isUndoEnabled = mPathStack.isNotEmpty(),
+                                isRedoEnabled = mRedoStack.isNotEmpty()
+                            )
+                        }
+                        ControllerBSEvents.Redo -> {
+                            // creating new Stack, otherwise recomposition won't get triggered
+                            val mPathStack = Stack<PathDetails>()
+                            mPathStack.addAll(drawingState.pathDetailStack)
+                            val mRedoStack = drawingState.redoStack
+                            mPathStack.push(mRedoStack.pop())
+                            drawingState = drawingState.makeDuplicate(
+                                mPathDetailStack = mPathStack,
+                                mRedoStack = mRedoStack
+                            )
+                            controllerBsState = controllerBsState.copy(
+                                isUndoEnabled = mPathStack.isNotEmpty(),
+                                isRedoEnabled = mRedoStack.isNotEmpty()
+                            )
+                        }
+                    }
+                }
+            )
+        }
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            DrawingCanvas(
+                modifier = Modifier.fillMaxSize(),
+                drawingState = drawingState,
+                onDrawingEvent = { drawingEvent ->
+                    when (drawingEvent) {
+                        is DrawingEvents.AddNewPath -> {
+                            // creating new Stack, otherwise recomposition won't get triggered
+                            val mPathStack = Stack<PathDetails>()
+                            mPathStack.addAll(drawingState.pathDetailStack)
+                            mPathStack.push(drawingEvent.pathDetail)
+                            drawingState = drawingState.copy(
+                                pathDetailStack = mPathStack,
+                                redoStack = Stack()
+                            )
+                            controllerBsState = controllerBsState.copy(
+                                isUndoEnabled = true,
+                                isRedoEnabled = false
+                            )
+                        }
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Preview(uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun MainScreenPreview() {
+
+    SketchDraftTheme {
+        MainScreen()
     }
 }

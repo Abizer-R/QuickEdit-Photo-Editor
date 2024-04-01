@@ -18,9 +18,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,6 +34,7 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.abizer_r.sketchdraft.ui.theme.SketchDraftTheme
 import com.abizer_r.sketchdraft.util.AppUtils
 import kotlin.math.max
 import kotlin.math.min
@@ -40,42 +43,68 @@ import kotlin.math.min
 @ExperimentalMaterial3Api
 fun BrushControllerBottomSheet(
     modifier: Modifier = Modifier,
-    initialValueOpacity: Int,
-    onOpacityChanged: (Float) -> Unit,
-    initialValueStrokeWidth: Int,
-    onStrokeWidthChanged: (Float) -> Unit,
-    colorList: List<Color>,
-    selectedColorIndex: Int,
-    onColorIdxChanged: (Int) -> Unit
+    controllerBsState: ControllerBSState,
+    onEvent: (ControllerBSEvents) -> Unit
 ) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            Button(
+                enabled = controllerBsState.isUndoEnabled,
+                onClick = {
+                    onEvent(ControllerBSEvents.Undo)
+                }
+            ) {
+                Text(text = "Undo")
+            }
+
+            Button(
+                enabled = controllerBsState.isRedoEnabled,
+                onClick = { onEvent(ControllerBSEvents.Redo) }
+            ) {
+                Text(text = "Redo")
+            }
+        }
+        Spacer(modifier = Modifier.height(24.dp))
         BrushControllerOptionSlider(
             sliderLabel = "StrokeWidth",
-            sliderValue = initialValueStrokeWidth,
+            sliderValue = controllerBsState.strokeWidth,
             minValue = 1f,
             maxValue = 100f,
-            onValueChange = onStrokeWidthChanged
+            onValueChange = {
+                onEvent(
+                    ControllerBSEvents.StrokeWidthChanged(it)
+                )
+            }
         )
         Spacer(modifier = Modifier.height(8.dp))
         BrushControllerOptionSlider(
             sliderLabel = "Opacity",
-            sliderValue = initialValueOpacity,
+            sliderValue = controllerBsState.opacity,
             minValue = 1f,
             maxValue = 100f,
-            onValueChange = onOpacityChanged
+            onValueChange = {
+                onEvent(
+                    ControllerBSEvents.OpacityChanged(it)
+                )
+            }
         )
         Spacer(modifier = Modifier.height(8.dp))
         LazyRow {
-            itemsIndexed(colorList) { index, color ->
+            itemsIndexed(controllerBsState.colorList) { index, color ->
                 ColorListItem(
                     color = color,
-                    isSelected = selectedColorIndex == index,
+                    isSelected = controllerBsState.selectedColorIndex == index,
                     onColorClicked = {
-                        onColorIdxChanged(index)
+                        onEvent(
+                            ControllerBSEvents.ColorSelected(index)
+                        )
                     }
                 )
             }
@@ -196,16 +225,22 @@ fun BrushControllerOptionSlider(
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PreviewControllerBS() {
-    BrushControllerBottomSheet(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        initialValueOpacity = 10,
-        onOpacityChanged = {},
-        initialValueStrokeWidth = 2,
-        onStrokeWidthChanged = {},
-        colorList = AppUtils.colorList,
-        selectedColorIndex = 0,
-        onColorIdxChanged = {}
-    )
+
+    Surface {
+        BrushControllerBottomSheet(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            controllerBsState = ControllerBSState(
+                opacity = 80,
+                strokeWidth = 6,
+                colorList = AppUtils.colorList,
+                selectedColorIndex = 0,
+                isUndoEnabled = true,
+                isRedoEnabled = true
+            ),
+            onEvent = {}
+        )
+
+    }
 }
