@@ -37,7 +37,6 @@ import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.getSelect
 import com.abizer_r.sketchdraft.ui.theme.SketchDraftTheme
 import com.abizer_r.sketchdraft.util.AppUtils
 import com.abizer_r.sketchdraft.util.DrawingUtils
-import com.abizer_r.sketchdraft.util.makeDuplicate
 import java.util.Stack
 import kotlin.math.roundToInt
 
@@ -101,24 +100,24 @@ fun MainScreen() {
                             controllerBsState = controllerBsState.copy(
                                 opacity = it.opacity.roundToInt()
                             )
-                            drawingState = drawingState.makeDuplicate(
-                                mOpacity = it.opacity.roundToInt()
+                            drawingState = drawingState.copy(
+                                opacity = it.opacity.roundToInt()
                             )
                         }
                         is ControllerBSEvents.StrokeWidthChanged -> {
                             controllerBsState = controllerBsState.copy(
                                 strokeWidth = it.strokeWidth.roundToInt()
                             )
-                            drawingState = drawingState.makeDuplicate(
-                                mStrokeWidth = it.strokeWidth.roundToInt()
+                            drawingState = drawingState.copy(
+                                strokeWidth = it.strokeWidth.roundToInt()
                             )
                         }
                         is ControllerBSEvents.ColorSelected -> {
                             controllerBsState = controllerBsState.copy(
                                 selectedColorIndex = it.index
                             )
-                            drawingState = drawingState.makeDuplicate(
-                                mStrokeColor = controllerBsState.getSelectedColor()
+                            drawingState = drawingState.copy(
+                                strokeColor = controllerBsState.getSelectedColor()
                             )
                         }
 
@@ -128,9 +127,9 @@ fun MainScreen() {
                             mPathStack.addAll(drawingState.pathDetailStack)
                             val mRedoStack = drawingState.redoStack
                             mRedoStack.push(mPathStack.pop())
-                            drawingState = drawingState.makeDuplicate(
-                                mPathDetailStack = mPathStack,
-                                mRedoStack = mRedoStack
+                            drawingState = drawingState.copy(
+                                pathDetailStack = mPathStack,
+                                redoStack = mRedoStack
                             )
                             controllerBsState = controllerBsState.copy(
                                 isUndoEnabled = mPathStack.isNotEmpty(),
@@ -143,9 +142,9 @@ fun MainScreen() {
                             mPathStack.addAll(drawingState.pathDetailStack)
                             val mRedoStack = drawingState.redoStack
                             mPathStack.push(mRedoStack.pop())
-                            drawingState = drawingState.makeDuplicate(
-                                mPathDetailStack = mPathStack,
-                                mRedoStack = mRedoStack
+                            drawingState = drawingState.copy(
+                                pathDetailStack = mPathStack,
+                                redoStack = mRedoStack
                             )
                             controllerBsState = controllerBsState.copy(
                                 isUndoEnabled = mPathStack.isNotEmpty(),

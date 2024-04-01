@@ -50,17 +50,3 @@ fun DrawingState.getPathDetailsForPath(
     alpha = opacity / 100f,
     color = strokeColor
 )
-
-fun DrawingState.makeDuplicate(
-    mStrokeWidth: Int? = null,
-    mStrokeColor: Color? = null,
-    mOpacity: Int? = null,
-    mPathDetailStack: Stack<PathDetails>? = null,
-    mRedoStack: Stack<PathDetails>? = null
-) = DrawingState(
-    strokeWidth = mStrokeWidth ?: strokeWidth,
-    strokeColor = mStrokeColor ?: strokeColor,
-    opacity = mOpacity ?: opacity,
-    pathDetailStack = mPathDetailStack ?: pathDetailStack,
-    redoStack = mRedoStack ?: redoStack
-)
