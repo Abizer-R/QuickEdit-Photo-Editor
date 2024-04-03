@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingState
 import com.abizer_r.sketchdraft.ui.drawingCanvas.PathDetails
 import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.ControllerBSState
+import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.StrokeMode
 import java.util.Stack
 
 object DrawingUtils {
@@ -18,6 +19,7 @@ object DrawingUtils {
     ) = ControllerBSState(
         strokeWidth = 8,
         opacity = 100,
+        strokeMode = StrokeMode.BRUSH,
         colorList = colorList,
         selectedColorIndex = 0,
         isUndoEnabled = false,

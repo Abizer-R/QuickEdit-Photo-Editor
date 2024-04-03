@@ -1,5 +1,6 @@
 package com.abizer_r.sketchdraft.ui.drawingCanvas
 
+import android.util.Log
 import android.view.MotionEvent
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
@@ -22,6 +23,7 @@ fun DrawingCanvas(
     drawingState: DrawingState,
     onDrawingEvent: (DrawingEvents) -> Unit
 ) {
+    Log.e("TEST", "DrawingCanvas: strokeMode = ${drawingState.strokeMode}", )
     var path = Path()
     var drawPathAction by remember { mutableStateOf<Any?>(null) }
     Canvas(

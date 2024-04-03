@@ -67,6 +67,7 @@ fun MainScreen() {
             DrawingState(
                 strokeWidth = controllerBsState.strokeWidth,
                 opacity = controllerBsState.opacity,
+                strokeMode = controllerBsState.strokeMode,
                 strokeColor = controllerBsState.getSelectedColor(),
                 pathDetailStack = Stack(),
                 redoStack = Stack()
@@ -118,6 +119,14 @@ fun MainScreen() {
                             )
                             drawingState = drawingState.copy(
                                 strokeColor = controllerBsState.getSelectedColor()
+                            )
+                        }
+                        is ControllerBSEvents.StrokeModeChanged -> {
+                            controllerBsState = controllerBsState.copy(
+                                strokeMode = it.strokeMode
+                            )
+                            drawingState = drawingState.copy(
+                                strokeMode = it.strokeMode
                             )
                         }
 
