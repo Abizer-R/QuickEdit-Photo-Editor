@@ -2,6 +2,7 @@ package com.abizer_r.sketchdraft
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
+import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -27,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.abizer_r.sketchdraft.ui.drawingCanvas.CustomLayerTypeComposable
 import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingCanvas
 import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingEvents
 import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingState
@@ -67,6 +69,7 @@ fun MainScreen() {
             DrawingState(
                 strokeWidth = controllerBsState.strokeWidth,
                 opacity = controllerBsState.opacity,
+                strokeMode = controllerBsState.strokeMode,
                 strokeColor = controllerBsState.getSelectedColor(),
                 pathDetailStack = Stack(),
                 redoStack = Stack()
@@ -120,6 +123,14 @@ fun MainScreen() {
                                 strokeColor = controllerBsState.getSelectedColor()
                             )
                         }
+                        is ControllerBSEvents.StrokeModeChanged -> {
+                            controllerBsState = controllerBsState.copy(
+                                strokeMode = it.strokeMode
+                            )
+                            drawingState = drawingState.copy(
+                                strokeMode = it.strokeMode
+                            )
+                        }
 
                         ControllerBSEvents.Undo -> {
                             // creating new Stack, otherwise recomposition won't get triggered
@@ -162,28 +173,35 @@ fun MainScreen() {
                 .padding(it)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            DrawingCanvas(
-                modifier = Modifier.fillMaxSize(),
-                drawingState = drawingState,
-                onDrawingEvent = { drawingEvent ->
-                    when (drawingEvent) {
-                        is DrawingEvents.AddNewPath -> {
-                            // creating new Stack, otherwise recomposition won't get triggered
-                            val mPathStack = Stack<PathDetails>()
-                            mPathStack.addAll(drawingState.pathDetailStack)
-                            mPathStack.push(drawingEvent.pathDetail)
-                            drawingState = drawingState.copy(
-                                pathDetailStack = mPathStack,
-                                redoStack = Stack()
-                            )
-                            controllerBsState = controllerBsState.copy(
-                                isUndoEnabled = true,
-                                isRedoEnabled = false
-                            )
+            /**
+             * This is required to make eraser feature work properly
+             */
+            CustomLayerTypeComposable(
+                layerType = View.LAYER_TYPE_HARDWARE
+            ) {
+                DrawingCanvas(
+                    modifier = Modifier.fillMaxSize(),
+                    drawingState = drawingState,
+                    onDrawingEvent = { drawingEvent ->
+                        when (drawingEvent) {
+                            is DrawingEvents.AddNewPath -> {
+                                // creating new Stack, otherwise recomposition won't get triggered
+                                val mPathStack = Stack<PathDetails>()
+                                mPathStack.addAll(drawingState.pathDetailStack)
+                                mPathStack.push(drawingEvent.pathDetail)
+                                drawingState = drawingState.copy(
+                                    pathDetailStack = mPathStack,
+                                    redoStack = Stack()
+                                )
+                                controllerBsState = controllerBsState.copy(
+                                    isUndoEnabled = true,
+                                    isRedoEnabled = false
+                                )
+                            }
                         }
                     }
-                }
-            )
+                )
+            }
         }
     }
 }
