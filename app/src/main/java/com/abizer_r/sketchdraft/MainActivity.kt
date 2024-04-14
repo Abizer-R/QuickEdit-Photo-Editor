@@ -173,28 +173,35 @@ fun MainScreen() {
                 .padding(it)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            DrawingCanvas(
-                modifier = Modifier.fillMaxSize(),
-                drawingState = drawingState,
-                onDrawingEvent = { drawingEvent ->
-                    when (drawingEvent) {
-                        is DrawingEvents.AddNewPath -> {
-                            // creating new Stack, otherwise recomposition won't get triggered
-                            val mPathStack = Stack<PathDetails>()
-                            mPathStack.addAll(drawingState.pathDetailStack)
-                            mPathStack.push(drawingEvent.pathDetail)
-                            drawingState = drawingState.copy(
-                                pathDetailStack = mPathStack,
-                                redoStack = Stack()
-                            )
-                            controllerBsState = controllerBsState.copy(
-                                isUndoEnabled = true,
-                                isRedoEnabled = false
-                            )
+            /**
+             * This is required to make eraser feature work properly
+             */
+            CustomLayerTypeComposable(
+                layerType = View.LAYER_TYPE_HARDWARE
+            ) {
+                DrawingCanvas(
+                    modifier = Modifier.fillMaxSize(),
+                    drawingState = drawingState,
+                    onDrawingEvent = { drawingEvent ->
+                        when (drawingEvent) {
+                            is DrawingEvents.AddNewPath -> {
+                                // creating new Stack, otherwise recomposition won't get triggered
+                                val mPathStack = Stack<PathDetails>()
+                                mPathStack.addAll(drawingState.pathDetailStack)
+                                mPathStack.push(drawingEvent.pathDetail)
+                                drawingState = drawingState.copy(
+                                    pathDetailStack = mPathStack,
+                                    redoStack = Stack()
+                                )
+                                controllerBsState = controllerBsState.copy(
+                                    isUndoEnabled = true,
+                                    isRedoEnabled = false
+                                )
+                            }
                         }
                     }
-                }
-            )
+                )
+            }
         }
     }
 }
