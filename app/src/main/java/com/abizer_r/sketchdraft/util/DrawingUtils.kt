@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
@@ -67,7 +68,8 @@ fun DrawScope.drawDefaultPath(
         brush = SolidColor(strokeColor),
         style = Stroke(
             width = strokeWidth,
-            cap = StrokeCap.Round
+            cap = StrokeCap.Round,
+            join = StrokeJoin.Round
         ),
         alpha = alpha,
         blendMode = if (strokeMode == StrokeMode.ERASER) BlendMode.Clear
