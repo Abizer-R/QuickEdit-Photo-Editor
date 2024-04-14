@@ -2,6 +2,7 @@ package com.abizer_r.sketchdraft
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
+import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -27,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.abizer_r.sketchdraft.ui.drawingCanvas.CustomLayerTypeComposable
 import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingCanvas
 import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingEvents
 import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingState

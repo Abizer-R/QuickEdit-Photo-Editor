@@ -2,6 +2,7 @@ package com.abizer_r.sketchdraft.ui.drawingCanvas
 
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -12,7 +13,11 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.viewinterop.AndroidView
 import com.abizer_r.sketchdraft.util.drawDefaultPath
 import com.abizer_r.sketchdraft.util.getPathDetailsForPath
 
@@ -58,19 +63,14 @@ fun DrawingCanvas(
     ) {
         drawingState.pathDetailStack.forEach { pathDetails ->
             drawDefaultPath(
-                path = pathDetails.path,
-                strokeColor = pathDetails.color,
-                strokeWidth = pathDetails.width,
-                alpha = pathDetails.alpha
+                pathDetails = pathDetails
             )
         }
 
         drawPathAction?.let {
             drawDefaultPath(
                 path = path,
-                strokeColor = drawingState.strokeColor,
-                strokeWidth = drawingState.strokeWidth.toFloat(),
-                alpha = drawingState.opacity / 100f
+                drawingState = drawingState
             )
         }
     }
