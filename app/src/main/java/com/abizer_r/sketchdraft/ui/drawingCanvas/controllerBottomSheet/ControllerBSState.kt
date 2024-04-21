@@ -13,7 +13,7 @@ data class ControllerBSState(
 )
 
 enum class StrokeMode {
-    BRUSH, ERASER
+    BRUSH, LINE, OVAL, RECTANGLE, ERASER
 }
 
 fun ControllerBSState.getSelectedColor() = colorList[selectedColorIndex]

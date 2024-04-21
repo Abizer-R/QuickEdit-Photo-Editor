@@ -114,7 +114,7 @@ fun BrushControllerBottomSheet(
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        if (controllerBsState.strokeMode == StrokeMode.BRUSH) {
+        if (controllerBsState.strokeMode != StrokeMode.ERASER) {
             ColorListRow(
                 colorList = controllerBsState.colorList,
                 selectedColorIndex = controllerBsState.selectedColorIndex,
@@ -147,7 +147,7 @@ fun RadioButtonRow(
                     }
                 }
             )
-            Text(text = it.name, modifier = Modifier.padding(end = 24.dp))
+            Text(text = it.name, modifier = Modifier.padding(end = 8.dp))
         }
     }
 }
