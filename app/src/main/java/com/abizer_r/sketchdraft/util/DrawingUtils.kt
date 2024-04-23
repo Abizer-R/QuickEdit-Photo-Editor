@@ -1,88 +1,46 @@
 package com.abizer_r.sketchdraft.util
 
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.nativeCanvas
 import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingState
-import com.abizer_r.sketchdraft.ui.drawingCanvas.PathDetails
+import com.abizer_r.sketchdraft.ui.drawingCanvas.PaintValues
 import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.ControllerBSState
-import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.StrokeMode
-import java.util.Stack
+import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.DrawMode
+import com.abizer_r.sketchdraft.ui.drawingCanvas.shapes.BrushShape
+import com.abizer_r.sketchdraft.ui.drawingCanvas.shapes.EraserBrushShape
+import com.abizer_r.sketchdraft.ui.drawingCanvas.shapes.LineShape
+import com.abizer_r.sketchdraft.ui.drawingCanvas.shapes.OvalShape
+import com.abizer_r.sketchdraft.ui.drawingCanvas.shapes.RectangleShape
+import com.abizer_r.sketchdraft.ui.drawingCanvas.shapes.Shape
 
 object DrawingUtils {
+
+    const val TOUCH_TOLERANCE = 4f
 
     fun getDefaultControllerBsState(
         colorList: ArrayList<Color>
     ) = ControllerBSState(
         strokeWidth = 8,
         opacity = 100,
-        strokeMode = StrokeMode.BRUSH,
+        drawMode = DrawMode.BRUSH,
         colorList = colorList,
         selectedColorIndex = 0,
         isUndoEnabled = false,
         isRedoEnabled = false
     )
+
+    fun createShape(drawMode: DrawMode): Shape {
+        return when (drawMode) {
+            DrawMode.ERASER -> EraserBrushShape()
+            DrawMode.BRUSH -> BrushShape()
+            DrawMode.LINE -> LineShape()
+            DrawMode.OVAL -> OvalShape()
+            DrawMode.RECTANGLE -> RectangleShape()
+        }
+    }
 }
 
-fun DrawScope.drawDefaultPath(
-    pathDetails: PathDetails
-) {
-    drawDefaultPath(
-        path = pathDetails.path,
-        strokeColor = pathDetails.color,
-        strokeWidth = pathDetails.width,
-        alpha = pathDetails.alpha,
-        strokeMode = pathDetails.strokeMode
-    )
-}
-
-fun DrawScope.drawDefaultPath(
-    path: Path,
-    drawingState: DrawingState
-) {
-    drawDefaultPath(
-        path = path,
-        strokeColor = drawingState.strokeColor,
-        strokeWidth = drawingState.strokeWidth.toFloat(),
-        alpha = drawingState.opacity / 100f,
-        strokeMode = drawingState.strokeMode
-    )
-}
-
-fun DrawScope.drawDefaultPath(
-    path: Path,
-    strokeColor: Color,
-    strokeWidth: Float,
-    alpha: Float,
-    strokeMode: StrokeMode
-) {
-    drawPath(
-        path = path,
-        brush = SolidColor(strokeColor),
-        style = Stroke(
-            width = strokeWidth,
-            cap = StrokeCap.Round,
-            join = StrokeJoin.Round
-        ),
-        alpha = alpha,
-        blendMode = if (strokeMode == StrokeMode.ERASER) BlendMode.Clear
-            else BlendMode.SrcOver
-    )
-}
-
-fun DrawingState.getPathDetailsForPath(
-    path: Path
-) = PathDetails(
-    path = path,
-    width = strokeWidth.toFloat(),
-    alpha = opacity / 100f,
+fun DrawingState.getPaintValues() = PaintValues(
     color = strokeColor,
-    strokeMode = strokeMode
+    width = strokeWidth.toFloat(),
+    alpha = opacity / 100f
 )
