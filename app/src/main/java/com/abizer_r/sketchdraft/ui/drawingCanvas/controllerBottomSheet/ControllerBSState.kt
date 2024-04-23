@@ -5,14 +5,14 @@ import androidx.compose.ui.graphics.Color
 data class ControllerBSState(
     val opacity: Int,
     val strokeWidth: Int,
-    val strokeMode: StrokeMode,
+    val drawMode: DrawMode,
     val colorList: List<Color>,
     val selectedColorIndex: Int,
     val isUndoEnabled: Boolean,
     val isRedoEnabled: Boolean
 )
 
-enum class StrokeMode {
+enum class DrawMode {
     BRUSH, LINE, OVAL, RECTANGLE, ERASER
 }
 

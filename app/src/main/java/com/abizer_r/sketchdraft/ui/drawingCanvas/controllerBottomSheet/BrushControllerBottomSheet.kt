@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
@@ -21,7 +20,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.outlined.Backspace
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -36,11 +34,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.ColorPainter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.abizer_r.sketchdraft.ui.theme.SketchDraftTheme
 import com.abizer_r.sketchdraft.util.AppUtils
 import kotlin.math.max
 import kotlin.math.min
@@ -80,7 +76,7 @@ fun BrushControllerBottomSheet(
         Spacer(modifier = Modifier.height(24.dp))
 
         RadioButtonRow(
-            selectedMode = controllerBsState.strokeMode,
+            selectedMode = controllerBsState.drawMode,
             onSelected = {
                 onEvent(
                     ControllerBSEvents.StrokeModeChanged(it)
@@ -114,7 +110,7 @@ fun BrushControllerBottomSheet(
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        if (controllerBsState.strokeMode != StrokeMode.ERASER) {
+        if (controllerBsState.drawMode != DrawMode.ERASER) {
             ColorListRow(
                 colorList = controllerBsState.colorList,
                 selectedColorIndex = controllerBsState.selectedColorIndex,
@@ -130,15 +126,15 @@ fun BrushControllerBottomSheet(
 
 @Composable
 fun RadioButtonRow(
-    selectedMode: StrokeMode,
-    onSelected: (StrokeMode) -> Unit
+    selectedMode: DrawMode,
+    onSelected: (DrawMode) -> Unit
 ) {
     val scrollState = rememberScrollState()
     Row(
         modifier = Modifier.horizontalScroll(scrollState),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        StrokeMode.values().forEach {
+        DrawMode.values().forEach {
             RadioButton(
                 selected = selectedMode == it,
                 onClick = {
@@ -156,7 +152,7 @@ fun RadioButtonRow(
 @Composable
 fun PreviewRadioRow() {
     RadioButtonRow(
-        selectedMode = StrokeMode.BRUSH,
+        selectedMode = DrawMode.BRUSH,
         onSelected = {}
     )
 }
@@ -301,7 +297,7 @@ fun PreviewControllerBS_Brush() {
             controllerBsState = ControllerBSState(
                 opacity = 80,
                 strokeWidth = 6,
-                strokeMode = StrokeMode.BRUSH,
+                drawMode = DrawMode.BRUSH,
                 colorList = AppUtils.colorList,
                 selectedColorIndex = 0,
                 isUndoEnabled = true,
@@ -325,7 +321,7 @@ fun PreviewControllerBS_Eraser() {
             controllerBsState = ControllerBSState(
                 opacity = 80,
                 strokeWidth = 6,
-                strokeMode = StrokeMode.ERASER,
+                drawMode = DrawMode.ERASER,
                 colorList = AppUtils.colorList,
                 selectedColorIndex = 0,
                 isUndoEnabled = true,

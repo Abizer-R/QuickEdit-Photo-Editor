@@ -1,16 +1,15 @@
 package com.abizer_r.sketchdraft.ui.drawingCanvas
 
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.StrokeMode
+import com.abizer_r.sketchdraft.ui.drawingCanvas.shapes.Shape
 
 data class PathDetails(
-    val path: Path,
-    val startOffset: Offset,
-    val endOffset: Offset,
+    val shape: Shape,
+    val paintValues: PaintValues
+)
+
+data class PaintValues(
+    val color: Color,
     val width: Float,
-    val alpha: Float,
-    val color: Color = Color.Blue,
-    val strokeMode: StrokeMode
+    val alpha: Float
 )
