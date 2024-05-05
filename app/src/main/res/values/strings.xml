@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">SketchDraft</string>
+<!--    <string name="app_name">TouchDraw - Draw &amp; Edit Photos with Ease</string>-->
+    <string name="app_name">TouchDraw</string>
 </resources>
