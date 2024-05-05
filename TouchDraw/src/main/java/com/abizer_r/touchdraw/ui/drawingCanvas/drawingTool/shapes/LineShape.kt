@@ -1,12 +1,12 @@
-package com.abizer_r.touchdraw.ui.drawingCanvas.shapes
+package com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import com.abizer_r.touchdraw.ui.drawingCanvas.PaintValues
+import com.abizer_r.touchdraw.ui.drawingCanvas.models.PaintValues
 
-class LineShape: Shape {
+class LineShape: DrawingShape {
     private var startOffset: Offset = Offset.Unspecified
     private var endOffset: Offset = Offset.Unspecified
 

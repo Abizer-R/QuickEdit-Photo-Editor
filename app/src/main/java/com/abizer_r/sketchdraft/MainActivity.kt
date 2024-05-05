@@ -2,13 +2,9 @@ package com.abizer_r.sketchdraft
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
-import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,10 +23,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.abizer_r.sketchdraft.ui.drawingCanvas.CustomLayerTypeComposable
-import com.abizer_r.touchdraw.ui.drawingCanvas.DrawingCanvas
-import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingState
-import com.abizer_r.touchdraw.ui.drawingCanvas.PathDetails
+import com.abizer_r.touchdraw.ui.drawingCanvas.DrawingState
+import com.abizer_r.touchdraw.ui.drawingCanvas.models.PathDetails
 import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.BrushControllerBottomSheet
 import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.ControllerBSEvents
 import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.getSelectedColor
@@ -39,6 +32,7 @@ import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.ControllerBSState
 import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.DrawMode
 import com.abizer_r.sketchdraft.util.AppUtils
+import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.DrawingTool
 import com.abizer_r.touchdraw.ui.editorScreen.EditorScreen
 import java.util.Stack
 import kotlin.math.roundToInt
@@ -70,7 +64,7 @@ fun MainScreen() {
             DrawingState(
                 strokeWidth = controllerBsState.strokeWidth,
                 opacity = controllerBsState.opacity,
-                drawMode = controllerBsState.drawMode,
+                drawingTool = DrawingTool.Brush,
                 strokeColor = controllerBsState.getSelectedColor(),
                 pathDetailStack = Stack(),
                 redoStack = Stack()
@@ -128,9 +122,9 @@ fun MainScreen() {
                             controllerBsState = controllerBsState.copy(
                                 drawMode = it.drawMode
                             )
-                            drawingState = drawingState.copy(
-                                drawMode = it.drawMode
-                            )
+//                            drawingState = drawingState.copy(
+//                                drawMode = it.drawMode
+//                            )
                         }
 
                         ControllerBSEvents.Undo -> {
@@ -168,20 +162,7 @@ fun MainScreen() {
             )
         }
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(it)
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            /**
-             * This is required to make eraser feature work properly
-             */
-            CustomLayerTypeComposable(
-                layerType = View.LAYER_TYPE_HARDWARE
-            ) {
-                DrawingCanvas(modifier = Modifier.fillMaxSize())
-//                DrawingCanvas(
+//        DrawingCanvas(
 //                    modifier = Modifier.fillMaxSize(),
 //                    drawingState = drawingState,
 //                    onDrawingEvent = { drawingEvent ->
@@ -203,8 +184,6 @@ fun MainScreen() {
 //                        }
 //                    }
 //                )
-            }
-        }
     }
 }
 

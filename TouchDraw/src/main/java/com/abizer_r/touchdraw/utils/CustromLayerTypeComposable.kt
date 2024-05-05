@@ -1,4 +1,4 @@
-package com.abizer_r.sketchdraft.ui.drawingCanvas
+package com.abizer_r.touchdraw.utils
 
 import android.view.View
 import androidx.compose.runtime.Composable

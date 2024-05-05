@@ -13,25 +13,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInteropFilter
-import com.abizer_r.touchdraw.ui.drawingCanvas.shapes.BrushShape
-import com.abizer_r.touchdraw.ui.drawingCanvas.shapes.Shape
-import com.abizer_r.touchdraw.utils.DrawingUtils
+import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.DrawingShape
+import com.abizer_r.touchdraw.ui.drawingCanvas.models.PaintValues
+import com.abizer_r.touchdraw.ui.drawingCanvas.models.PathDetails
+import com.abizer_r.touchdraw.utils.getPaintValues
+import com.abizer_r.touchdraw.utils.getShape
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun DrawingCanvas(
-    modifier: Modifier,
-//    drawingState: DrawingState,
-//    onDrawingEvent: (DrawingEvents) -> Unit
+    modifier: Modifier = Modifier,
+    drawingState: DrawingState,
+    onDrawingEvent: (DrawingEvents) -> Unit
 ) {
-//    Log.e("TEST", "DrawingCanvas: drawMode = ${drawingState.drawMode}", )
+//    Log.e("TEST", "DrawingCanvas: drawingTool = ${drawingState.drawingTool}", )
 
     /**
      * The variables/states below are changed inside the ".pointerInteropFilter" modifier
      * And when these are changed, the draw phase is called (compose has 3 phases: composition, layout and draw)
      * SO, Recomposition isn't triggered
      */
-    var currentShape: Shape? = null
+    var currentShape: DrawingShape? = null
     var drawPathAction by remember { mutableStateOf<Any?>(null) }
 
     Canvas(
@@ -39,8 +41,7 @@ fun DrawingCanvas(
             .pointerInteropFilter {
                 when (it.action) {
                     MotionEvent.ACTION_DOWN -> {
-//                        currentShape = DrawingUtils.createShape(drawingState.drawMode)
-                        currentShape = BrushShape()
+                        currentShape = drawingState.drawingTool.getShape()
                         currentShape?.initShape(startX = it.x, startY = it.y)
                     }
 
@@ -56,14 +57,14 @@ fun DrawingCanvas(
                     MotionEvent.ACTION_CANCEL,
                     MotionEvent.ACTION_UP -> {
                         if (currentShape != null && currentShape!!.shouldDraw()) {
-//                            onDrawingEvent(
-//                                DrawingEvents.AddNewPath(
-//                                    pathDetail = PathDetails(
-//                                        shape = currentShape!!,
-//                                        paintValues = drawingState.getPaintValues()
-//                                    )
-//                                )
-//                            )
+                            onDrawingEvent(
+                                DrawingEvents.AddNewPath(
+                                    pathDetail = PathDetails(
+                                        drawingShape = currentShape!!,
+                                        paintValues = drawingState.getPaintValues()
+                                    )
+                                )
+                            )
                         }
                     }
                 }
@@ -72,22 +73,20 @@ fun DrawingCanvas(
 
 
     ) {
-//        drawingState.pathDetailStack.forEach { pathDetails ->
-//            pathDetails.shape.draw(
-//                drawScope = this,
-//                paintValues = pathDetails.paintValues
-//            )
-//        }
-//
+        drawingState.pathDetailStack.forEach { pathDetails ->
+            Log.e("TEST", "DrawingCanvas: drawing from stack. drawingShape = ${pathDetails.drawingShape}", )
+            pathDetails.drawingShape.draw(
+                drawScope = this,
+                paintValues = pathDetails.paintValues
+            )
+        }
+
+        Log.e("TEST", "DrawingCanvas: done \n\n\n", )
+
         drawPathAction?.let {
             currentShape?.draw(
                 drawScope = this,
-//                paintValues = drawingState.getPaintValues()
-                paintValues = PaintValues(
-                    color = Color.White,
-                    width = 12f,
-                    alpha = 1f
-                )
+                paintValues = drawingState.getPaintValues()
             )
         }
     }

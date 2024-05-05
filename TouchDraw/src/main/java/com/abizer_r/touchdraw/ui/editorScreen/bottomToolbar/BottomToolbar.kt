@@ -100,7 +100,7 @@ fun BottomToolBar(
         )
 
         /**
-         * Tool Item: Shape
+         * Tool Item: DrawingShape
          */
         ToolbarItem(
             imageVector = Icons.Default.Category,

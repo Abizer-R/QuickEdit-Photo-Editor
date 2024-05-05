@@ -1,4 +1,4 @@
-package com.abizer_r.touchdraw.ui.drawingCanvas.shapes
+package com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -7,9 +7,9 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import com.abizer_r.touchdraw.ui.drawingCanvas.PaintValues
+import com.abizer_r.touchdraw.ui.drawingCanvas.models.PaintValues
 
-class OvalShape: Shape {
+class OvalShape: DrawingShape {
     private var startOffset: Offset = Offset.Unspecified
     private var endOffset: Offset = Offset.Unspecified
 
