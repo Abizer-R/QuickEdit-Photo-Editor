@@ -29,16 +29,17 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.abizer_r.sketchdraft.ui.drawingCanvas.CustomLayerTypeComposable
-import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingCanvas
-import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingEvents
+import com.abizer_r.touchdraw.ui.drawingCanvas.DrawingCanvas
 import com.abizer_r.sketchdraft.ui.drawingCanvas.DrawingState
-import com.abizer_r.sketchdraft.ui.drawingCanvas.PathDetails
+import com.abizer_r.touchdraw.ui.drawingCanvas.PathDetails
 import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.BrushControllerBottomSheet
 import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.ControllerBSEvents
 import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.getSelectedColor
-import com.abizer_r.sketchdraft.ui.theme.SketchDraftTheme
+import com.abizer_r.components.theme.SketchDraftTheme
+import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.ControllerBSState
+import com.abizer_r.sketchdraft.ui.drawingCanvas.controllerBottomSheet.DrawMode
 import com.abizer_r.sketchdraft.util.AppUtils
-import com.abizer_r.sketchdraft.util.DrawingUtils
+import com.abizer_r.touchdraw.ui.editorScreen.EditorScreen
 import java.util.Stack
 import kotlin.math.roundToInt
 
@@ -47,7 +48,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             SketchDraftTheme {
-                MainScreen()
+                EditorScreen()
             }
         }
     }
@@ -58,7 +59,7 @@ class MainActivity : ComponentActivity() {
 fun MainScreen() {
     var controllerBsState by remember {
         mutableStateOf(
-            DrawingUtils.getDefaultControllerBsState(
+            getDefaultControllerBsState(
                 colorList = AppUtils.colorList
             )
         )
@@ -179,32 +180,46 @@ fun MainScreen() {
             CustomLayerTypeComposable(
                 layerType = View.LAYER_TYPE_HARDWARE
             ) {
-                DrawingCanvas(
-                    modifier = Modifier.fillMaxSize(),
-                    drawingState = drawingState,
-                    onDrawingEvent = { drawingEvent ->
-                        when (drawingEvent) {
-                            is DrawingEvents.AddNewPath -> {
-                                // creating new Stack, otherwise recomposition won't get triggered
-                                val mPathStack = Stack<PathDetails>()
-                                mPathStack.addAll(drawingState.pathDetailStack)
-                                mPathStack.push(drawingEvent.pathDetail)
-                                drawingState = drawingState.copy(
-                                    pathDetailStack = mPathStack,
-                                    redoStack = Stack()
-                                )
-                                controllerBsState = controllerBsState.copy(
-                                    isUndoEnabled = true,
-                                    isRedoEnabled = false
-                                )
-                            }
-                        }
-                    }
-                )
+                DrawingCanvas(modifier = Modifier.fillMaxSize())
+//                DrawingCanvas(
+//                    modifier = Modifier.fillMaxSize(),
+//                    drawingState = drawingState,
+//                    onDrawingEvent = { drawingEvent ->
+//                        when (drawingEvent) {
+//                            is DrawingEvents.AddNewPath -> {
+//                                // creating new Stack, otherwise recomposition won't get triggered
+//                                val mPathStack = Stack<PathDetails>()
+//                                mPathStack.addAll(drawingState.pathDetailStack)
+//                                mPathStack.push(drawingEvent.pathDetail)
+//                                drawingState = drawingState.copy(
+//                                    pathDetailStack = mPathStack,
+//                                    redoStack = Stack()
+//                                )
+//                                controllerBsState = controllerBsState.copy(
+//                                    isUndoEnabled = true,
+//                                    isRedoEnabled = false
+//                                )
+//                            }
+//                        }
+//                    }
+//                )
             }
         }
     }
 }
+
+
+fun getDefaultControllerBsState(
+    colorList: ArrayList<Color>
+) = ControllerBSState(
+    strokeWidth = 8,
+    opacity = 100,
+    drawMode = DrawMode.BRUSH,
+    colorList = colorList,
+    selectedColorIndex = 0,
+    isUndoEnabled = false,
+    isRedoEnabled = false
+)
 
 @Preview(uiMode = UI_MODE_NIGHT_YES)
 @Composable
