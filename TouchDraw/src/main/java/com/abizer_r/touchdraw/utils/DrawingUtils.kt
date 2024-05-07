@@ -1,8 +1,6 @@
 package com.abizer_r.touchdraw.utils
 
 import androidx.compose.ui.graphics.Color
-import com.abizer_r.touchdraw.ui.drawingCanvas.DrawingState
-import com.abizer_r.touchdraw.ui.drawingCanvas.models.PaintValues
 import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.BrushShape
 import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.AbstractShape
 import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.LineShape
@@ -20,15 +18,18 @@ object DrawingUtils {
         defaultColorSelected: Color = Color.White
     ): ArrayList<BottomToolbarItem> {
         return arrayListOf(
-            BottomToolbarItem.ColorItem(currentColor = defaultColorSelected),
+            BottomToolbarItem.ColorItem,
             BottomToolbarItem.BrushTool(
-                width = 12, opacity = 100
+                width = DrawingConstants.DEFAULT_STROKE_WIDTH,
+                opacity = DrawingConstants.DEFAULT_STROKE_OPACITY
             ),
             BottomToolbarItem.ShapeTool(
-                width = 12, opacity = 100, shapeTypes = ShapeTypes.LINE
+                width = DrawingConstants.DEFAULT_STROKE_WIDTH,
+                opacity = DrawingConstants.DEFAULT_STROKE_OPACITY,
+                shapeType = ShapeTypes.LINE
             ),
             BottomToolbarItem.EraserTool(
-                width = 12
+                width = DrawingConstants.DEFAULT_STROKE_WIDTH
             )
         )
     }
@@ -52,28 +53,28 @@ fun BottomToolbarItem.getShape(
         is BottomToolbarItem.BrushTool -> {
             BrushShape(
                 color = selectedColor,
-                width = toolbarItem.width.toFloat(),
-                alpha = toolbarItem.opacity.toFloat() / 100f
+                width = toolbarItem.width,
+                alpha = toolbarItem.opacity / 100f
             )
         }
 
-        is BottomToolbarItem.ShapeTool -> when (toolbarItem.shapeTypes) {
+        is BottomToolbarItem.ShapeTool -> when (toolbarItem.shapeType) {
             ShapeTypes.LINE -> LineShape(
                 color = selectedColor,
-                width = toolbarItem.width.toFloat(),
-                alpha = toolbarItem.opacity.toFloat() / 100f
+                width = toolbarItem.width,
+                alpha = toolbarItem.opacity / 100f
             )
 
             ShapeTypes.OVAL -> OvalShape(
                 color = selectedColor,
-                width = toolbarItem.width.toFloat(),
-                alpha = toolbarItem.opacity.toFloat() / 100f
+                width = toolbarItem.width,
+                alpha = toolbarItem.opacity / 100f
             )
 
             ShapeTypes.RECTANGLE -> RectangleShape(
                 color = selectedColor,
-                width = toolbarItem.width.toFloat(),
-                alpha = toolbarItem.opacity.toFloat() / 100f
+                width = toolbarItem.width,
+                alpha = toolbarItem.opacity / 100f
             )
         }
 
@@ -82,7 +83,7 @@ fun BottomToolbarItem.getShape(
              * this else block represents the EraserTool, as ColorItem won't be sent here
              */
             val width =
-                if (toolbarItem is BottomToolbarItem.EraserTool) toolbarItem.width.toFloat()
+                if (toolbarItem is BottomToolbarItem.EraserTool) toolbarItem.width
                 else DrawingConstants.DEFAULT_STROKE_WIDTH
             BrushShape(
                 isEraser = true,
@@ -90,4 +91,55 @@ fun BottomToolbarItem.getShape(
             )
         }
     }
+}
+
+fun BottomToolbarItem.getWidthOrNull(): Float? {
+    return when (this) {
+        is BottomToolbarItem.BrushTool -> this.width
+        is BottomToolbarItem.EraserTool -> this.width
+        is BottomToolbarItem.ShapeTool -> this.width
+        else -> null
+    }
+}
+
+fun BottomToolbarItem.setWidthIfPossible(mWidth: Float): BottomToolbarItem {
+    when (this) {
+        is BottomToolbarItem.BrushTool -> this.width = mWidth
+        is BottomToolbarItem.EraserTool -> this.width = mWidth
+        is BottomToolbarItem.ShapeTool -> this.width = mWidth
+        else -> {}
+    }
+    return this
+}
+
+fun BottomToolbarItem.getOpacityOrNull(): Float? {
+    return when (this) {
+        is BottomToolbarItem.BrushTool -> this.opacity
+        is BottomToolbarItem.ShapeTool -> this.opacity
+        else -> null
+    }
+}
+
+fun BottomToolbarItem.setOpacityIfPossible(mOpacity: Float): BottomToolbarItem {
+    when (this) {
+        is BottomToolbarItem.BrushTool -> this.opacity = mOpacity
+        is BottomToolbarItem.ShapeTool -> this.opacity = mOpacity
+        else -> {}
+    }
+    return this
+}
+
+fun BottomToolbarItem.getShapeTypeOrNull(): ShapeTypes? {
+    return when (this) {
+        is BottomToolbarItem.ShapeTool -> this.shapeType
+        else -> null
+    }
+}
+
+fun BottomToolbarItem.setShapeTypeIfPossible(mShapeType: ShapeTypes): BottomToolbarItem {
+    when (this) {
+        is BottomToolbarItem.ShapeTool -> this.shapeType = mShapeType
+        else -> {}
+    }
+    return this
 }

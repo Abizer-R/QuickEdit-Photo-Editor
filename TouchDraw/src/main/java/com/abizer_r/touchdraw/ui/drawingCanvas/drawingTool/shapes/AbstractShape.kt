@@ -1,8 +1,6 @@
 package com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import com.abizer_r.touchdraw.ui.drawingCanvas.models.PaintValues
 import com.abizer_r.touchdraw.utils.DrawingConstants
 
 abstract class AbstractShape: BaseShape {

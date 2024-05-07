@@ -60,6 +60,7 @@ fun BottomToolBar(
             ToolbarItem(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 toolbarItem = mToolbarItem,
+                selectedColor = bottomToolbarState.selectedColor,
                 isSelected = mToolbarItem == bottomToolbarState.selectedItem,
                 onEvent = onEvent
             )
@@ -71,12 +72,18 @@ fun BottomToolBar(
 @Composable
 fun ToolbarItem(
     modifier: Modifier = Modifier,
+    selectedColor: Color,
     toolbarItem: BottomToolbarItem,
     isSelected: Boolean,
     onEvent: (BottomToolbarEvents) -> Unit
 ) {
     if (toolbarItem is BottomToolbarItem.ColorItem) {
-        ColorToolbarItem(modifier = modifier, colorItem = toolbarItem, onEvent = onEvent)
+        ColorToolbarItem(
+            modifier = modifier,
+            selectedColor = selectedColor,
+            colorItem = toolbarItem,
+            onEvent = onEvent
+        )
         return
     }
     val columnModifier = if (isSelected) {
@@ -93,10 +100,12 @@ fun ToolbarItem(
             ImageVector.vectorResource(id = R.drawable.ic_eraser),
             stringResource(id = R.string.tool_label_Eraser)
         )
+
         is BottomToolbarItem.ShapeTool -> Pair(
             Icons.Default.Category,
             stringResource(id = R.string.tool_label_Shape)
         )
+
         else -> Pair(
             Icons.Default.Brush,
             stringResource(id = R.string.tool_label_brush)
@@ -149,6 +158,7 @@ fun ToolbarItem(
 @Composable
 fun ColorToolbarItem(
     modifier: Modifier = Modifier,
+    selectedColor: Color,
     colorItem: BottomToolbarItem.ColorItem,
     onEvent: (BottomToolbarEvents) -> Unit
 ) {
@@ -158,7 +168,7 @@ fun ColorToolbarItem(
         verticalArrangement = Arrangement.Center
     ) {
         Image(
-            painter = ColorPainter(colorItem.currentColor),
+            painter = ColorPainter(selectedColor),
             contentDescription = null,
             modifier = Modifier
                 .clip(CircleShape)

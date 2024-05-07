@@ -8,7 +8,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import com.abizer_r.touchdraw.ui.drawingCanvas.models.PaintValues
 
 class RectangleShape(
     color: Color? = null,

@@ -1,7 +1,6 @@
 package com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes
 
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import com.abizer_r.touchdraw.ui.drawingCanvas.models.PaintValues
 
 interface BaseShape {
     fun draw(drawScope: DrawScope)

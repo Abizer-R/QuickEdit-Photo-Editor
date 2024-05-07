@@ -3,4 +3,7 @@
     <string name="tool_label_brush">Brush</string>
     <string name="tool_label_Shape">Shape</string>
     <string name="tool_label_Eraser">Eraser</string>
+
+    <string name="width">Width</string>
+    <string name="opacity">Opacity</string>
 </resources>

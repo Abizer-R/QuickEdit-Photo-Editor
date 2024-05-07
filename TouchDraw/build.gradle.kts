@@ -61,4 +61,5 @@ dependencies {
 
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
     implementation("io.mhssn:colorpicker:1.0.0")
+    implementation("com.github.SmartToolFactory:Compose-Colorful-Sliders:1.2.2")
 }

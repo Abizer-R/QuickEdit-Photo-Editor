@@ -4,8 +4,8 @@ import androidx.compose.ui.graphics.Color
 import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.ShapeTypes
 
 sealed class BottomToolbarItem {
-    class ColorItem(val currentColor: Color) : BottomToolbarItem()
-    class BrushTool(val width: Int, val opacity: Int) : BottomToolbarItem()
-    class ShapeTool(val width: Int, val opacity: Int, val shapeTypes: ShapeTypes) : BottomToolbarItem()
-    class EraserTool(val width: Int) : BottomToolbarItem()
+    object ColorItem : BottomToolbarItem()
+    class BrushTool(var width: Float, var opacity: Float) : BottomToolbarItem()
+    class ShapeTool(var width: Float, var opacity: Float, var shapeType: ShapeTypes) : BottomToolbarItem()
+    class EraserTool(var width: Float) : BottomToolbarItem()
 }
