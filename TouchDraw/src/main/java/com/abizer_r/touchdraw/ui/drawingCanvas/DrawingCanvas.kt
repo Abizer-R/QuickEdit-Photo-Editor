@@ -13,17 +13,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInteropFilter
-import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.DrawingShape
-import com.abizer_r.touchdraw.ui.drawingCanvas.models.PaintValues
+import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.AbstractShape
 import com.abizer_r.touchdraw.ui.drawingCanvas.models.PathDetails
-import com.abizer_r.touchdraw.utils.getPaintValues
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.utils.getShape
+import java.util.Stack
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun DrawingCanvas(
     modifier: Modifier = Modifier,
-    drawingState: DrawingState,
+    pathDetailStack: Stack<PathDetails>,
+    selectedColor: Color,
+    currentTool: BottomToolbarItem,
     onDrawingEvent: (DrawingEvents) -> Unit
 ) {
 //    Log.e("TEST", "DrawingCanvas: drawingTool = ${drawingState.drawingTool}", )
@@ -33,7 +35,7 @@ fun DrawingCanvas(
      * And when these are changed, the draw phase is called (compose has 3 phases: composition, layout and draw)
      * SO, Recomposition isn't triggered
      */
-    var currentShape: DrawingShape? = null
+    var currentShape: AbstractShape? = null
     var drawPathAction by remember { mutableStateOf<Any?>(null) }
 
     Canvas(
@@ -41,7 +43,7 @@ fun DrawingCanvas(
             .pointerInteropFilter {
                 when (it.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        currentShape = drawingState.drawingTool.getShape()
+                        currentShape = currentTool.getShape(selectedColor = selectedColor)
                         currentShape?.initShape(startX = it.x, startY = it.y)
                     }
 
@@ -61,7 +63,6 @@ fun DrawingCanvas(
                                 DrawingEvents.AddNewPath(
                                     pathDetail = PathDetails(
                                         drawingShape = currentShape!!,
-                                        paintValues = drawingState.getPaintValues()
                                     )
                                 )
                             )
@@ -73,11 +74,10 @@ fun DrawingCanvas(
 
 
     ) {
-        drawingState.pathDetailStack.forEach { pathDetails ->
+        pathDetailStack.forEach { pathDetails ->
             Log.e("TEST", "DrawingCanvas: drawing from stack. drawingShape = ${pathDetails.drawingShape}", )
             pathDetails.drawingShape.draw(
                 drawScope = this,
-                paintValues = pathDetails.paintValues
             )
         }
 
@@ -86,7 +86,6 @@ fun DrawingCanvas(
         drawPathAction?.let {
             currentShape?.draw(
                 drawScope = this,
-                paintValues = drawingState.getPaintValues()
             )
         }
     }

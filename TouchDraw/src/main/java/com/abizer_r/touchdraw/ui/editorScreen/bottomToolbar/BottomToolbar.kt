@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,119 +41,81 @@ import androidx.compose.ui.unit.dp
 import com.abizer_r.components.R
 import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.components.theme.ToolBarBackgroundColor
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvents
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
+import com.abizer_r.touchdraw.utils.DrawingUtils
 
 @Composable
 fun BottomToolBar(
     modifier: Modifier,
-    selectedColor: Color,
-    selectedToolbarType: BottomToolbarItems,
-    onToolItemClicked: (BottomToolbarItems) -> Unit
+    bottomToolbarState: BottomToolbarState,
+    onEvent: (BottomToolbarEvents) -> Unit
 ) {
-    Row(
-        modifier = modifier
-            .horizontalScroll(state = rememberScrollState())
-            .background(ToolBarBackgroundColor),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceEvenly
+
+    LazyRow(
+        modifier = modifier.background(ToolBarBackgroundColor)
     ) {
-
-        /**
-         * Tool Item: Color Picker
-         */
-        Column(
-            modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Image(
-                painter = ColorPainter(selectedColor),
-                contentDescription = null,
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(color = MaterialTheme.colorScheme.onBackground)
-                    .padding(1.dp)
-                    .clip(CircleShape)
-                    .size(23.dp)
-                    .clickable {
-                        onToolItemClicked(BottomToolbarItems.Color)
-                    }
-            )
-
-            Text(
-                style = TextStyle(
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = MaterialTheme.typography.bodySmall.fontSize
-                ),
-                text = stringResource(id = R.string.tool_label_color)
+        items(bottomToolbarState.toolbarItems) { mToolbarItem ->
+            ToolbarItem(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                toolbarItem = mToolbarItem,
+                isSelected = mToolbarItem == bottomToolbarState.selectedItem,
+                onEvent = onEvent
             )
         }
-
-
-        /**
-         * Tool Item: Brush
-         */
-        ToolbarItem(
-            imageVector = Icons.Default.Brush,
-            isSelected = selectedToolbarType == BottomToolbarItems.Brush,
-            label = stringResource(id = R.string.tool_label_brush),
-            onClick = {
-                onToolItemClicked(BottomToolbarItems.Brush)
-            }
-        )
-
-        /**
-         * Tool Item: DrawingShape
-         */
-        ToolbarItem(
-            imageVector = Icons.Default.Category,
-            isSelected = selectedToolbarType == BottomToolbarItems.Shape,
-            label = stringResource(id = R.string.tool_label_Shape),
-            onClick = {
-                onToolItemClicked(BottomToolbarItems.Shape)
-            }
-        )
-
-        /**
-         * Tool Item: Eraser
-         */
-        ToolbarItem(
-            imageVector = ImageVector.vectorResource(id = R.drawable.ic_eraser),
-            isSelected = selectedToolbarType == BottomToolbarItems.Eraser,
-            label = stringResource(id = R.string.tool_label_Eraser),
-            onClick = {
-                onToolItemClicked(BottomToolbarItems.Eraser)
-            }
-        )
     }
 }
 
+
 @Composable
 fun ToolbarItem(
-    imageVector: ImageVector,
+    modifier: Modifier = Modifier,
+    toolbarItem: BottomToolbarItem,
     isSelected: Boolean,
-    label: String,
-    onClick: () -> Unit
+    onEvent: (BottomToolbarEvents) -> Unit
 ) {
+    if (toolbarItem is BottomToolbarItem.ColorItem) {
+        ColorToolbarItem(modifier = modifier, colorItem = toolbarItem, onEvent = onEvent)
+        return
+    }
     val columnModifier = if (isSelected) {
-        Modifier
+        modifier
             .clip(RoundedCornerShape(5.dp))
             .background(Color.DarkGray)
             .padding(start = 8.dp, end = 8.dp, bottom = 4.dp)
     } else {
-        Modifier.padding(start = 8.dp, end = 8.dp, bottom = 4.dp)
+        modifier.padding(start = 8.dp, end = 8.dp, bottom = 4.dp)
+    }
+
+    val (imageVector, labelText) = when (toolbarItem) {
+        is BottomToolbarItem.EraserTool -> Pair(
+            ImageVector.vectorResource(id = R.drawable.ic_eraser),
+            stringResource(id = R.string.tool_label_Eraser)
+        )
+        is BottomToolbarItem.ShapeTool -> Pair(
+            Icons.Default.Category,
+            stringResource(id = R.string.tool_label_Shape)
+        )
+        else -> Pair(
+            Icons.Default.Brush,
+            stringResource(id = R.string.tool_label_brush)
+        )
     }
 
 
     Column(
         modifier = columnModifier.clickable {
-            onClick()
+            onEvent(BottomToolbarEvents.OnItemClicked(toolbarItem))
         },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         if (isSelected) {
             Image(
-                modifier = Modifier.size(16.dp).scale(1.5f),
+                modifier = Modifier
+                    .size(16.dp)
+                    .scale(1.5f),
                 contentDescription = null,
                 imageVector = Icons.Default.ArrowDropUp,
                 contentScale = ContentScale.Crop,
@@ -177,7 +141,42 @@ fun ToolbarItem(
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = MaterialTheme.typography.labelSmall.fontSize
             ),
-            text = label
+            text = labelText
+        )
+    }
+}
+
+@Composable
+fun ColorToolbarItem(
+    modifier: Modifier = Modifier,
+    colorItem: BottomToolbarItem.ColorItem,
+    onEvent: (BottomToolbarEvents) -> Unit
+) {
+    Column(
+        modifier = modifier.padding(start = 8.dp, end = 8.dp, top = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(
+            painter = ColorPainter(colorItem.currentColor),
+            contentDescription = null,
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(color = MaterialTheme.colorScheme.onBackground)
+                .padding(1.dp)
+                .clip(CircleShape)
+                .size(23.dp)
+                .clickable {
+                    onEvent(BottomToolbarEvents.OnItemClicked(colorItem))
+                }
+        )
+
+        Text(
+            style = TextStyle(
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = MaterialTheme.typography.bodySmall.fontSize
+            ),
+            text = stringResource(id = R.string.tool_label_color)
         )
     }
 }
@@ -189,9 +188,8 @@ fun PreviewBottomToolbar() {
     SketchDraftTheme {
         BottomToolBar(
             modifier = Modifier.fillMaxWidth(),
-            selectedColor = Color.Yellow,
-            selectedToolbarType = BottomToolbarItems.Brush,
-            onToolItemClicked = {}
+            bottomToolbarState = DrawingUtils.getDefaultBottomToolbarState(),
+            onEvent = {}
         )
     }
 }

@@ -7,12 +7,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.DialogProperties
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -22,13 +23,13 @@ import com.abizer_r.touchdraw.utils.CustomLayerTypeComposable
 import com.abizer_r.touchdraw.ui.drawingCanvas.DrawingCanvas
 import com.abizer_r.touchdraw.ui.drawingCanvas.DrawingEvents
 import com.abizer_r.touchdraw.ui.drawingCanvas.DrawingState
-import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.DrawingTool
 import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.ShapeTypes
 import com.abizer_r.touchdraw.ui.drawingCanvas.models.PathDetails
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolbarItems
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvents
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TopToolBar
-import com.abizer_r.touchdraw.utils.toDrawingTool
+import com.abizer_r.touchdraw.utils.DrawingUtils
 import io.mhssn.colorpicker.ColorPickerDialog
 import io.mhssn.colorpicker.ColorPickerType
 import java.util.Stack
@@ -39,26 +40,19 @@ fun EditorScreen() {
     val colorOnBackground = MaterialTheme.colorScheme.onBackground
 
     var showColorPicker by remember { mutableStateOf(false) }
-    var opacity by remember { mutableStateOf(100) }
-    var strokeWidth by remember { mutableStateOf(12) }
-    var shapeType by remember { mutableStateOf(ShapeTypes.LINE) }
-    var selectedToolType: BottomToolbarItems by remember {
-        mutableStateOf(BottomToolbarItems.Brush)
-    }
-    /**
-     * TODO: implement selecting strokeWidth, strokeColor and opacity
-     */
-    var drawingState by remember {
+
+    var bottomToolbarState by remember {
         mutableStateOf(
-            DrawingState(
-                strokeWidth = strokeWidth,
-                opacity = opacity,
-                drawingTool = selectedToolType.toDrawingTool(shapeType = shapeType),
-                strokeColor = colorOnBackground,
-                pathDetailStack = Stack(),
-                redoStack = Stack()
+            DrawingUtils.getDefaultBottomToolbarState(
+                defaultColorSelected = colorOnBackground
             )
         )
+    }
+
+    val pathDetailStack = remember { Stack<PathDetails>() }
+    val redoStack = remember { Stack<PathDetails>() }
+    var pathDetailStackStateTrigger by remember {
+        mutableStateOf(Triple(0f, pathDetailStack, redoStack))
     }
 
 
@@ -76,32 +70,22 @@ fun EditorScreen() {
                 width = Dimension.matchParent
                 height = Dimension.wrapContent
             },
-            enableUndo = drawingState.pathDetailStack.isNotEmpty(),
-            enableRedo = drawingState.redoStack.isNotEmpty(),
+            enableUndo = pathDetailStackStateTrigger.second.isNotEmpty(),
+            enableRedo = redoStack.isNotEmpty(),
             onUndo = {
-                // creating new Stack, otherwise recomposition won't get triggered
-                val mPathStack = Stack<PathDetails>()
-                mPathStack.addAll(drawingState.pathDetailStack)
-                val mRedoStack = drawingState.redoStack
-                if (mPathStack.isNotEmpty()) {
-                    mRedoStack.push(mPathStack.pop())
+                if (pathDetailStack.isNotEmpty()) {
+                    redoStack.push(pathDetailStack.pop())
                 }
-                drawingState = drawingState.copy(
-                    pathDetailStack = mPathStack,
-                    redoStack = mRedoStack
+                pathDetailStackStateTrigger = pathDetailStackStateTrigger.copy(
+                    first = pathDetailStackStateTrigger.first + 1
                 )
             },
             onRedo = {
-                // creating new Stack, otherwise recomposition won't get triggered
-                val mPathStack = Stack<PathDetails>()
-                mPathStack.addAll(drawingState.pathDetailStack)
-                val mRedoStack = drawingState.redoStack
-                if (mRedoStack.isNotEmpty()) {
-                    mPathStack.push(mRedoStack.pop())
+                if (redoStack.isNotEmpty()) {
+                    pathDetailStack.push(redoStack.pop())
                 }
-                drawingState = drawingState.copy(
-                    pathDetailStack = mPathStack,
-                    redoStack = mRedoStack
+                pathDetailStackStateTrigger = pathDetailStackStateTrigger.copy(
+                    first = pathDetailStackStateTrigger.first + 1
                 )
             }
         )
@@ -116,17 +100,16 @@ fun EditorScreen() {
             }
         ) {
             DrawingCanvas(
-                drawingState = drawingState,
-                onDrawingEvent = { drawingEvent ->
-                    when (drawingEvent) {
+                pathDetailStack = pathDetailStack,
+                selectedColor = bottomToolbarState.selectedColor,
+                currentTool = bottomToolbarState.selectedItem,
+                onDrawingEvent = {
+                    when (it) {
                         is DrawingEvents.AddNewPath -> {
-                            // creating new Stack, otherwise recomposition won't get triggered
-                            val mPathStack = Stack<PathDetails>()
-                            mPathStack.addAll(drawingState.pathDetailStack)
-                            mPathStack.push(drawingEvent.pathDetail)
-                            drawingState = drawingState.copy(
-                                pathDetailStack = mPathStack,
-                                redoStack = Stack()
+                            pathDetailStack.push(it.pathDetail)
+                            redoStack.clear()
+                            pathDetailStackStateTrigger = pathDetailStackStateTrigger.copy(
+                                first = pathDetailStackStateTrigger.first + 1
                             )
                         }
                     }
@@ -143,18 +126,17 @@ fun EditorScreen() {
                 width = Dimension.matchParent
                 height = Dimension.wrapContent
             },
-            selectedColor = drawingState.strokeColor,
-            selectedToolbarType = selectedToolType,
-            onToolItemClicked = {
+            bottomToolbarState = bottomToolbarState,
+            onEvent = {
                 when (it) {
-                    BottomToolbarItems.Color -> {
-                        showColorPicker = true
-                    }
-                    else -> {
-                        selectedToolType = it
-                        drawingState = drawingState.copy(
-                            drawingTool = it.toDrawingTool(shapeType = shapeType)
-                        )
+                    is BottomToolbarEvents.OnItemClicked -> {
+                        if (it.toolbarItem is BottomToolbarItem.ColorItem) {
+                            showColorPicker = true
+                        } else {
+                            bottomToolbarState = bottomToolbarState.copy(
+                                selectedItem = it.toolbarItem
+                            )
+                        }
                     }
                 }
             }
@@ -170,8 +152,8 @@ fun EditorScreen() {
             },
             onPickedColor = { selectedColor ->
                 showColorPicker = false
-                drawingState = drawingState.copy(
-                    strokeColor = selectedColor
+                bottomToolbarState = bottomToolbarState.copy(
+                    selectedColor = selectedColor
                 )
             }
         )

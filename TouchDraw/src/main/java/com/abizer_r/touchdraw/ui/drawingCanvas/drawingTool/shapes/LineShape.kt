@@ -1,23 +1,32 @@
 package com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes
 
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import com.abizer_r.touchdraw.ui.drawingCanvas.models.PaintValues
 
-class LineShape: DrawingShape {
+class LineShape(
+    color: Color? = null,
+    width: Float? = null,
+    alpha: Float? = null
+) : AbstractShape() {
+
+    init {
+        updatePaintValues(color, width, alpha)
+    }
+
     private var startOffset: Offset = Offset.Unspecified
     private var endOffset: Offset = Offset.Unspecified
 
-    override fun draw(drawScope: DrawScope, paintValues: PaintValues) {
+    override fun draw(drawScope: DrawScope) {
         drawScope.drawLine(
             start = startOffset,
             end = endOffset,
-            brush = SolidColor(paintValues.color),
-            strokeWidth = paintValues.width,
+            brush = SolidColor(mColor),
+            strokeWidth = mWidth,
             cap = StrokeCap.Round,
-            alpha = paintValues.alpha
+            alpha = mAlpha
         )
     }
 
