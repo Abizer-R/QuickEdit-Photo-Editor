@@ -2,6 +2,7 @@ package com.abizer_r.touchdraw.ui.editorScreen
 
 import ToolbarExtensionView
 import android.content.res.Configuration
+import android.util.Log
 import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,9 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.abizer_r.components.theme.SketchDraftTheme
+import com.abizer_r.touchdraw.ui.draggableView.DraggableParentView
 import com.abizer_r.touchdraw.utils.CustomLayerTypeComposable
 import com.abizer_r.touchdraw.ui.drawingCanvas.DrawingCanvas
 import com.abizer_r.touchdraw.ui.drawingCanvas.DrawingEvents
@@ -29,6 +32,7 @@ import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvents
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TopToolBar
+import com.abizer_r.touchdraw.ui.textInputScreen.TextInputScreen
 import com.abizer_r.touchdraw.utils.DrawingUtils
 import com.abizer_r.touchdraw.utils.getOpacityOrNull
 import com.abizer_r.touchdraw.utils.getShapeTypeOrNull
@@ -47,6 +51,7 @@ fun EditorScreen() {
 
     var showColorPicker by remember { mutableStateOf(false) }
     var showBottomToolbarExtension by remember { mutableStateOf(false) }
+    var showTextInputScreen by remember { mutableStateOf(false) }
 
     var bottomToolbarState by remember {
         mutableStateOf(
@@ -69,7 +74,7 @@ fun EditorScreen() {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        val (topToolbar, bottomToolbar, bottomToolbarExtension, drawingCanvas) = createRefs()
+        val (topToolbar, bottomToolbar, bottomToolbarExtension, drawingCanvas, textInputScreen) = createRefs()
 
         TopToolBar(
             modifier = Modifier.constrainAs(topToolbar) {
@@ -124,7 +129,37 @@ fun EditorScreen() {
             )
         }
 
+//        DraggableParentView(
+//            modifier = Modifier.constrainAs(drawingCanvas) {
+//                top.linkTo(topToolbar.bottom)
+//                bottom.linkTo(bottomToolbar.top)
+//                width = Dimension.matchParent
+//                height = Dimension.fillToConstraints
+//            }
+//        )
 
+        if (showTextInputScreen) {
+            TextInputScreen(
+                modifier = Modifier
+                    .constrainAs(textInputScreen) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        width = Dimension.matchParent
+                        height = Dimension.fillToConstraints
+                    }
+                    .zIndex(1f),
+                onDoneClicked = { mText ->
+                    showTextInputScreen = showTextInputScreen.not()
+                    /**
+                     * TODO: make a draggable text item using "mText"
+                     */
+                    Log.e("TEST", "EditorScreen: onDoneClicked() - mText = $mText", )
+                },
+                onBackPressed = {
+                    showTextInputScreen = false
+                }
+            )
+        }
 
 
         BottomToolBar(
@@ -142,10 +177,16 @@ fun EditorScreen() {
                                 showColorPicker = true
                             }
 
-                            bottomToolbarState.selectedItem -> {
-                                showBottomToolbarExtension = !showBottomToolbarExtension
+                            is BottomToolbarItem.TextTool -> {
+                                showTextInputScreen = showTextInputScreen.not()
                             }
 
+                            // Clicked on already selected item
+                            bottomToolbarState.selectedItem -> {
+                                showBottomToolbarExtension = showBottomToolbarExtension.not()
+                            }
+
+                            // clicked on another item
                             else -> {
                                 showBottomToolbarExtension = false
                                 bottomToolbarState = bottomToolbarState.copy(
@@ -160,12 +201,13 @@ fun EditorScreen() {
 
         if (showBottomToolbarExtension) {
             ToolbarExtensionView(
-                modifier = Modifier.constrainAs(bottomToolbarExtension) {
-                    bottom.linkTo(bottomToolbar.top)
-                    width = Dimension.matchParent
-                }
+                modifier = Modifier
+                    .constrainAs(bottomToolbarExtension) {
+                        bottom.linkTo(bottomToolbar.top)
+                        width = Dimension.matchParent
+                    }
                     .padding(bottom = 2.dp) /* added padding to get a visual separation between BottomToolbar and extension */
-                    .clickable {  }, /* added clickable{} to avoid triggering touchEvent in DrawingCanvas when clicking anywhere on toolbarExtension */
+                    .clickable { }, /* added clickable{} to avoid triggering touchEvent in DrawingCanvas when clicking anywhere on toolbarExtension */
                 width = bottomToolbarState.selectedItem.getWidthOrNull(),
                 onWidthChange = { mWidth ->
                     bottomToolbarState = bottomToolbarState.copy(

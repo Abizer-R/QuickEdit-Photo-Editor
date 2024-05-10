@@ -8,4 +8,7 @@ sealed class BottomToolbarItem {
     class BrushTool(var width: Float, var opacity: Float) : BottomToolbarItem()
     class ShapeTool(var width: Float, var opacity: Float, var shapeType: ShapeTypes) : BottomToolbarItem()
     class EraserTool(var width: Float) : BottomToolbarItem()
+
+
+    class TextTool() : BottomToolbarItem()
 }

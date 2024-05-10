@@ -30,7 +30,8 @@ object DrawingUtils {
             ),
             BottomToolbarItem.EraserTool(
                 width = DrawingConstants.DEFAULT_STROKE_WIDTH
-            )
+            ),
+            BottomToolbarItem.TextTool()
         )
     }
 
