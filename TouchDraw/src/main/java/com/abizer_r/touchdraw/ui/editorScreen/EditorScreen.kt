@@ -28,6 +28,7 @@ import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.touchdraw.ui.drawingCanvas.DrawingCanvas
 import com.abizer_r.touchdraw.ui.drawingCanvas.DrawingEvents
 import com.abizer_r.touchdraw.ui.drawingCanvas.models.PathDetails
+import com.abizer_r.touchdraw.ui.drawingView.DrawingView
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvents
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
@@ -95,6 +96,9 @@ fun EditorScreen() {
             enableUndo = pathDetailStackStateTrigger.second.isNotEmpty(),
             enableRedo = redoStack.isNotEmpty(),
             onUndo = {
+                /**
+                 * TODO: include the transformable views in undo-redo as well
+                 */
                 if (pathDetailStack.isNotEmpty()) {
                     redoStack.push(pathDetailStack.pop())
                 }
@@ -112,81 +116,67 @@ fun EditorScreen() {
             }
         )
 
-        Box(
+        DrawingView(
             modifier = Modifier.constrainAs(editorLayout) {
                 top.linkTo(topToolbar.bottom)
                 bottom.linkTo(bottomToolbar.top)
                 width = Dimension.matchParent
                 height = Dimension.fillToConstraints
-            }
-        ) {
-
-            CustomLayerTypeComposable(
-                layerType = View.LAYER_TYPE_HARDWARE,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                DrawingCanvas(
-                    pathDetailStack = pathDetailStack,
-                    selectedColor = bottomToolbarState.selectedColor,
-                    currentTool = bottomToolbarState.selectedItem,
-                    onDrawingEvent = {
-                        when (it) {
-                            is DrawingEvents.AddNewPath -> {
-                                pathDetailStack.push(it.pathDetail)
-                                redoStack.clear()
-                                pathDetailStackStateTrigger = pathDetailStackStateTrigger.copy(
-                                    first = pathDetailStackStateTrigger.first + 1
-                                )
-                            }
-                        }
-                    }
-                )
-            }
-
-            transformableContainerState.childrenStateList.forEach { mViewState ->
-                TransformableBox(
-                    viewState = mViewState,
-                    onEvent = { mEvent ->
-                        val stateList = transformableContainerState.childrenStateList
-                        when(mEvent) {
-                            is TransformableBoxEvents.OnDrag -> {
-                                val index = stateList.indexOfFirst { mEvent.id == it.id }
-                                if (index >= 0 && index < stateList.size) {
-                                    stateList[index] = stateList[index].copy(
-                                        positionOffset = (stateList[index].positionOffset + mEvent.dragAmount)
-                                    )
-                                }
-                            }
-
-                            is TransformableBoxEvents.OnZoom -> {
-                                val index = stateList.indexOfFirst { mEvent.id == it.id }
-                                if (index >= 0 && index < stateList.size) {
-                                    stateList[index] = stateList[index].copy(
-                                        scale = (stateList[index].scale * mEvent.zoomAmount).coerceIn(1f, 5f)
-                                    )
-                                }
-                            }
-
-                            is TransformableBoxEvents.OnRotate -> {
-                                val index = stateList.indexOfFirst { mEvent.id == it.id }
-                                if (index >= 0 && index < stateList.size) {
-                                    stateList[index] = stateList[index].copy(
-                                        rotation = stateList[index].rotation + mEvent.rotationChange
-                                    )
-                                }
-                            }
-                        }
-
-                        transformableContainerState = transformableContainerState.copy(
-                            childrenStateList = stateList,
-                            triggerRecomposition = transformableContainerState.triggerRecomposition + 1
+            },
+            pathDetailStack = pathDetailStack,
+            selectedColor = bottomToolbarState.selectedColor,
+            currentTool = bottomToolbarState.selectedItem,
+            transformableViewsList = transformableContainerState.childrenStateList,
+            onDrawingEvent = {
+                when (it) {
+                    is DrawingEvents.AddNewPath -> {
+                        pathDetailStack.push(it.pathDetail)
+                        redoStack.clear()
+                        pathDetailStackStateTrigger = pathDetailStackStateTrigger.copy(
+                            first = pathDetailStackStateTrigger.first + 1
                         )
-
-                        Log.e("TEST_event2", "childrenList = ${transformableContainerState.childrenStateList}", )
                     }
+                }
+            },
+            onTransformViewEvent = { mEvent ->
+                val stateList = transformableContainerState.childrenStateList
+                when(mEvent) {
+                    is TransformableBoxEvents.OnDrag -> {
+                        val index = stateList.indexOfFirst { mEvent.id == it.id }
+                        if (index >= 0 && index < stateList.size) {
+                            stateList[index] = stateList[index].copy(
+                                positionOffset = (stateList[index].positionOffset + mEvent.dragAmount)
+                            )
+                        }
+                    }
+
+                    is TransformableBoxEvents.OnZoom -> {
+                        val index = stateList.indexOfFirst { mEvent.id == it.id }
+                        if (index >= 0 && index < stateList.size) {
+                            stateList[index] = stateList[index].copy(
+                                scale = (stateList[index].scale * mEvent.zoomAmount).coerceIn(1f, 5f)
+                            )
+                        }
+                    }
+
+                    is TransformableBoxEvents.OnRotate -> {
+                        val index = stateList.indexOfFirst { mEvent.id == it.id }
+                        if (index >= 0 && index < stateList.size) {
+                            stateList[index] = stateList[index].copy(
+                                rotation = stateList[index].rotation + mEvent.rotationChange
+                            )
+                        }
+                    }
+                }
+
+                transformableContainerState = transformableContainerState.copy(
+                    childrenStateList = stateList,
+                    triggerRecomposition = transformableContainerState.triggerRecomposition + 1
                 )
+
+                Log.e("TEST_event2", "childrenList = ${transformableContainerState.childrenStateList}", )
             }
-        }
+        )
 
         if (showTextInputScreen) {
             TextInputScreen(
