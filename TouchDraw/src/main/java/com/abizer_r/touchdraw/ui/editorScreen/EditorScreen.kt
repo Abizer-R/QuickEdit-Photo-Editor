@@ -3,7 +3,6 @@ package com.abizer_r.touchdraw.ui.editorScreen
 import ToolbarExtensionView
 import android.content.res.Configuration
 import android.util.Log
-import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -23,16 +23,16 @@ import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.abizer_r.components.theme.SketchDraftTheme
-import com.abizer_r.touchdraw.ui.draggableView.DraggableParentView
-import com.abizer_r.touchdraw.utils.CustomLayerTypeComposable
-import com.abizer_r.touchdraw.ui.drawingCanvas.DrawingCanvas
-import com.abizer_r.touchdraw.ui.drawingCanvas.DrawingEvents
+import com.abizer_r.touchdraw.ui.transformableViews.containerView.TransformableViewsContainer
 import com.abizer_r.touchdraw.ui.drawingCanvas.models.PathDetails
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvents
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TopToolBar
 import com.abizer_r.touchdraw.ui.textInputScreen.TextInputScreen
+import com.abizer_r.touchdraw.ui.transformableViews.childView.TransformableBoxEvents
+import com.abizer_r.touchdraw.ui.transformableViews.childView.TransformableBoxState
+import com.abizer_r.touchdraw.ui.transformableViews.containerView.TransformableContainerState
 import com.abizer_r.touchdraw.utils.DrawingUtils
 import com.abizer_r.touchdraw.utils.getOpacityOrNull
 import com.abizer_r.touchdraw.utils.getShapeTypeOrNull
@@ -43,6 +43,7 @@ import com.abizer_r.touchdraw.utils.setWidthIfPossible
 import io.mhssn.colorpicker.ColorPickerDialog
 import io.mhssn.colorpicker.ColorPickerType
 import java.util.Stack
+import java.util.UUID
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -59,6 +60,10 @@ fun EditorScreen() {
                 defaultColorSelected = colorOnBackground
             )
         )
+    }
+
+    var `transformableContainerState` by remember {
+        mutableStateOf(TransformableContainerState())
     }
 
     val pathDetailStack = remember { Stack<PathDetails>() }
@@ -102,41 +107,100 @@ fun EditorScreen() {
             }
         )
 
-        CustomLayerTypeComposable(
-            layerType = View.LAYER_TYPE_HARDWARE,
-            modifier = Modifier.constrainAs(drawingCanvas) {
-                top.linkTo(topToolbar.bottom)
-                bottom.linkTo(bottomToolbar.top)
-                width = Dimension.matchParent
-                height = Dimension.fillToConstraints
-            }
-        ) {
-            DrawingCanvas(
-                pathDetailStack = pathDetailStack,
-                selectedColor = bottomToolbarState.selectedColor,
-                currentTool = bottomToolbarState.selectedItem,
-                onDrawingEvent = {
-                    when (it) {
-                        is DrawingEvents.AddNewPath -> {
-                            pathDetailStack.push(it.pathDetail)
-                            redoStack.clear()
-                            pathDetailStackStateTrigger = pathDetailStackStateTrigger.copy(
-                                first = pathDetailStackStateTrigger.first + 1
-                            )
-                        }
-                    }
-                }
-            )
-        }
-
-//        DraggableParentView(
+//        CustomLayerTypeComposable(
+//            layerType = View.LAYER_TYPE_HARDWARE,
 //            modifier = Modifier.constrainAs(drawingCanvas) {
 //                top.linkTo(topToolbar.bottom)
 //                bottom.linkTo(bottomToolbar.top)
 //                width = Dimension.matchParent
 //                height = Dimension.fillToConstraints
 //            }
-//        )
+//        ) {
+//            DrawingCanvas(
+//                pathDetailStack = pathDetailStack,
+//                selectedColor = bottomToolbarState.selectedColor,
+//                currentTool = bottomToolbarState.selectedItem,
+//                onDrawingEvent = {
+//                    when (it) {
+//                        is DrawingEvents.AddNewPath -> {
+//                            pathDetailStack.push(it.pathDetail)
+//                            redoStack.clear()
+//                            pathDetailStackStateTrigger = pathDetailStackStateTrigger.copy(
+//                                first = pathDetailStackStateTrigger.first + 1
+//                            )
+//                        }
+//                    }
+//                }
+//            )
+//        }
+
+        TransformableViewsContainer(
+            modifier = Modifier.constrainAs(drawingCanvas) {
+                top.linkTo(topToolbar.bottom)
+                bottom.linkTo(bottomToolbar.top)
+                width = Dimension.matchParent
+                height = Dimension.fillToConstraints
+            },
+            transformableBoxList = transformableContainerState.childrenStateList,
+            onTransformableBoxEvents = { mEvent ->
+                val stateList = transformableContainerState.childrenStateList
+                when(mEvent) {
+//                    is TransformableBoxEvents.OnTransform -> {
+//                        val index = stateList.indexOfFirst { mEvent.id == it.id }
+//                        if (index >= 0 && index < stateList.size) {
+//                            stateList[index] = stateList[index].copy(
+//                                positionOffset = mEvent.newOffSet,
+//                                scale = mEvent.newScale,
+//                                rotation = mEvent.newRotation
+//                            )
+//                        }
+//                    }
+
+                    is TransformableBoxEvents.OnDrag -> {
+                        val index = stateList.indexOfFirst { mEvent.id == it.id }
+                        if (index >= 0 && index < stateList.size) {
+                            stateList[index] = stateList[index].copy(
+                                positionOffset = (stateList[index].positionOffset + mEvent.dragAmount)
+                            )
+                        }
+                    }
+
+//                    is TransformableBoxEvents.OnScaleChange -> {
+//                        val index = stateList.indexOfFirst { mEvent.id == it.id }
+//                        if (index >= 0 && index < stateList.size) {
+//                            stateList[index] = stateList[index].copy(
+//                                scale = mEvent.newScale
+//                            )
+//                        }
+//                    }
+
+                    is TransformableBoxEvents.OnZoom -> {
+                        val index = stateList.indexOfFirst { mEvent.id == it.id }
+                        if (index >= 0 && index < stateList.size) {
+                            stateList[index] = stateList[index].copy(
+                                scale = (stateList[index].scale * mEvent.zoomAmount).coerceIn(1f, 5f)
+                            )
+                        }
+                    }
+
+                    is TransformableBoxEvents.OnRotate -> {
+                        val index = stateList.indexOfFirst { mEvent.id == it.id }
+                        if (index >= 0 && index < stateList.size) {
+                            stateList[index] = stateList[index].copy(
+                                rotation = stateList[index].rotation + mEvent.rotationChange
+                            )
+                        }
+                    }
+                }
+
+                transformableContainerState = transformableContainerState.copy(
+                    childrenStateList = stateList,
+                    triggerRecomposition = transformableContainerState.triggerRecomposition + 1
+                )
+
+                Log.e("TEST_event2", "childrenList = ${transformableContainerState.childrenStateList}", )
+            }
+        )
 
         if (showTextInputScreen) {
             TextInputScreen(
@@ -153,6 +217,21 @@ fun EditorScreen() {
                     /**
                      * TODO: make a draggable text item using "mText"
                      */
+
+                    val stateList = transformableContainerState.childrenStateList
+                    stateList.add(
+                        TransformableBoxState(
+                            id = UUID.randomUUID().toString(),
+                            positionOffset = Offset(0f, 0f),
+                            viewSizeInDp = 100.dp,
+                            scale = 1f,
+                            rotation = 0f
+                        )
+                    )
+                    transformableContainerState = transformableContainerState.copy(
+                        childrenStateList = stateList,
+                        triggerRecomposition = transformableContainerState.triggerRecomposition + 1
+                    )
                     Log.e("TEST", "EditorScreen: onDoneClicked() - mText = $mText", )
                 },
                 onBackPressed = {
