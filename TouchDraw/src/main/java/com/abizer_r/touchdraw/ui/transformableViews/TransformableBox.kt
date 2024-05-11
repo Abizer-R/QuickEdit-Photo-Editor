@@ -1,4 +1,4 @@
-package com.abizer_r.touchdraw.ui.transformableViews.childView
+package com.abizer_r.touchdraw.ui.transformableViews
 
 import android.util.Log
 import androidx.compose.foundation.background
@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -45,15 +44,6 @@ fun TransformableBox(
                                 "\nrotation: $rotationChange"
                     )
 
-//                    onEvent(
-//                        TransformableBoxEvents.OnTransform(
-//                            id = viewState.id,
-//                            newOffSet = viewState.positionOffset + pan,
-//                            newScale = (viewState.scale * zoom).coerceIn(1f, 5f),
-//                            newRotation = viewState.rotation + rotationChange,
-//                        )
-//                    )
-
                     onEvent(
                         TransformableBoxEvents.OnDrag(
                             id = viewState.id,
@@ -62,10 +52,6 @@ fun TransformableBox(
                     )
 
                     onEvent(
-//                        TransformableBoxEvents.OnScaleChange(
-//                            id = viewState.id,
-//                            newScale = (viewState.scale * zoom).coerceIn(1f, 5f)
-//                        )
 
                         TransformableBoxEvents.OnZoom(
                             id = viewState.id,
@@ -87,7 +73,4 @@ fun TransformableBox(
     ) {
 
     }
-
-
-
 }

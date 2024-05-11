@@ -1,4 +1,4 @@
-package com.abizer_r.touchdraw.ui.transformableViews.childView
+package com.abizer_r.touchdraw.ui.transformableViews
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Dp

@@ -1,8 +1,6 @@
-package com.abizer_r.touchdraw.ui.transformableViews.childView
+package com.abizer_r.touchdraw.ui.transformableViews
 
 import androidx.compose.ui.geometry.Offset
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvents
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 
 sealed class TransformableBoxEvents {
     data class OnDrag(val id: String, val dragAmount: Offset): TransformableBoxEvents()
