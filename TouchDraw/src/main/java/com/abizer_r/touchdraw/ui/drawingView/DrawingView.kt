@@ -1,6 +1,5 @@
 package com.abizer_r.touchdraw.ui.drawingView
 
-import android.util.Log
 import android.view.View
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,9 +10,10 @@ import com.abizer_r.touchdraw.ui.drawingCanvas.DrawingCanvas
 import com.abizer_r.touchdraw.ui.drawingCanvas.DrawingEvents
 import com.abizer_r.touchdraw.ui.drawingCanvas.models.PathDetails
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
-import com.abizer_r.touchdraw.ui.transformableViews.TransformableBox
-import com.abizer_r.touchdraw.ui.transformableViews.TransformableBoxEvents
-import com.abizer_r.touchdraw.ui.transformableViews.TransformableBoxState
+import com.abizer_r.touchdraw.ui.transformableViews.TransformableTextView
+import com.abizer_r.touchdraw.ui.transformableViews.TransformableViewType
+import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
+import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxState
 import com.abizer_r.touchdraw.utils.CustomLayerTypeComposable
 import java.util.Stack
 
@@ -23,7 +23,7 @@ fun DrawingView(
     pathDetailStack: Stack<PathDetails>,
     selectedColor: Color,
     currentTool: BottomToolbarItem,
-    transformableViewsList: ArrayList<TransformableBoxState>,
+    transformableViewsList: ArrayList<TransformableViewType>,
     onDrawingEvent: (DrawingEvents) -> Unit,
     onTransformViewEvent: (TransformableBoxEvents) -> Unit
 ) {
@@ -44,11 +44,15 @@ fun DrawingView(
         }
 
 
-        transformableViewsList.forEach { mViewState ->
-            TransformableBox(
-                viewState = mViewState,
-                onEvent = onTransformViewEvent
-            )
+        transformableViewsList.forEach { mViewDetail ->
+            when (mViewDetail) {
+                is TransformableViewType.TextTransformable -> {
+                    TransformableTextView(
+                        viewDetail = mViewDetail,
+                        onEvent = onTransformViewEvent
+                    )
+                }
+            }
         }
     }
 }

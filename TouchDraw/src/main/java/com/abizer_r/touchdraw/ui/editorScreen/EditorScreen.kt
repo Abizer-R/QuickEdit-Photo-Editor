@@ -3,10 +3,8 @@ package com.abizer_r.touchdraw.ui.editorScreen
 import ToolbarExtensionView
 import android.content.res.Configuration
 import android.util.Log
-import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +23,6 @@ import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.abizer_r.components.theme.SketchDraftTheme
-import com.abizer_r.touchdraw.ui.drawingCanvas.DrawingCanvas
 import com.abizer_r.touchdraw.ui.drawingCanvas.DrawingEvents
 import com.abizer_r.touchdraw.ui.drawingCanvas.models.PathDetails
 import com.abizer_r.touchdraw.ui.drawingView.DrawingView
@@ -34,11 +31,17 @@ import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarE
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TopToolBar
 import com.abizer_r.touchdraw.ui.textInputScreen.TextInputScreen
-import com.abizer_r.touchdraw.ui.transformableViews.TransformableBox
-import com.abizer_r.touchdraw.ui.transformableViews.TransformableBoxEvents
-import com.abizer_r.touchdraw.ui.transformableViews.TransformableBoxState
-import com.abizer_r.touchdraw.ui.transformableViews.TransformableContainerState
-import com.abizer_r.touchdraw.utils.CustomLayerTypeComposable
+import com.abizer_r.touchdraw.ui.transformableViews.TransformableViewType
+import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
+import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxState
+import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableContainerState
+import com.abizer_r.touchdraw.ui.transformableViews.getId
+import com.abizer_r.touchdraw.ui.transformableViews.getPositionOffset
+import com.abizer_r.touchdraw.ui.transformableViews.getRotation
+import com.abizer_r.touchdraw.ui.transformableViews.getScale
+import com.abizer_r.touchdraw.ui.transformableViews.setPositionOffset
+import com.abizer_r.touchdraw.ui.transformableViews.setRotation
+import com.abizer_r.touchdraw.ui.transformableViews.setScale
 import com.abizer_r.touchdraw.utils.DrawingUtils
 import com.abizer_r.touchdraw.utils.getOpacityOrNull
 import com.abizer_r.touchdraw.utils.getShapeTypeOrNull
@@ -126,7 +129,7 @@ fun EditorScreen() {
             pathDetailStack = pathDetailStack,
             selectedColor = bottomToolbarState.selectedColor,
             currentTool = bottomToolbarState.selectedItem,
-            transformableViewsList = transformableContainerState.childrenStateList,
+            transformableViewsList = transformableContainerState.transformableViewsList,
             onDrawingEvent = {
                 when (it) {
                     is DrawingEvents.AddNewPath -> {
@@ -139,42 +142,42 @@ fun EditorScreen() {
                 }
             },
             onTransformViewEvent = { mEvent ->
-                val stateList = transformableContainerState.childrenStateList
+                val stateList = transformableContainerState.transformableViewsList
                 when(mEvent) {
                     is TransformableBoxEvents.OnDrag -> {
-                        val index = stateList.indexOfFirst { mEvent.id == it.id }
+                        val index = stateList.indexOfFirst { mEvent.id == it.getId() }
                         if (index >= 0 && index < stateList.size) {
-                            stateList[index] = stateList[index].copy(
-                                positionOffset = (stateList[index].positionOffset + mEvent.dragAmount)
+                            stateList[index] = stateList[index].setPositionOffset(
+                                stateList[index].getPositionOffset() + mEvent.dragAmount
                             )
                         }
                     }
 
                     is TransformableBoxEvents.OnZoom -> {
-                        val index = stateList.indexOfFirst { mEvent.id == it.id }
+                        val index = stateList.indexOfFirst { mEvent.id == it.getId() }
                         if (index >= 0 && index < stateList.size) {
-                            stateList[index] = stateList[index].copy(
-                                scale = (stateList[index].scale * mEvent.zoomAmount).coerceIn(1f, 5f)
+                            stateList[index] = stateList[index].setScale(
+                                (stateList[index].getScale() * mEvent.zoomAmount).coerceIn(1f, 5f)
                             )
                         }
                     }
 
                     is TransformableBoxEvents.OnRotate -> {
-                        val index = stateList.indexOfFirst { mEvent.id == it.id }
+                        val index = stateList.indexOfFirst { mEvent.id == it.getId() }
                         if (index >= 0 && index < stateList.size) {
-                            stateList[index] = stateList[index].copy(
-                                rotation = stateList[index].rotation + mEvent.rotationChange
+                            stateList[index] = stateList[index].setRotation(
+                                stateList[index].getRotation() + mEvent.rotationChange
                             )
                         }
                     }
                 }
 
                 transformableContainerState = transformableContainerState.copy(
-                    childrenStateList = stateList,
+                    transformableViewsList = stateList,
                     triggerRecomposition = transformableContainerState.triggerRecomposition + 1
                 )
 
-                Log.e("TEST_event2", "childrenList = ${transformableContainerState.childrenStateList}", )
+                Log.e("TEST_event2", "childrenList = ${transformableContainerState.transformableViewsList}", )
             }
         )
 
@@ -194,18 +197,21 @@ fun EditorScreen() {
                      * TODO: make a draggable text item using "mText"
                      */
 
-                    val stateList = transformableContainerState.childrenStateList
+                    val stateList = transformableContainerState.transformableViewsList
                     stateList.add(
-                        TransformableBoxState(
-                            id = UUID.randomUUID().toString(),
-                            positionOffset = Offset(0f, 0f),
-                            viewSizeInDp = 100.dp,
-                            scale = 1f,
-                            rotation = 0f
+                        TransformableViewType.TextTransformable(
+                            text = mText,
+                            viewState = TransformableBoxState(
+                                id = UUID.randomUUID().toString(),
+                                positionOffset = Offset(0f, 0f),
+                                scale = 1f,
+                                rotation = 0f
+                            )
                         )
+
                     )
                     transformableContainerState = transformableContainerState.copy(
-                        childrenStateList = stateList,
+                        transformableViewsList = stateList,
                         triggerRecomposition = transformableContainerState.triggerRecomposition + 1
                     )
                     Log.e("TEST", "EditorScreen: onDoneClicked() - mText = $mText", )
