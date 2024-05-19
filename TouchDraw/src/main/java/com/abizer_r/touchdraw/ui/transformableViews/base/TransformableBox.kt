@@ -69,7 +69,7 @@ fun TransformableBox(
                     onEvent(
                         TransformableBoxEvents.OnDrag(
                             id = viewState.id,
-                            dragAmount = pan
+                            dragAmount = pan * viewState.scale  // multiply with scale to get the actual drag amount (see commit message)
                         )
                     )
 
