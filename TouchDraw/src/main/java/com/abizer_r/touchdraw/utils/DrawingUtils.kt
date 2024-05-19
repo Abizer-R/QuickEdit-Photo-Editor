@@ -1,6 +1,9 @@
 package com.abizer_r.touchdraw.utils
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.BrushShape
 import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.AbstractShape
 import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.LineShape
@@ -143,4 +146,18 @@ fun BottomToolbarItem.setShapeTypeIfPossible(mShapeType: ShapeTypes): BottomTool
         else -> {}
     }
     return this
+}
+
+@Composable
+fun Dp.toPx(): Float {
+    return with(LocalDensity.current) {
+        this@toPx.toPx()
+    }
+}
+
+@Composable
+fun Float.pxToDp(): Dp {
+    return with(LocalDensity.current) {
+        this@pxToDp.toDp()
+    }
 }

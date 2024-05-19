@@ -157,7 +157,7 @@ fun EditorScreen() {
                         val index = stateList.indexOfFirst { mEvent.id == it.getId() }
                         if (index >= 0 && index < stateList.size) {
                             stateList[index] = stateList[index].setScale(
-                                (stateList[index].getScale() * mEvent.zoomAmount).coerceIn(1f, 5f)
+                                (stateList[index].getScale() * mEvent.zoomAmount).coerceIn(0.5f, 5f)
                             )
                         }
                     }

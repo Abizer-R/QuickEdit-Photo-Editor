@@ -64,17 +64,6 @@ fun TextInputScreen(
     }
 
 
-    /**
-     *
-     * TODO: handle back press
-     * https://stackoverflow.com/questions/69151521/how-to-override-the-system-onbackpress-in-jetpack-compose
-     *
-     *
-     *
-     *
-     *
-     */
-
     ConstraintLayout(
         modifier = modifier
             .fillMaxSize()
