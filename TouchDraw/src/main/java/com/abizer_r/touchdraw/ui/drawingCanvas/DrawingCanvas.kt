@@ -12,12 +12,15 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.AbstractShape
 import com.abizer_r.touchdraw.ui.drawingCanvas.models.PathDetails
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.utils.getShape
 import java.util.Stack
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -37,6 +40,7 @@ fun DrawingCanvas(
      */
     var currentShape: AbstractShape? = null
     var drawPathAction by remember { mutableStateOf<Any?>(null) }
+    var previousY: Float? = remember { null }
 
     Canvas(
         modifier = modifier
@@ -54,6 +58,14 @@ fun DrawingCanvas(
                         // Below state is just to trigger the draw() phase of canvas
                         // Without it, current path won't be drawn until the "drawState" is changed
                         drawPathAction = Offset(it.x, it.y)
+
+
+                        val delta = previousY?.run { it.y - previousY!! } ?: 0f
+                        Log.d(
+                            "TEST_DRAG",
+                            "y = ${it.y.roundToInt()} | \uD835\uDEE5 ${delta.roundToInt()} | ${it.yPrecision.roundToInt()}"
+                        )
+                        previousY = it.y
                     }
 
                     MotionEvent.ACTION_CANCEL,
