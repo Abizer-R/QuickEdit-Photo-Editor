@@ -4,50 +4,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
-import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.BrushShape
-import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.AbstractShape
-import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.LineShape
-import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.OvalShape
-import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.RectangleShape
-import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.ShapeTypes
+import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.BrushShape
+import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.AbstractShape
+import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.LineShape
+import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.OvalShape
+import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.RectangleShape
+import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
 
 object DrawingUtils {
 
     const val TOUCH_TOLERANCE = 4f
 
-    fun getDefaultBottomToolbarItemsList(
-        defaultColorSelected: Color = Color.White
-    ): ArrayList<BottomToolbarItem> {
-        return arrayListOf(
-            BottomToolbarItem.ColorItem,
-            BottomToolbarItem.BrushTool(
-                width = DrawingConstants.DEFAULT_STROKE_WIDTH,
-                opacity = DrawingConstants.DEFAULT_STROKE_OPACITY
-            ),
-            BottomToolbarItem.ShapeTool(
-                width = DrawingConstants.DEFAULT_STROKE_WIDTH,
-                opacity = DrawingConstants.DEFAULT_STROKE_OPACITY,
-                shapeType = ShapeTypes.LINE
-            ),
-            BottomToolbarItem.EraserTool(
-                width = DrawingConstants.DEFAULT_STROKE_WIDTH
-            ),
-            BottomToolbarItem.TextTool()
-        )
-    }
 
-    fun getDefaultBottomToolbarState(
-        defaultColorSelected: Color = Color.White
-    ): BottomToolbarState {
-        val toolbarListItems = getDefaultBottomToolbarItemsList(defaultColorSelected)
-        return BottomToolbarState(
-            toolbarItems = toolbarListItems,
-            selectedItem = toolbarListItems[1],
-            selectedColor = defaultColorSelected
-        )
-    }
 }
 
 fun BottomToolbarItem.getShape(
@@ -63,19 +32,19 @@ fun BottomToolbarItem.getShape(
         }
 
         is BottomToolbarItem.ShapeTool -> when (toolbarItem.shapeType) {
-            ShapeTypes.LINE -> LineShape(
+            ShapeType.LINE -> LineShape(
                 color = selectedColor,
                 width = toolbarItem.width,
                 alpha = toolbarItem.opacity / 100f
             )
 
-            ShapeTypes.OVAL -> OvalShape(
+            ShapeType.OVAL -> OvalShape(
                 color = selectedColor,
                 width = toolbarItem.width,
                 alpha = toolbarItem.opacity / 100f
             )
 
-            ShapeTypes.RECTANGLE -> RectangleShape(
+            ShapeType.RECTANGLE -> RectangleShape(
                 color = selectedColor,
                 width = toolbarItem.width,
                 alpha = toolbarItem.opacity / 100f
@@ -133,14 +102,14 @@ fun BottomToolbarItem.setOpacityIfPossible(mOpacity: Float): BottomToolbarItem {
     return this
 }
 
-fun BottomToolbarItem.getShapeTypeOrNull(): ShapeTypes? {
+fun BottomToolbarItem.getShapeTypeOrNull(): ShapeType? {
     return when (this) {
         is BottomToolbarItem.ShapeTool -> this.shapeType
         else -> null
     }
 }
 
-fun BottomToolbarItem.setShapeTypeIfPossible(mShapeType: ShapeTypes): BottomToolbarItem {
+fun BottomToolbarItem.setShapeTypeIfPossible(mShapeType: ShapeType): BottomToolbarItem {
     when (this) {
         is BottomToolbarItem.ShapeTool -> this.shapeType = mShapeType
         else -> {}

@@ -1,4 +1,4 @@
-package com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes
+package com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color

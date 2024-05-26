@@ -1,6 +1,5 @@
-package com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes
+package com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes
 
-import android.util.Log
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
@@ -10,7 +9,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import kotlin.math.roundToInt
 
 class BrushShape(
     private val isEraser: Boolean = false,

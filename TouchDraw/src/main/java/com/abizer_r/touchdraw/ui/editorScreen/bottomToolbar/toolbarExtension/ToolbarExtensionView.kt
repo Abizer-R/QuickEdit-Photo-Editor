@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.abizer_r.components.R
 import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.components.theme.ToolBarBackgroundColor
-import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.ShapeTypes
+import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.toolbarExtension.CustomSliderItem
 import com.abizer_r.touchdraw.utils.DrawingConstants
 
@@ -30,8 +30,8 @@ fun ToolbarExtensionView(
     onWidthChange: (Float) -> Unit = {},
     opacity: Float? = null,
     onOpacityChange: (Float) -> Unit = {},
-    shapeType: ShapeTypes? = null,
-    onShapeTypeChange: (ShapeTypes) -> Unit = {}
+    shapeType: ShapeType? = null,
+    onShapeTypeChange: (ShapeType) -> Unit = {}
 ) {
 
     Column(
@@ -75,15 +75,15 @@ fun ToolbarExtensionView(
 @Composable
 fun RadioButtonRow(
     modifier: Modifier = Modifier,
-    selectedShape: ShapeTypes,
-    onShapeSelected: (ShapeTypes) -> Unit
+    selectedShape: ShapeType,
+    onShapeSelected: (ShapeType) -> Unit
 ) {
     val scrollState = rememberScrollState()
     Row(
         modifier = modifier.horizontalScroll(scrollState),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ShapeTypes.values().forEach { mShape ->
+        ShapeType.values().forEach { mShape ->
             RadioButton(
                 selected = selectedShape == mShape,
                 onClick = {
@@ -105,7 +105,7 @@ fun RadioButtonRow(
 @Composable
 fun PreviewRadioRow() {
     RadioButtonRow(
-        selectedShape = ShapeTypes.LINE,
+        selectedShape = ShapeType.LINE,
         onShapeSelected = {}
     )
 }
@@ -121,7 +121,7 @@ fun PreviewToolbarExtension() {
             onWidthChange = {},
             opacity = 45f,
             onOpacityChange = {},
-            shapeType = ShapeTypes.LINE,
+            shapeType = ShapeType.LINE,
             onShapeTypeChange = {},
         )
     }

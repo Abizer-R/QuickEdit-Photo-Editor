@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.touchdraw.R
+import com.abizer_r.touchdraw.ui.drawMode.DrawModeScreen
 import com.abizer_r.touchdraw.ui.editorScreen.EditorScreen
 import com.abizer_r.touchdraw.ui.textMode.TextModeScreen
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,11 +38,19 @@ fun MainScreen() {
             startDestination = "editorScreen"
         ) {
             composable(route = "editorScreen") {
-                EditorScreen(
-                    onTextToolClicked = {
+
+
+
+//                EditorScreen()
+                DrawModeScreen(
+                    goToTextModeScreen = {
+                        /**
+                         * TODO: Store the bitmap somewhere and pass it to the TextModeScreen
+                         */
                         navController.navigate("textMode")
                     }
                 )
+
             }
             composable(route = "textMode") { entry ->
                 TextModeScreen(

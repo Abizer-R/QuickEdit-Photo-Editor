@@ -1,4 +1,4 @@
-package com.abizer_r.touchdraw.ui.drawingCanvas
+package com.abizer_r.touchdraw.ui.drawMode.drawingCanvas
 
 import android.util.Log
 import android.view.MotionEvent
@@ -12,11 +12,10 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInteropFilter
-import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.AbstractShape
-import com.abizer_r.touchdraw.ui.drawingCanvas.models.PathDetails
+import com.abizer_r.touchdraw.ui.drawMode.DrawModeEvent
+import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.AbstractShape
+import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.models.PathDetails
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.utils.getShape
 import java.util.Stack
@@ -29,7 +28,7 @@ fun DrawingCanvas(
     pathDetailStack: Stack<PathDetails>,
     selectedColor: Color,
     currentTool: BottomToolbarItem,
-    onDrawingEvent: (DrawingEvents) -> Unit
+    onDrawingEvent: (DrawModeEvent) -> Unit
 ) {
 //    Log.e("TEST", "DrawingCanvas: drawingTool = ${drawingState.drawingTool}", )
 
@@ -72,7 +71,7 @@ fun DrawingCanvas(
                     MotionEvent.ACTION_UP -> {
                         if (currentShape != null && currentShape!!.shouldDraw()) {
                             onDrawingEvent(
-                                DrawingEvents.AddNewPath(
+                                DrawModeEvent.AddNewPath(
                                     pathDetail = PathDetails(
                                         drawingShape = currentShape!!,
                                     )

@@ -76,10 +76,13 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.0-RC")
-    implementation("com.google.dagger:hilt-android:2.48")
-    kapt("com.google.dagger:hilt-compiler:2.48")
+    implementation("com.google.dagger:hilt-android:2.49")
+    kapt("com.google.dagger:hilt-compiler:2.49")
+
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    // Below dependency allows us to create viewModels scoped to a particular composable screen inside a NavHost (ie in navigation)
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")   // This
 }
 
 kapt {

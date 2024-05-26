@@ -1,11 +1,11 @@
-package com.abizer_r.touchdraw.ui.drawingCanvas
+package com.abizer_r.touchdraw.ui.drawMode.drawingCanvas
 
 import androidx.compose.ui.graphics.Color
-import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.DrawingTool
-import com.abizer_r.touchdraw.ui.drawingCanvas.models.PathDetails
+import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.DrawingTool
+import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.models.PathDetails
 import java.util.Stack
 
-data class DrawingState (
+data class DrawingCanvasState (
     val strokeWidth: Int,
     val strokeColor: Color,
     val drawingTool: DrawingTool,

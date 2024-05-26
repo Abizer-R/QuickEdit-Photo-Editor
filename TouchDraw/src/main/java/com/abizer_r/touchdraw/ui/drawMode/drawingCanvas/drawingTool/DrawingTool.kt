@@ -1,6 +1,6 @@
-package com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool
+package com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool
 
-import com.abizer_r.touchdraw.ui.drawingCanvas.drawingTool.shapes.ShapeTypes
+import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
 
 /**
  * TODO: delete this class (this is not used in EditorScreen implementation)
@@ -11,6 +11,6 @@ sealed class DrawingTool {
     object Eraser : DrawingTool()
 
     class Shape(
-        val shapeType: ShapeTypes
+        val shapeType: ShapeType
     ) : DrawingTool()
 }

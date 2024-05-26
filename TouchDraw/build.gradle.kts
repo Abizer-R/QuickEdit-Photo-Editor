@@ -1,6 +1,8 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    id("com.google.dagger.hilt.android")
+    id("kotlin-kapt")
 }
 
 android {
@@ -45,6 +47,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose-android:2.8.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -63,4 +66,17 @@ dependencies {
     implementation("io.mhssn:colorpicker:1.0.0")
     implementation("com.github.SmartToolFactory:Compose-Colorful-Sliders:1.2.2")
     implementation("com.github.SmartToolFactory:Compose-Screenshot:1.0.3")
+
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.0-RC")
+    implementation("com.google.dagger:hilt-android:2.49")
+    kapt("com.google.dagger:hilt-compiler:2.49")
+
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    // Below dependency allows us to create viewModels scoped to a particular composable screen inside a NavHost (ie in navigation)
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")   // This
+}
+
+kapt {
+    correctErrorTypes = true
 }

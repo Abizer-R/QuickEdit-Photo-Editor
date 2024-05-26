@@ -39,16 +39,18 @@ import androidx.compose.ui.unit.dp
 import com.abizer_r.components.R
 import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.components.theme.ToolBarBackgroundColor
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvents
+import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
+import com.abizer_r.touchdraw.utils.DrawingConstants
 import com.abizer_r.touchdraw.utils.DrawingUtils
 
 @Composable
 fun BottomToolBar(
     modifier: Modifier,
     bottomToolbarState: BottomToolbarState,
-    onEvent: (BottomToolbarEvents) -> Unit
+    onEvent: (BottomToolbarEvent) -> Unit
 ) {
 
     LazyRow(
@@ -73,7 +75,7 @@ fun ToolbarItem(
     selectedColor: Color,
     toolbarItem: BottomToolbarItem,
     isSelected: Boolean,
-    onEvent: (BottomToolbarEvents) -> Unit
+    onEvent: (BottomToolbarEvent) -> Unit
 ) {
     if (toolbarItem is BottomToolbarItem.ColorItem) {
         ColorToolbarItem(
@@ -118,7 +120,7 @@ fun ToolbarItem(
 
     Column(
         modifier = columnModifier.clickable {
-            onEvent(BottomToolbarEvents.OnItemClicked(toolbarItem))
+            onEvent(BottomToolbarEvent.OnItemClicked(toolbarItem))
         },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -163,7 +165,7 @@ fun ColorToolbarItem(
     modifier: Modifier = Modifier,
     selectedColor: Color,
     colorItem: BottomToolbarItem.ColorItem,
-    onEvent: (BottomToolbarEvents) -> Unit
+    onEvent: (BottomToolbarEvent) -> Unit
 ) {
     Column(
         modifier = modifier.padding(start = 8.dp, end = 8.dp, top = 12.dp),
@@ -180,7 +182,7 @@ fun ColorToolbarItem(
                 .clip(CircleShape)
                 .size(23.dp)
                 .clickable {
-                    onEvent(BottomToolbarEvents.OnItemClicked(colorItem))
+                    onEvent(BottomToolbarEvent.OnItemClicked(colorItem))
                 }
         )
 
@@ -198,10 +200,31 @@ fun ColorToolbarItem(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PreviewBottomToolbar() {
+    val toolbarListItems = arrayListOf(
+        BottomToolbarItem.ColorItem,
+        BottomToolbarItem.BrushTool(
+            width = DrawingConstants.DEFAULT_STROKE_WIDTH,
+            opacity = DrawingConstants.DEFAULT_STROKE_OPACITY
+        ),
+        BottomToolbarItem.ShapeTool(
+            width = DrawingConstants.DEFAULT_STROKE_WIDTH,
+            opacity = DrawingConstants.DEFAULT_STROKE_OPACITY,
+            shapeType = ShapeType.LINE
+        ),
+        BottomToolbarItem.EraserTool(
+            width = DrawingConstants.DEFAULT_STROKE_WIDTH
+        ),
+        BottomToolbarItem.TextTool()
+    )
     SketchDraftTheme {
         BottomToolBar(
             modifier = Modifier.fillMaxWidth(),
-            bottomToolbarState = DrawingUtils.getDefaultBottomToolbarState(),
+            bottomToolbarState = BottomToolbarState(
+
+                toolbarItems = toolbarListItems,
+                selectedItem = toolbarListItems[1],
+                selectedColor = Color.White
+            ),
             onEvent = {}
         )
     }
