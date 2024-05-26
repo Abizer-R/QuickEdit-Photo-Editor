@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -30,7 +31,7 @@ import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvents
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TopToolBar
-import com.abizer_r.touchdraw.ui.textInputScreen.TextInputScreen
+import com.abizer_r.touchdraw.ui.textMode.TextModeScreen
 import com.abizer_r.touchdraw.ui.transformableViews.TransformableViewType
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxState
@@ -49,6 +50,9 @@ import com.abizer_r.touchdraw.utils.getWidthOrNull
 import com.abizer_r.touchdraw.utils.setOpacityIfPossible
 import com.abizer_r.touchdraw.utils.setShapeTypeIfPossible
 import com.abizer_r.touchdraw.utils.setWidthIfPossible
+import com.smarttoolfactory.screenshot.ImageResult
+import com.smarttoolfactory.screenshot.ScreenshotBox
+import com.smarttoolfactory.screenshot.rememberScreenshotState
 import io.mhssn.colorpicker.ColorPickerDialog
 import io.mhssn.colorpicker.ColorPickerType
 import java.util.Stack
@@ -56,12 +60,14 @@ import java.util.UUID
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun EditorScreen() {
+fun EditorScreen(
+    onTextToolClicked: () -> Unit
+) {
     val colorOnBackground = MaterialTheme.colorScheme.onBackground
 
     var showColorPicker by remember { mutableStateOf(false) }
     var showBottomToolbarExtension by remember { mutableStateOf(false) }
-    var showTextInputScreen by remember { mutableStateOf(false) }
+    var isTextToolSelected by remember { mutableStateOf(false) }
 
     var bottomToolbarState by remember {
         mutableStateOf(
@@ -81,7 +87,10 @@ fun EditorScreen() {
         mutableStateOf(Triple(0f, pathDetailStack, redoStack))
     }
 
-
+    val screenshotState = rememberScreenshotState()
+    val screenShotImageResult by remember {
+        screenshotState.imageState
+    }
 
     ConstraintLayout(
         modifier = Modifier
@@ -119,108 +128,109 @@ fun EditorScreen() {
             }
         )
 
-        DrawingView(
-            modifier = Modifier.constrainAs(editorLayout) {
-                top.linkTo(topToolbar.bottom)
-                bottom.linkTo(bottomToolbar.top)
-                width = Dimension.matchParent
-                height = Dimension.fillToConstraints
-            },
-            pathDetailStack = pathDetailStack,
-            selectedColor = bottomToolbarState.selectedColor,
-            currentTool = bottomToolbarState.selectedItem,
-            transformableViewsList = transformableContainerState.transformableViewsList,
-            onDrawingEvent = {
-                when (it) {
-                    is DrawingEvents.AddNewPath -> {
-                        pathDetailStack.push(it.pathDetail)
-                        redoStack.clear()
-                        pathDetailStackStateTrigger = pathDetailStackStateTrigger.copy(
-                            first = pathDetailStackStateTrigger.first + 1
-                        )
-                    }
-                }
-            },
-            onTransformViewEvent = { mEvent ->
-                val stateList = transformableContainerState.transformableViewsList
-                when(mEvent) {
-                    is TransformableBoxEvents.OnDrag -> {
-                        val index = stateList.indexOfFirst { mEvent.id == it.getId() }
-                        if (index >= 0 && index < stateList.size) {
-                            stateList[index] = stateList[index].setPositionOffset(
-                                stateList[index].getPositionOffset() + mEvent.dragAmount
+        ScreenshotBox(screenshotState = screenshotState) {
+            DrawingView(
+                modifier = Modifier.constrainAs(editorLayout) {
+                    top.linkTo(topToolbar.bottom)
+                    bottom.linkTo(bottomToolbar.top)
+                    width = Dimension.matchParent
+                    height = Dimension.fillToConstraints
+                },
+                pathDetailStack = pathDetailStack,
+                selectedColor = bottomToolbarState.selectedColor,
+                currentTool = bottomToolbarState.selectedItem,
+                transformableViewsList = transformableContainerState.transformableViewsList,
+                onDrawingEvent = {
+                    when (it) {
+                        is DrawingEvents.AddNewPath -> {
+                            pathDetailStack.push(it.pathDetail)
+                            redoStack.clear()
+                            pathDetailStackStateTrigger = pathDetailStackStateTrigger.copy(
+                                first = pathDetailStackStateTrigger.first + 1
                             )
                         }
                     }
-
-                    is TransformableBoxEvents.OnZoom -> {
-                        val index = stateList.indexOfFirst { mEvent.id == it.getId() }
-                        if (index >= 0 && index < stateList.size) {
-                            stateList[index] = stateList[index].setScale(
-                                (stateList[index].getScale() * mEvent.zoomAmount).coerceIn(0.5f, 5f)
-                            )
-                        }
-                    }
-
-                    is TransformableBoxEvents.OnRotate -> {
-                        val index = stateList.indexOfFirst { mEvent.id == it.getId() }
-                        if (index >= 0 && index < stateList.size) {
-                            stateList[index] = stateList[index].setRotation(
-                                stateList[index].getRotation() + mEvent.rotationChange
-                            )
-                        }
-                    }
-                }
-
-                transformableContainerState = transformableContainerState.copy(
-                    transformableViewsList = stateList,
-                    triggerRecomposition = transformableContainerState.triggerRecomposition + 1
-                )
-
-                Log.e("TEST_event2", "childrenList = ${transformableContainerState.transformableViewsList}", )
-            }
-        )
-
-        if (showTextInputScreen) {
-            TextInputScreen(
-                modifier = Modifier
-                    .constrainAs(textInputScreen) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
-                        width = Dimension.matchParent
-                        height = Dimension.fillToConstraints
-                    }
-                    .zIndex(1f),
-                onDoneClicked = { mText ->
-                    showTextInputScreen = showTextInputScreen.not()
-                    /**
-                     * TODO: make a draggable text item using "mText"
-                     */
-
+                },
+                onTransformViewEvent = { mEvent ->
                     val stateList = transformableContainerState.transformableViewsList
-                    stateList.add(
-                        TransformableViewType.TextTransformable(
-                            text = mText,
-                            viewState = TransformableBoxState(
-                                id = UUID.randomUUID().toString(),
-                                positionOffset = Offset(0f, 0f),
-                                scale = 1f,
-                                rotation = 0f
-                            )
-                        )
+                    when(mEvent) {
+                        is TransformableBoxEvents.OnDrag -> {
+                            val index = stateList.indexOfFirst { mEvent.id == it.getId() }
+                            if (index >= 0 && index < stateList.size) {
+                                stateList[index] = stateList[index].setPositionOffset(
+                                    stateList[index].getPositionOffset() + mEvent.dragAmount
+                                )
+                            }
+                        }
 
-                    )
+                        is TransformableBoxEvents.OnZoom -> {
+                            val index = stateList.indexOfFirst { mEvent.id == it.getId() }
+                            if (index >= 0 && index < stateList.size) {
+                                stateList[index] = stateList[index].setScale(
+                                    (stateList[index].getScale() * mEvent.zoomAmount).coerceIn(0.5f, 5f)
+                                )
+                            }
+                        }
+
+                        is TransformableBoxEvents.OnRotate -> {
+                            val index = stateList.indexOfFirst { mEvent.id == it.getId() }
+                            if (index >= 0 && index < stateList.size) {
+                                stateList[index] = stateList[index].setRotation(
+                                    stateList[index].getRotation() + mEvent.rotationChange
+                                )
+                            }
+                        }
+                    }
+
                     transformableContainerState = transformableContainerState.copy(
                         transformableViewsList = stateList,
                         triggerRecomposition = transformableContainerState.triggerRecomposition + 1
                     )
-                    Log.e("TEST", "EditorScreen: onDoneClicked() - mText = $mText", )
-                },
-                onBackPressed = {
-                    showTextInputScreen = false
+
+                    Log.e("TEST_event2", "childrenList = ${transformableContainerState.transformableViewsList}", )
                 }
             )
+
         }
+
+//        if (shouldShowTextInputScreen) {
+//            TextModeScreen(
+//                modifier = Modifier
+//                    .constrainAs(textInputScreen) {
+//                        top.linkTo(parent.top)
+//                        bottom.linkTo(parent.bottom)
+//                        width = Dimension.matchParent
+//                        height = Dimension.fillToConstraints
+//                    }
+//                    .zIndex(1f),
+//                imageBitmap = (screenShotImageResult as ImageResult.Success).data.asImageBitmap(),
+//                onDoneClicked = { mText ->
+//                    isTextToolSelected = isTextToolSelected.not()
+//
+//                    val stateList = transformableContainerState.transformableViewsList
+//                    stateList.add(
+//                        TransformableViewType.TextTransformable(
+//                            text = mText,
+//                            viewState = TransformableBoxState(
+//                                id = UUID.randomUUID().toString(),
+//                                positionOffset = Offset(0f, 0f),
+//                                scale = 1f,
+//                                rotation = 0f
+//                            )
+//                        )
+//
+//                    )
+//                    transformableContainerState = transformableContainerState.copy(
+//                        transformableViewsList = stateList,
+//                        triggerRecomposition = transformableContainerState.triggerRecomposition + 1
+//                    )
+//                    Log.e("TEST", "EditorScreen: onDoneClicked() - mText = $mText", )
+//                },
+//                onBackPressed = {
+//                    isTextToolSelected = false
+//                }
+//            )
+//        }
 
 
         BottomToolBar(
@@ -239,7 +249,9 @@ fun EditorScreen() {
                             }
 
                             is BottomToolbarItem.TextTool -> {
-                                showTextInputScreen = showTextInputScreen.not()
+                                isTextToolSelected = isTextToolSelected.not()
+                                screenshotState.capture()
+                                onTextToolClicked()
                             }
 
                             // Clicked on already selected item
@@ -318,6 +330,8 @@ fun EditorScreen() {
 @Composable
 fun PreviewEditorScreen() {
     SketchDraftTheme {
-        EditorScreen()
+        EditorScreen(
+            onTextToolClicked = {}
+        )
     }
 }
