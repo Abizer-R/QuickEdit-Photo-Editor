@@ -3,8 +3,8 @@ package com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state
 import androidx.compose.ui.graphics.Color
 
 data class BottomToolbarState(
-    val toolbarItems: ArrayList<BottomToolbarItem>,
-    val selectedItem: BottomToolbarItem,
-    val selectedColor: Color,
+    val toolbarItems: ArrayList<BottomToolbarItem> = arrayListOf(),
+    val selectedItem: BottomToolbarItem = BottomToolbarItem.NONE,
+    val selectedColor: Color = Color.White,
     val recompositionTriggerValue: Int = 0
 )

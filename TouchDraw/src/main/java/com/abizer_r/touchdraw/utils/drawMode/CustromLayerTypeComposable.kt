@@ -1,4 +1,4 @@
-package com.abizer_r.touchdraw.utils
+package com.abizer_r.touchdraw.utils.drawMode
 
 import android.view.View
 import androidx.compose.runtime.Composable

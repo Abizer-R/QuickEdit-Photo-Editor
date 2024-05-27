@@ -27,9 +27,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
@@ -39,11 +42,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.components.theme.TextInputBackgroundColor
 import com.abizer_r.components.theme.ToolBarBackgroundColor
 import com.abizer_r.touchdraw.R
+import com.abizer_r.touchdraw.ui.drawMode.DrawModeViewModel
+import com.abizer_r.touchdraw.ui.drawMode.stateHandling.TextModeEvent
+import com.abizer_r.touchdraw.ui.drawMode.stateHandling.TextModeEvent.*
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TextModeTopToolbar
+import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
 
 @Composable
 fun TextModeScreen(
@@ -52,8 +64,16 @@ fun TextModeScreen(
     onDoneClicked: (String) -> Unit,
     onBackPressed: () -> Unit
 ) {
+    val context = LocalContext.current
+    val lifeCycleOwner = LocalLifecycleOwner.current
 
-    var textInput by remember { mutableStateOf("") }
+    val viewModel: TextModeViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle(
+        lifecycleOwner = lifeCycleOwner
+    )
+    val bottomToolbarState by viewModel.bottomToolbarState.collectAsStateWithLifecycle(
+        lifecycleOwner = lifeCycleOwner
+    )
 
     val focusRequesterForTextField = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -64,11 +84,12 @@ fun TextModeScreen(
         }
     }
 
-    LaunchedEffect(key1 = Unit) {
-        focusRequesterForTextField.requestFocus()
-    }
+//    LaunchedEffect(key1 = Unit) {
+//        focusRequesterForTextField.requestFocus()
+//    }
 
     BackHandler {
+        keyboardController?.hide()
         onBackPressed()
     }
 
@@ -76,10 +97,10 @@ fun TextModeScreen(
     ConstraintLayout(
         modifier = modifier
             .fillMaxSize()
-            .background(TextInputBackgroundColor)
+            .background(MaterialTheme.colorScheme.background)
             .imePadding()
     ) {
-        val (topToolBar, imageBitmapView, textInputView) = createRefs()
+        val (topToolBar, bottomToolbar, imageBitmapView, textInputView) = createRefs()
 
         TextModeTopToolbar(
             modifier = Modifier.constrainAs(topToolBar) {
@@ -87,9 +108,18 @@ fun TextModeScreen(
                 width = Dimension.matchParent
                 height = Dimension.wrapContent
             },
-            onCloseClicked = onBackPressed,
+            onCloseClicked = {
+                if (state.isTextFieldVisible) {
+                    viewModel.onEvent(HideTextField)
+                } else {
+                    onBackPressed()
+                }
+            },
             onDoneClicked = {
-                onDoneClicked(textInput)
+                /**
+                 * TODO: State Screenshot and return (similar to DrawModeScreen)
+                 */
+                onDoneClicked(state.textFieldValue)
             }
         )
 
@@ -104,38 +134,57 @@ fun TextModeScreen(
             },
             bitmap = imageBitmap,
             contentScale = ContentScale.Fit,
-            contentDescription = null
+            contentDescription = null,
+            alpha = if (state.isTextFieldVisible) 0.3f else 1f
         )
 
-        TextField(
-            modifier = Modifier
-                .constrainAs(textInputView) {
-                    top.linkTo(topToolBar.bottom)
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.wrapContent
-                    height = Dimension.wrapContent
-                }
-                .background(Color.Transparent)
-                .focusRequester(focusRequesterForTextField),
-            value = textInput,
-            onValueChange = { mText ->
-                textInput = mText
-            },
-            colors = TextFieldDefaults.colors(
-                focusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                focusedContainerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent
-
-            ),
-            textStyle = TextStyle(
-                textAlign = TextAlign.Center,
-                fontSize = MaterialTheme.typography.headlineMedium.fontSize
+        if (state.isTextFieldVisible) {
+            TextField(
+                modifier = Modifier
+                    .constrainAs(textInputView) {
+                        top.linkTo(topToolBar.bottom)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        width = Dimension.wrapContent
+                        height = Dimension.wrapContent
+                    }
+                    .background(Color.Transparent)
+                    .focusRequester(focusRequesterForTextField),
+                value = state.textFieldValue,
+                onValueChange = { mText ->
+                    viewModel.onEvent(UpdateTextFieldValue(mText))
+                },
+                colors = TextModeUtils.getColorsForTextField(),
+                textStyle = TextStyle(
+                    textAlign = TextAlign.Center,
+                    fontSize = MaterialTheme.typography.headlineMedium.fontSize
+                )
             )
+            if (viewModel.shouldRequestFocus) {
+                LaunchedEffect(key1 = Unit) {
+                    focusRequesterForTextField.requestFocus()
+                }
+            }
+        }
+
+
+        BottomToolBar(
+            modifier = Modifier.constrainAs(bottomToolbar) {
+                bottom.linkTo(parent.bottom)
+                width = Dimension.matchParent
+                height = Dimension.wrapContent
+            },
+            bottomToolbarState = bottomToolbarState,
+            onEvent = {
+                viewModel.onBottomToolbarEvent(it)
+//                if (
+//                    it is BottomToolbarEvent.OnItemClicked &&
+//                    it.toolbarItem == BottomToolbarItem.AddItem
+//                ) {
+//                    viewModel.shouldRequestFocus = true
+//                }
+            }
         )
     }
 }

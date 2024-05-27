@@ -22,20 +22,20 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.abizer_r.components.util.defaultErrorToast
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.DrawingCanvas
+import com.abizer_r.touchdraw.ui.drawMode.stateHandling.DrawModeEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TopToolBar
-import com.abizer_r.touchdraw.utils.CustomLayerTypeComposable
-import com.abizer_r.touchdraw.utils.getOpacityOrNull
-import com.abizer_r.touchdraw.utils.getShapeTypeOrNull
-import com.abizer_r.touchdraw.utils.getWidthOrNull
+import com.abizer_r.touchdraw.utils.drawMode.CustomLayerTypeComposable
+import com.abizer_r.touchdraw.utils.drawMode.getOpacityOrNull
+import com.abizer_r.touchdraw.utils.drawMode.getShapeTypeOrNull
+import com.abizer_r.touchdraw.utils.drawMode.getWidthOrNull
 import com.smarttoolfactory.screenshot.ImageResult
 import com.smarttoolfactory.screenshot.ScreenshotBox
 import com.smarttoolfactory.screenshot.rememberScreenshotState
 import io.mhssn.colorpicker.ColorPickerDialog
 import io.mhssn.colorpicker.ColorPickerType
-import com.abizer_r.components.R as RComponents
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -182,7 +182,7 @@ fun DrawModeScreen(
             },
             bottomToolbarState = bottomToolbarState,
             onEvent = {
-                if (it is BottomToolbarEvent.OnItemClicked && it.toolbarItem is BottomToolbarItem.TextTool) {
+                if (it is BottomToolbarEvent.OnItemClicked && it.toolbarItem is BottomToolbarItem.TextMode) {
                     viewModel.shouldGoToNextScreen = true
                     screenshotState.capture()
                 } else {

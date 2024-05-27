@@ -1,4 +1,4 @@
-package com.abizer_r.touchdraw.utils
+package com.abizer_r.touchdraw.utils.drawMode
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -11,11 +11,39 @@ import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.OvalS
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.RectangleShape
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
 
-object DrawingUtils {
+object DrawModeUtils {
 
-    const val TOUCH_TOLERANCE = 4f
+    fun getDefaultBottomToolbarState(
+        defaultColorSelected: Color = Color.White
+    ): BottomToolbarState {
+        val toolbarListItems = getDefaultBottomToolbarItemsList()
+        return BottomToolbarState(
+            toolbarItems = toolbarListItems,
+            selectedItem = toolbarListItems[1],
+            selectedColor = defaultColorSelected
+        )
+    }
 
+    private fun getDefaultBottomToolbarItemsList(): ArrayList<BottomToolbarItem> {
+        return arrayListOf(
+            BottomToolbarItem.ColorItem,
+            BottomToolbarItem.BrushTool(
+                width = DrawingConstants.DEFAULT_STROKE_WIDTH,
+                opacity = DrawingConstants.DEFAULT_STROKE_OPACITY
+            ),
+            BottomToolbarItem.ShapeTool(
+                width = DrawingConstants.DEFAULT_STROKE_WIDTH,
+                opacity = DrawingConstants.DEFAULT_STROKE_OPACITY,
+                shapeType = ShapeType.LINE
+            ),
+            BottomToolbarItem.EraserTool(
+                width = DrawingConstants.DEFAULT_STROKE_WIDTH
+            ),
+            BottomToolbarItem.TextMode
+        )
+    }
 
 }
 

@@ -1,7 +1,7 @@
 package com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes
 
 import androidx.compose.ui.graphics.Color
-import com.abizer_r.touchdraw.utils.DrawingConstants
+import com.abizer_r.touchdraw.utils.drawMode.DrawingConstants
 
 abstract class AbstractShape: BaseShape {
     var mColor: Color = Color.White

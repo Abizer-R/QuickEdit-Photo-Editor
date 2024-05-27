@@ -21,7 +21,7 @@ import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.components.theme.ToolBarBackgroundColor
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.toolbarExtension.CustomSliderItem
-import com.abizer_r.touchdraw.utils.DrawingConstants
+import com.abizer_r.touchdraw.utils.drawMode.DrawingConstants
 
 @Composable
 fun ToolbarExtensionView(

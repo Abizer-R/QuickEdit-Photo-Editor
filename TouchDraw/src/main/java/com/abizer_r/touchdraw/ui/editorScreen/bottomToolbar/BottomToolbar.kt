@@ -4,19 +4,24 @@ import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clipScrollableContainer
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.material.icons.filled.Brush
+import androidx.compose.material.icons.filled.AddCircleOutline
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material3.MaterialTheme
@@ -43,8 +48,9 @@ import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.Shape
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
-import com.abizer_r.touchdraw.utils.DrawingConstants
-import com.abizer_r.touchdraw.utils.DrawingUtils
+import com.abizer_r.touchdraw.utils.drawMode.DrawModeUtils
+import com.abizer_r.touchdraw.utils.drawMode.DrawingConstants
+import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
 
 @Composable
 fun BottomToolBar(
@@ -54,11 +60,23 @@ fun BottomToolBar(
 ) {
 
     LazyRow(
-        modifier = modifier.background(ToolBarBackgroundColor)
+        modifier = modifier
+            .fillMaxWidth()
+            .background(ToolBarBackgroundColor)
     ) {
-        items(bottomToolbarState.toolbarItems) { mToolbarItem ->
+        itemsIndexed(bottomToolbarState.toolbarItems) { index, mToolbarItem ->
+            val itemModifier = Modifier
+            if (index == 0) {
+                itemModifier.padding(start = 8.dp)
+            } else if (index == bottomToolbarState.toolbarItems.size - 1) {
+                itemModifier.padding(end = 8.dp)
+            } else {
+                itemModifier.padding(horizontal = 16.dp)
+            }
             ToolbarItem(
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier.padding(
+                    horizontal = 16.dp
+                ),
                 toolbarItem = mToolbarItem,
                 selectedColor = bottomToolbarState.selectedColor,
                 isSelected = mToolbarItem == bottomToolbarState.selectedItem,
@@ -106,14 +124,19 @@ fun ToolbarItem(
             stringResource(id = R.string.shape)
         )
 
-        is BottomToolbarItem.TextTool -> Pair(
+        is BottomToolbarItem.TextMode -> Pair(
             Icons.Default.TextFields,
             stringResource(id = R.string.text)
         )
 
-        else -> Pair(
-            Icons.Default.Brush,
+        is BottomToolbarItem.BrushTool -> Pair(
+            ImageVector.vectorResource(id = R.drawable.ic_stylus_note),
             stringResource(id = R.string.brush)
+        )
+
+        else -> Pair(
+            Icons.Default.AddCircleOutline,
+            ""
         )
     }
 
@@ -128,17 +151,19 @@ fun ToolbarItem(
         if (isSelected) {
             Image(
                 modifier = Modifier
-                    .size(16.dp)
-                    .scale(1.5f),
+                    .size(height = 12.dp, width = 24.dp)
+                    .scale(1f),
                 contentDescription = null,
-                imageVector = Icons.Default.ArrowDropUp,
-                contentScale = ContentScale.Crop,
+                imageVector = Icons.Default.ArrowDropDown,
+                contentScale = ContentScale.FillBounds,
                 colorFilter = ColorFilter.tint(
                     color = MaterialTheme.colorScheme.onBackground
                 )
             )
         } else {
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(
+                if (labelText.isNotBlank()) 12.dp else 4.dp
+            ))
         }
 
         Image(
@@ -150,13 +175,15 @@ fun ToolbarItem(
             )
         )
 
-        Text(
-            style = TextStyle(
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = MaterialTheme.typography.labelSmall.fontSize
-            ),
-            text = labelText
-        )
+        if (labelText.isNotBlank()) {
+            Text(
+                style = TextStyle(
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = MaterialTheme.typography.labelSmall.fontSize
+                ),
+                text = labelText
+            )
+        }
     }
 }
 
@@ -199,32 +226,23 @@ fun ColorToolbarItem(
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun PreviewBottomToolbar() {
-    val toolbarListItems = arrayListOf(
-        BottomToolbarItem.ColorItem,
-        BottomToolbarItem.BrushTool(
-            width = DrawingConstants.DEFAULT_STROKE_WIDTH,
-            opacity = DrawingConstants.DEFAULT_STROKE_OPACITY
-        ),
-        BottomToolbarItem.ShapeTool(
-            width = DrawingConstants.DEFAULT_STROKE_WIDTH,
-            opacity = DrawingConstants.DEFAULT_STROKE_OPACITY,
-            shapeType = ShapeType.LINE
-        ),
-        BottomToolbarItem.EraserTool(
-            width = DrawingConstants.DEFAULT_STROKE_WIDTH
-        ),
-        BottomToolbarItem.TextTool()
-    )
+fun DrawMode_BottomToolbar() {
     SketchDraftTheme {
         BottomToolBar(
             modifier = Modifier.fillMaxWidth(),
-            bottomToolbarState = BottomToolbarState(
+            bottomToolbarState = DrawModeUtils.getDefaultBottomToolbarState(),
+            onEvent = {}
+        )
+    }
+}
 
-                toolbarItems = toolbarListItems,
-                selectedItem = toolbarListItems[1],
-                selectedColor = Color.White
-            ),
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun TextMode_BottomToolbar() {
+    SketchDraftTheme {
+        BottomToolBar(
+            modifier = Modifier.fillMaxWidth(),
+            bottomToolbarState = TextModeUtils.getDefaultBottomToolbarState(),
             onEvent = {}
         )
     }

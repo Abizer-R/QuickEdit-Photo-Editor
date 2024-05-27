@@ -1,17 +1,17 @@
 package com.abizer_r.touchdraw.ui.drawMode
 
 import android.icu.util.Calendar
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
+import com.abizer_r.touchdraw.ui.drawMode.stateHandling.DrawModeEvent
+import com.abizer_r.touchdraw.ui.drawMode.stateHandling.DrawModeState
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
-import com.abizer_r.touchdraw.utils.DrawingConstants
-import com.abizer_r.touchdraw.utils.setOpacityIfPossible
-import com.abizer_r.touchdraw.utils.setShapeTypeIfPossible
-import com.abizer_r.touchdraw.utils.setWidthIfPossible
+import com.abizer_r.touchdraw.utils.drawMode.DrawModeUtils
+import com.abizer_r.touchdraw.utils.drawMode.setOpacityIfPossible
+import com.abizer_r.touchdraw.utils.drawMode.setShapeTypeIfPossible
+import com.abizer_r.touchdraw.utils.drawMode.setWidthIfPossible
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +26,7 @@ class DrawModeViewModel @Inject constructor(
     private val _state = MutableStateFlow(DrawModeState())
     val state: StateFlow<DrawModeState> = _state
 
-    private val _bottomToolbarState = MutableStateFlow(getDefaultBottomToolbarState())
+    private val _bottomToolbarState = MutableStateFlow(DrawModeUtils.getDefaultBottomToolbarState())
     val bottomToolbarState: StateFlow<BottomToolbarState> = _bottomToolbarState
 
     var shouldGoToNextScreen = false
@@ -104,6 +104,8 @@ class DrawModeViewModel @Inject constructor(
                     )
                 }
             }
+
+            else -> {}
         }
     }
 
@@ -132,36 +134,5 @@ class DrawModeViewModel @Inject constructor(
                 }
             }
         }
-
-    }
-
-    private fun getDefaultBottomToolbarState(
-        defaultColorSelected: Color = Color.White
-    ): BottomToolbarState {
-        val toolbarListItems = getDefaultBottomToolbarItemsList()
-        return BottomToolbarState(
-            toolbarItems = toolbarListItems,
-            selectedItem = toolbarListItems[1],
-            selectedColor = defaultColorSelected
-        )
-    }
-
-    private fun getDefaultBottomToolbarItemsList(): ArrayList<BottomToolbarItem> {
-        return arrayListOf(
-            BottomToolbarItem.ColorItem,
-            BottomToolbarItem.BrushTool(
-                width = DrawingConstants.DEFAULT_STROKE_WIDTH,
-                opacity = DrawingConstants.DEFAULT_STROKE_OPACITY
-            ),
-            BottomToolbarItem.ShapeTool(
-                width = DrawingConstants.DEFAULT_STROKE_WIDTH,
-                opacity = DrawingConstants.DEFAULT_STROKE_OPACITY,
-                shapeType = ShapeType.LINE
-            ),
-            BottomToolbarItem.EraserTool(
-                width = DrawingConstants.DEFAULT_STROKE_WIDTH
-            ),
-            BottomToolbarItem.TextTool()
-        )
     }
 }

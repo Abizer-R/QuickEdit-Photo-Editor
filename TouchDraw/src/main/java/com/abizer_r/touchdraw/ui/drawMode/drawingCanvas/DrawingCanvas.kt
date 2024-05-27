@@ -13,11 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInteropFilter
-import com.abizer_r.touchdraw.ui.drawMode.DrawModeEvent
+import com.abizer_r.touchdraw.ui.drawMode.stateHandling.DrawModeEvent
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.AbstractShape
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.models.PathDetails
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
-import com.abizer_r.touchdraw.utils.getShape
+import com.abizer_r.touchdraw.utils.drawMode.getShape
 import java.util.Stack
 import kotlin.math.roundToInt
 

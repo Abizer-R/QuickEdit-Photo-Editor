@@ -1,5 +1,6 @@
 package com.abizer_r.sketchdraft.ui.main
 
+import android.graphics.Bitmap
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +24,8 @@ class MainActivityViewModel @Inject constructor(
      *
      *
      */
+
+    var bitmap: Bitmap? = null
 
 
 

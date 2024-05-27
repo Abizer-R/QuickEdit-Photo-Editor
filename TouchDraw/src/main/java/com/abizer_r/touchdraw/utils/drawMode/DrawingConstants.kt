@@ -1,4 +1,4 @@
-package com.abizer_r.touchdraw.utils
+package com.abizer_r.touchdraw.utils.drawMode
 
 object DrawingConstants {
     const val DEFAULT_STROKE_WIDTH = 12f

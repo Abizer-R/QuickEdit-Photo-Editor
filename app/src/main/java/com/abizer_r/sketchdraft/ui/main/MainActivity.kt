@@ -1,13 +1,16 @@
 package com.abizer_r.sketchdraft.ui.main
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -31,6 +34,12 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen() {
+    /**
+     * TODO: Watch the below video
+     * TODO: Sharing data between compose navigation screens = https://www.youtube.com/watch?v=h61Wqy3qcKg&ab_channel=PhilippLackner
+     */
+    val mainActivityViewModel: MainActivityViewModel = viewModel()
+    
     SketchDraftTheme {
         val navController = rememberNavController()
         NavHost(
@@ -44,9 +53,7 @@ fun MainScreen() {
 //                EditorScreen()
                 DrawModeScreen(
                     goToTextModeScreen = {
-                        /**
-                         * TODO: Store the bitmap somewhere and pass it to the TextModeScreen
-                         */
+                        mainActivityViewModel.bitmap = it.copy(Bitmap.Config.ARGB_8888, false)
                         navController.navigate("textMode")
                     }
                 )
@@ -54,7 +61,8 @@ fun MainScreen() {
             }
             composable(route = "textMode") { entry ->
                 TextModeScreen(
-                    imageBitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_1),
+                    imageBitmap = mainActivityViewModel.bitmap?.asImageBitmap()
+                        ?: ImageBitmap.imageResource(id = R.drawable.placeholder_image_1),
                     onBackPressed = {
                         navController.popBackStack()
                     },
