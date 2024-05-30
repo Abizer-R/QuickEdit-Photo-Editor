@@ -6,7 +6,8 @@ import com.abizer_r.touchdraw.ui.transformableViews.TransformableViewType
 
 data class TransformableBoxState(
     val id: String,
-    var positionOffset: Offset,
-    var scale: Float,
-    var rotation: Float
+    var positionOffset: Offset = Offset(0f, 0f),
+    var scale: Float = 1f,
+    var rotation: Float = 0f,
+    var isSelected: Boolean = true
 )

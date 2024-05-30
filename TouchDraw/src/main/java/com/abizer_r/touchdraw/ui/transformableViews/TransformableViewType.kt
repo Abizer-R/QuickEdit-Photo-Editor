@@ -64,3 +64,20 @@ fun TransformableViewType.setRotation(mRotation: Float): TransformableViewType {
     }
     return this
 }
+
+fun TransformableViewType.getIsSelected(): Boolean {
+    return when (this) {
+        is TransformableViewType.TextTransformable -> {
+            viewState.isSelected
+        }
+    }
+}
+
+fun TransformableViewType.setIsSelected(mIsSelected: Boolean): TransformableViewType {
+    when (this) {
+        is TransformableViewType.TextTransformable -> {
+            this.viewState.isSelected = mIsSelected
+        }
+    }
+    return this
+}

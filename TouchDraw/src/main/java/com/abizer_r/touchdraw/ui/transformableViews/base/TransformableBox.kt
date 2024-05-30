@@ -6,8 +6,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -39,62 +41,61 @@ fun TransformableBox(
 ) {
 
     val localDensity = LocalDensity.current
-    // we need to keep the border width similar regardless the scale (zoom)
-    val borderStrokeWidth = 1.dp.toPx() / viewState.scale
 
-    Box(
-        modifier = modifier
-            .offset(
-                (viewState.positionOffset.x / localDensity.density).dp,
-                (viewState.positionOffset.y / localDensity.density).dp,
-            )
-            .scale(viewState.scale)
-            .rotate(viewState.rotation)
-            .pointerInput(Unit) {
-                detectTransformGestures { centroid, pan, zoom, rotationChange ->
-                    Log.e(
-                        "TEST_TransformBox", "DraggableParentView: " +
-                                "\ncentroid: $centroid" +
-                                "\npan: $pan" +
-                                "\nzoom: $zoom" +
-                                "\nrotation: $rotationChange"
+    var boxModifier = modifier
+        .offset(
+            (viewState.positionOffset.x / localDensity.density).dp,
+            (viewState.positionOffset.y / localDensity.density).dp,
+        )
+        .scale(viewState.scale)
+        .rotate(viewState.rotation)
+        .pointerInput(Unit) {
+            detectTransformGestures { centroid, pan, zoom, rotationChange ->
+                Log.e(
+                    "TEST_TransformBox", "DraggableParentView: " +
+                            "\ncentroid: $centroid" +
+                            "\npan: $pan" +
+                            "\nzoom: $zoom" +
+                            "\nrotation: $rotationChange"
+                )
+
+                onEvent(
+                    TransformableBoxEvents.OnDrag(
+                        id = viewState.id,
+                        dragAmount = pan * viewState.scale  // multiply with scale to get the actual drag amount (see commit message)
+                    )
+                )
+
+                onEvent(
+
+                    TransformableBoxEvents.OnZoom(
+                        id = viewState.id,
+                        zoomAmount = zoom
                     )
 
-                    onEvent(
-                        TransformableBoxEvents.OnDrag(
-                            id = viewState.id,
-                            dragAmount = pan * viewState.scale  // multiply with scale to get the actual drag amount (see commit message)
-                        )
+                )
+
+                onEvent(
+                    TransformableBoxEvents.OnRotate(
+                        id = viewState.id,
+                        rotationChange = rotationChange
                     )
+                )
 
-                    onEvent(
-
-                        TransformableBoxEvents.OnZoom(
-                            id = viewState.id,
-                            zoomAmount = zoom
-                        )
-
-                    )
-
-                    onEvent(
-                        TransformableBoxEvents.OnRotate(
-                            id = viewState.id,
-                            rotationChange = rotationChange
-                        )
-                    )
-
-                }
             }
-            .dashedBorder(
-                strokeWidthInPx = borderStrokeWidth,
-                color = MaterialTheme.colorScheme.onBackground,
-                cornerRadiusDp = 0.dp,
-                isDashedBorder = true,
-                dashOnOffSizePair = Pair(2.dp.toPx(), 2.dp.toPx())
-            )
-            .padding(8.dp)
-
-    ) {
+        }
+    if (viewState.isSelected) {
+        // we need to keep the border width similar regardless the scale (zoom)
+        val borderStrokeWidth = 1.dp.toPx() / viewState.scale
+        boxModifier = boxModifier.dashedBorder(
+            strokeWidthInPx = borderStrokeWidth,
+            color = MaterialTheme.colorScheme.onBackground,
+            cornerRadiusDp = 0.dp,
+            isDashedBorder = true,
+            dashOnOffSizePair = Pair(2.dp.toPx(), 2.dp.toPx())
+        )
+    }
+    Box(modifier = boxModifier.padding(8.dp)) {
         content()
     }
 }
@@ -141,7 +142,7 @@ fun PreviewTextItem() {
     SketchDraftTheme {
         Box(
             modifier = Modifier
-                .fillMaxSize()
+                .size(300.dp, 100.dp)
                 .background(MaterialTheme.colorScheme.background)
         ) {
             TransformableTextView(
@@ -151,7 +152,8 @@ fun PreviewTextItem() {
                         id = "",
                         positionOffset = Offset(100f, 100f),
                         scale = 1f,
-                        rotation = 0f
+                        rotation = 0f,
+                        isSelected = true
                     )
                 ),
                 onEvent = {},

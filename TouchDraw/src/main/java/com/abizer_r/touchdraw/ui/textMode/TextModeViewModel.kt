@@ -1,5 +1,6 @@
 package com.abizer_r.touchdraw.ui.textMode
 
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -9,6 +10,16 @@ import com.abizer_r.touchdraw.ui.drawMode.stateHandling.TextModeState
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
+import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
+import com.abizer_r.touchdraw.ui.transformableViews.getId
+import com.abizer_r.touchdraw.ui.transformableViews.getIsSelected
+import com.abizer_r.touchdraw.ui.transformableViews.getPositionOffset
+import com.abizer_r.touchdraw.ui.transformableViews.getRotation
+import com.abizer_r.touchdraw.ui.transformableViews.getScale
+import com.abizer_r.touchdraw.ui.transformableViews.setIsSelected
+import com.abizer_r.touchdraw.ui.transformableViews.setPositionOffset
+import com.abizer_r.touchdraw.ui.transformableViews.setRotation
+import com.abizer_r.touchdraw.ui.transformableViews.setScale
 import com.abizer_r.touchdraw.utils.drawMode.DrawingConstants
 import com.abizer_r.touchdraw.utils.drawMode.setOpacityIfPossible
 import com.abizer_r.touchdraw.utils.drawMode.setShapeTypeIfPossible
@@ -51,9 +62,25 @@ class TextModeViewModel @Inject constructor(
 
             is TextModeEvent.UpdateTextFieldValue -> {
                 _state.update {
-                    it.copy(textFieldValue = event.textInput
+                    it.copy(textFieldValue = event.textInput)
+                }
+            }
+
+            is TextModeEvent.UpdateTransformableViewsList -> {
+                _state.update {
+                    it.copy(
+                        transformableViewsList = event.list,
+                        recompositionTrigger = it.recompositionTrigger + 1
                     )
                 }
+            }
+
+            is TextModeEvent.AddTransformableTextView -> {
+                val newList = state.value.transformableViewsList.also { list ->
+                    list.add(event.view)
+                }
+                _state.update {it.copy(transformableViewsList = newList) }
+                updateViewSelection(selectedViewId = event.view.getId())
             }
 //            is DrawModeEvent.ToggleColorPicker -> {
 //                _state.update {
@@ -66,6 +93,50 @@ class TextModeViewModel @Inject constructor(
 
 
             else -> {}
+        }
+    }
+
+    fun onTransformableBoxEvent(mEvent: TransformableBoxEvents) {
+        val stateList = state.value.transformableViewsList
+        val viewItem = stateList.find { it.getId() == mEvent.id } ?: return
+        if (viewItem.getIsSelected().not()) {
+            updateViewSelection(viewItem.getId())
+        }
+        when(mEvent) {
+            is TransformableBoxEvents.OnDrag -> {
+                viewItem.setPositionOffset(
+                    mOffset = viewItem.getPositionOffset() + mEvent.dragAmount
+                )
+            }
+
+            is TransformableBoxEvents.OnZoom -> {
+                viewItem.setScale(
+                    mScale = (viewItem.getScale() * mEvent.zoomAmount).coerceIn(0.5f, 5f)
+                )
+            }
+
+            is TransformableBoxEvents.OnRotate -> {
+                viewItem.setRotation(
+                    mRotation = viewItem.getRotation() + mEvent.rotationChange
+                )
+            }
+        }
+        onEvent(TextModeEvent.UpdateTransformableViewsList(stateList))
+    }
+
+    fun updateViewSelection(selectedViewId: String? = null) {
+        val transformableViewsList = state.value.transformableViewsList
+        transformableViewsList.forEach {
+            val isSelected = if (selectedViewId != null) {
+                it.getId() == selectedViewId
+            } else false
+            it.setIsSelected(isSelected)
+        }
+        _state.update {
+            it.copy(
+                transformableViewsList = transformableViewsList,
+                recompositionTrigger = it.recompositionTrigger + 1
+            )
         }
     }
 

@@ -1,62 +1,54 @@
 package com.abizer_r.touchdraw.ui.textMode
 
-import android.content.res.Configuration
+import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.imageResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.abizer_r.components.theme.SketchDraftTheme
-import com.abizer_r.components.theme.TextInputBackgroundColor
-import com.abizer_r.components.theme.ToolBarBackgroundColor
-import com.abizer_r.touchdraw.R
-import com.abizer_r.touchdraw.ui.drawMode.DrawModeViewModel
-import com.abizer_r.touchdraw.ui.drawMode.stateHandling.TextModeEvent
 import com.abizer_r.touchdraw.ui.drawMode.stateHandling.TextModeEvent.*
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TextModeTopToolbar
+import com.abizer_r.touchdraw.ui.transformableViews.TransformableTextView
+import com.abizer_r.touchdraw.ui.transformableViews.TransformableViewType
+import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
+import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxState
+import com.abizer_r.touchdraw.ui.transformableViews.getId
+import com.abizer_r.touchdraw.ui.transformableViews.getPositionOffset
+import com.abizer_r.touchdraw.ui.transformableViews.getRotation
+import com.abizer_r.touchdraw.ui.transformableViews.getScale
+import com.abizer_r.touchdraw.ui.transformableViews.setPositionOffset
+import com.abizer_r.touchdraw.ui.transformableViews.setRotation
+import com.abizer_r.touchdraw.ui.transformableViews.setScale
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
+import java.util.UUID
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TextModeScreen(
     modifier: Modifier = Modifier,
@@ -100,7 +92,7 @@ fun TextModeScreen(
             .background(MaterialTheme.colorScheme.background)
             .imePadding()
     ) {
-        val (topToolBar, bottomToolbar, imageBitmapView, textInputView) = createRefs()
+        val (topToolBar, bottomToolbar, editorBox, textInputView) = createRefs()
 
         TextModeTopToolbar(
             modifier = Modifier.constrainAs(topToolBar) {
@@ -116,27 +108,59 @@ fun TextModeScreen(
                 }
             },
             onDoneClicked = {
-                /**
-                 * TODO: State Screenshot and return (similar to DrawModeScreen)
-                 */
-                onDoneClicked(state.textFieldValue)
+                if (state.isTextFieldVisible) {
+                    viewModel.onEvent(AddTransformableTextView(
+                        view = TransformableViewType.TextTransformable(
+                            text = state.textFieldValue,
+                            viewState = TransformableBoxState(id = UUID.randomUUID().toString())
+                        )
+                    ))
+                    viewModel.onEvent(HideTextField)
+                } else {
+                    /**
+                     * TODO: State Screenshot and return (similar to DrawModeScreen)
+                     */
+                    onDoneClicked(state.textFieldValue)
+                }
             }
         )
 
-        Image(
-            modifier = Modifier.constrainAs(imageBitmapView) {
+        Box(
+            modifier = Modifier.constrainAs(editorBox) {
                 top.linkTo(topToolBar.bottom)
                 bottom.linkTo(parent.bottom)
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
                 width = Dimension.fillToConstraints
                 height = Dimension.fillToConstraints
-            },
-            bitmap = imageBitmap,
-            contentScale = ContentScale.Fit,
-            contentDescription = null,
-            alpha = if (state.isTextFieldVisible) 0.3f else 1f
-        )
+            }
+        ) {
+
+            Image(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInteropFilter {
+                        viewModel.updateViewSelection(null)
+                        true
+                    },
+                bitmap = imageBitmap,
+                contentScale = ContentScale.Fit,
+                contentDescription = null,
+                alpha = if (state.isTextFieldVisible) 0.3f else 1f
+            )
+
+
+
+            if (state.isTextFieldVisible.not()) {
+                DrawAllTransformableViews(
+                    transformableViewsList = state.transformableViewsList,
+                    onTransformableBoxEvent = {
+                        viewModel.onTransformableBoxEvent(it)
+                    }
+                )
+            }
+
+        }
 
         if (state.isTextFieldVisible) {
             TextField(
@@ -189,14 +213,19 @@ fun TextModeScreen(
     }
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun PreviewTextModeScreen() {
-    SketchDraftTheme {
-        TextModeScreen(
-            imageBitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_1),
-            onDoneClicked = {},
-            onBackPressed = {}
-        )
+fun DrawAllTransformableViews(
+    transformableViewsList: ArrayList<TransformableViewType>,
+    onTransformableBoxEvent: (event: TransformableBoxEvents) -> Unit
+) {
+    transformableViewsList.forEach { mViewDetail ->
+        when (mViewDetail) {
+            is TransformableViewType.TextTransformable -> {
+                TransformableTextView(
+                    viewDetail = mViewDetail,
+                    onEvent = onTransformableBoxEvent
+                )
+            }
+        }
     }
 }

@@ -121,56 +121,6 @@ fun DrawModeScreen(
                     }
                 )
             }
-
-
-//            transformableViewsList.forEach { mViewDetail ->
-//                when (mViewDetail) {
-//                    is TransformableViewType.TextTransformable -> {
-//                        TransformableTextView(
-//                            viewDetail = mViewDetail,
-//                            onEvent = { mEvent ->
-//                                val stateList = transformableContainerState.transformableViewsList
-//                                when(mEvent) {
-//                                    is TransformableBoxEvents.OnDrag -> {
-//                                        val index = stateList.indexOfFirst { mEvent.id == it.getId() }
-//                                        if (index >= 0 && index < stateList.size) {
-//                                            stateList[index] = stateList[index].setPositionOffset(
-//                                                stateList[index].getPositionOffset() + mEvent.dragAmount
-//                                            )
-//                                        }
-//                                    }
-//
-//                                    is TransformableBoxEvents.OnZoom -> {
-//                                        val index = stateList.indexOfFirst { mEvent.id == it.getId() }
-//                                        if (index >= 0 && index < stateList.size) {
-//                                            stateList[index] = stateList[index].setScale(
-//                                                (stateList[index].getScale() * mEvent.zoomAmount).coerceIn(0.5f, 5f)
-//                                            )
-//                                        }
-//                                    }
-//
-//                                    is TransformableBoxEvents.OnRotate -> {
-//                                        val index = stateList.indexOfFirst { mEvent.id == it.getId() }
-//                                        if (index >= 0 && index < stateList.size) {
-//                                            stateList[index] = stateList[index].setRotation(
-//                                                stateList[index].getRotation() + mEvent.rotationChange
-//                                            )
-//                                        }
-//                                    }
-//                                }
-//
-//                                transformableContainerState = transformableContainerState.copy(
-//                                    transformableViewsList = stateList,
-//                                    triggerRecomposition = transformableContainerState.triggerRecomposition + 1
-//                                )
-//
-//                                Log.e("TEST_event2", "childrenList = ${transformableContainerState.transformableViewsList}", )
-//
-//                            }
-//                        )
-//                    }
-//                }
-//            }
         }
 
 
