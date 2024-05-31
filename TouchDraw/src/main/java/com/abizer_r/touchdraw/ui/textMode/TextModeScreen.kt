@@ -1,10 +1,9 @@
 package com.abizer_r.touchdraw.ui.textMode
 
-import android.util.Log
+import android.graphics.Bitmap
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.material3.MaterialTheme
@@ -16,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -31,6 +31,8 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import com.abizer_r.components.util.defaultErrorToast
 import com.abizer_r.touchdraw.ui.drawMode.stateHandling.TextModeEvent.*
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TextModeTopToolbar
@@ -38,22 +40,21 @@ import com.abizer_r.touchdraw.ui.transformableViews.TransformableTextView
 import com.abizer_r.touchdraw.ui.transformableViews.TransformableViewType
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxState
-import com.abizer_r.touchdraw.ui.transformableViews.getId
-import com.abizer_r.touchdraw.ui.transformableViews.getPositionOffset
-import com.abizer_r.touchdraw.ui.transformableViews.getRotation
-import com.abizer_r.touchdraw.ui.transformableViews.getScale
-import com.abizer_r.touchdraw.ui.transformableViews.setPositionOffset
-import com.abizer_r.touchdraw.ui.transformableViews.setRotation
-import com.abizer_r.touchdraw.ui.transformableViews.setScale
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
+import com.smarttoolfactory.screenshot.ImageResult
+import com.smarttoolfactory.screenshot.ScreenshotBox
+import com.smarttoolfactory.screenshot.rememberScreenshotState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TextModeScreen(
     modifier: Modifier = Modifier,
-    imageBitmap: ImageBitmap,
-    onDoneClicked: (String) -> Unit,
+    bitmap: ImageBitmap,
+    onDoneClicked: (bitmap: Bitmap) -> Unit,
     onBackPressed: () -> Unit
 ) {
     val context = LocalContext.current
@@ -76,9 +77,23 @@ fun TextModeScreen(
         }
     }
 
-//    LaunchedEffect(key1 = Unit) {
-//        focusRequesterForTextField.requestFocus()
-//    }
+    val screenshotState = rememberScreenshotState()
+
+    when (screenshotState.imageState.value) {
+        ImageResult.Initial -> {}
+        is ImageResult.Error -> {
+            viewModel.shouldGoToNextScreen = false
+            context.defaultErrorToast()
+        }
+        is ImageResult.Success -> {
+            if (viewModel.shouldGoToNextScreen) {
+                viewModel.shouldGoToNextScreen = false
+                screenshotState.bitmap?.let { mBitmap ->
+                    onDoneClicked(mBitmap)
+                } ?: context.defaultErrorToast()
+            }
+        }
+    }
 
     BackHandler {
         keyboardController?.hide()
@@ -117,23 +132,28 @@ fun TextModeScreen(
                     ))
                     viewModel.onEvent(HideTextField)
                 } else {
-                    /**
-                     * TODO: State Screenshot and return (similar to DrawModeScreen)
-                     */
-                    onDoneClicked(state.textFieldValue)
+                    viewModel.shouldGoToNextScreen = true
+                    lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                        viewModel.updateViewSelection(null)
+                        delay(200)  /* Delay to update the selection in ui */
+                        screenshotState.capture()
+                    }
                 }
             }
         )
-
-        Box(
+        val aspectRatio = bitmap.let {
+            bitmap.width.toFloat() / bitmap.height.toFloat()
+        }
+        ScreenshotBox(
             modifier = Modifier.constrainAs(editorBox) {
                 top.linkTo(topToolBar.bottom)
-                bottom.linkTo(parent.bottom)
+                bottom.linkTo(bottomToolbar.top)
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
-                width = Dimension.fillToConstraints
+                width = Dimension.ratio(aspectRatio.toString())
                 height = Dimension.fillToConstraints
-            }
+            }.clipToBounds(),
+            screenshotState = screenshotState
         ) {
 
             Image(
@@ -143,7 +163,7 @@ fun TextModeScreen(
                         viewModel.updateViewSelection(null)
                         true
                     },
-                bitmap = imageBitmap,
+                bitmap = bitmap,
                 contentScale = ContentScale.Fit,
                 contentDescription = null,
                 alpha = if (state.isTextFieldVisible) 0.3f else 1f

@@ -45,6 +45,8 @@ class TextModeViewModel @Inject constructor(
     var shouldRequestFocus = false
         private set
 
+    var shouldGoToNextScreen = false
+
 //    private var lastCaptureRequest: Long = Calendar.getInstance().timeInMillis
 
     fun onEvent(event: TextModeEvent) {

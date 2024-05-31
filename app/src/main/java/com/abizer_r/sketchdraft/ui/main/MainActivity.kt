@@ -52,6 +52,7 @@ fun MainScreen() {
 
 //                EditorScreen()
                 DrawModeScreen(
+                    bitmap = mainActivityViewModel.bitmap,
                     goToTextModeScreen = {
                         mainActivityViewModel.bitmap = it.copy(Bitmap.Config.ARGB_8888, false)
                         navController.navigate("textMode")
@@ -61,13 +62,19 @@ fun MainScreen() {
             }
             composable(route = "textMode") { entry ->
                 TextModeScreen(
-                    imageBitmap = mainActivityViewModel.bitmap?.asImageBitmap()
+                    bitmap = mainActivityViewModel.bitmap?.asImageBitmap()
                         ?: ImageBitmap.imageResource(id = R.drawable.placeholder_image_1),
                     onBackPressed = {
                         navController.popBackStack()
                     },
                     onDoneClicked = {
-
+                        mainActivityViewModel.bitmap = it.copy(Bitmap.Config.ARGB_8888, false)
+                        navController.navigate(
+                            "editorScreen",
+                            navOptions = NavOptions.Builder()
+                                .setPopUpTo(route = "editorScreen", inclusive = true)
+                                .build()
+                        )
                     }
                 )
             }

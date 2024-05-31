@@ -40,6 +40,7 @@ import io.mhssn.colorpicker.ColorPickerType
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun DrawModeScreen(
+    bitmap: Bitmap? = null,
     goToTextModeScreen: (bitmap: Bitmap) -> Unit
 ) {
 
@@ -98,11 +99,19 @@ fun DrawModeScreen(
             }
         )
 
+        val aspectRatio = bitmap?.let {
+            bitmap.width.toFloat() / bitmap.height.toFloat()
+        }
+        val screenShotBoxWidth = if (aspectRatio != null) {
+            Dimension.ratio(aspectRatio.toString())
+        } else Dimension.fillToConstraints
         ScreenshotBox(
             modifier = Modifier.constrainAs(drawingView) {
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
                 top.linkTo(topToolbar.bottom)
                 bottom.linkTo(bottomToolbar.top)
-                width = Dimension.matchParent
+                width = screenShotBoxWidth
                 height = Dimension.fillToConstraints
             },
             screenshotState = screenshotState
@@ -113,6 +122,8 @@ fun DrawModeScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 DrawingCanvas(
+                    modifier = Modifier.fillMaxSize(),
+                    bitmap = bitmap,
                     pathDetailStack = state.pathDetailStack,
                     selectedColor = bottomToolbarState.selectedColor,
                     currentTool = bottomToolbarState.selectedItem,

@@ -1,5 +1,7 @@
 package com.abizer_r.touchdraw.ui.drawMode.drawingCanvas
 
+import android.graphics.Bitmap
+import android.graphics.Paint
 import android.util.Log
 import android.view.MotionEvent
 import androidx.compose.foundation.Canvas
@@ -10,8 +12,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import com.abizer_r.touchdraw.ui.drawMode.stateHandling.DrawModeEvent
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.AbstractShape
@@ -25,6 +30,7 @@ import kotlin.math.roundToInt
 @Composable
 fun DrawingCanvas(
     modifier: Modifier = Modifier,
+    bitmap: Bitmap? = null,
     pathDetailStack: Stack<PathDetails>,
     selectedColor: Color,
     currentTool: BottomToolbarItem,
@@ -43,6 +49,17 @@ fun DrawingCanvas(
 
     Canvas(
         modifier = modifier
+            .drawBehind {
+                bitmap?.let { mBitmap ->
+                    drawIntoCanvas { mCanvas ->
+                        val destRect = android.graphics.Rect(0, 0, mBitmap.width, mBitmap.height)
+                        mCanvas.nativeCanvas.drawBitmap(
+                            mBitmap, null, destRect, Paint()
+                        )
+                    }
+                }
+
+            }
             .pointerInteropFilter {
                 when (it.action) {
                     MotionEvent.ACTION_DOWN -> {
