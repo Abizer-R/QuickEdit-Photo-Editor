@@ -20,6 +20,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.abizer_r.components.util.defaultErrorToast
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.DrawingCanvas
 import com.abizer_r.touchdraw.ui.drawMode.stateHandling.DrawModeEvent
@@ -36,6 +37,9 @@ import com.smarttoolfactory.screenshot.ScreenshotBox
 import com.smarttoolfactory.screenshot.rememberScreenshotState
 import io.mhssn.colorpicker.ColorPickerDialog
 import io.mhssn.colorpicker.ColorPickerType
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -144,8 +148,11 @@ fun DrawModeScreen(
             bottomToolbarState = bottomToolbarState,
             onEvent = {
                 if (it is BottomToolbarEvent.OnItemClicked && it.toolbarItem is BottomToolbarItem.TextMode) {
-                    viewModel.shouldGoToNextScreen = true
-                    screenshotState.capture()
+                    viewModel.handleStateBeforeCaptureScreenshot()
+                    lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                        delay(200)  /* Delay to update the ToolbarExtensionView Visibility in ui */
+                        screenshotState.capture()
+                    }
                 } else {
                     viewModel.onBottomToolbarEvent(it)
                 }
@@ -159,7 +166,6 @@ fun DrawModeScreen(
                         bottom.linkTo(bottomToolbar.top)
                         width = Dimension.matchParent
                     }
-                    .padding(bottom = 2.dp) /* added padding to get a visual separation between BottomToolbar and extension */
                     .clickable { }, /* added clickable{} to avoid triggering touchEvent in DrawingCanvas when clicking anywhere on toolbarExtension */
                 width = bottomToolbarState.selectedItem.getWidthOrNull(),
                 onWidthChange = { mWidth ->

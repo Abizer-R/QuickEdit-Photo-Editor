@@ -31,7 +31,12 @@ class DrawModeViewModel @Inject constructor(
 
     var shouldGoToNextScreen = false
 
-    private var lastCaptureRequest: Long = Calendar.getInstance().timeInMillis
+    fun handleStateBeforeCaptureScreenshot() {
+        shouldGoToNextScreen = true
+        _state.update {
+            it.copy(showBottomToolbarExtension = false)
+        }
+    }
 
     fun onEvent(event: DrawModeEvent) {
         when (event) {
