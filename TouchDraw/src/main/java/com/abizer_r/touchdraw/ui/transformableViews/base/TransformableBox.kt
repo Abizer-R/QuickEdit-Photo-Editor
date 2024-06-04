@@ -14,6 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
@@ -36,6 +37,7 @@ import com.abizer_r.touchdraw.utils.drawMode.toPx
 fun TransformableBox(
     modifier: Modifier = Modifier,
     viewState: TransformableBoxState,
+    showBorderOnly: Boolean = false,
     onEvent: (TransformableBoxEvents) -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -87,13 +89,17 @@ fun TransformableBox(
     if (viewState.isSelected) {
         // we need to keep the border width similar regardless the scale (zoom)
         val borderStrokeWidth = 1.dp.toPx() / viewState.scale
+        val borderColor = if (showBorderOnly) Color.White else Color.Transparent
         boxModifier = boxModifier.dashedBorder(
             strokeWidthInPx = borderStrokeWidth,
-            color = MaterialTheme.colorScheme.onBackground,
+            color = borderColor,
             cornerRadiusDp = 0.dp,
             isDashedBorder = true,
             dashOnOffSizePair = Pair(2.dp.toPx(), 2.dp.toPx())
         )
+    }
+    if (showBorderOnly) {
+        boxModifier = boxModifier.alpha(0f)
     }
     Box(modifier = boxModifier.padding(8.dp)) {
         content()

@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.material3.MaterialTheme
@@ -13,6 +14,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -40,6 +42,7 @@ import com.abizer_r.touchdraw.ui.transformableViews.TransformableTextView
 import com.abizer_r.touchdraw.ui.transformableViews.TransformableViewType
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxState
+import com.abizer_r.touchdraw.ui.transformableViews.getIsSelected
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
 import com.smarttoolfactory.screenshot.ImageResult
 import com.smarttoolfactory.screenshot.ScreenshotBox
@@ -107,7 +110,7 @@ fun TextModeScreen(
             .background(MaterialTheme.colorScheme.background)
             .imePadding()
     ) {
-        val (topToolBar, bottomToolbar, editorBox, textInputView) = createRefs()
+        val (topToolBar, bottomToolbar, editorBox, editorBoxBgStretched, textInputView) = createRefs()
 
         TextModeTopToolbar(
             modifier = Modifier.constrainAs(topToolBar) {
@@ -145,14 +148,16 @@ fun TextModeScreen(
             bitmap.width.toFloat() / bitmap.height.toFloat()
         }
         ScreenshotBox(
-            modifier = Modifier.constrainAs(editorBox) {
-                top.linkTo(topToolBar.bottom)
-                bottom.linkTo(bottomToolbar.top)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-                width = Dimension.ratio(aspectRatio.toString())
-                height = Dimension.fillToConstraints
-            }.clipToBounds(),
+            modifier = Modifier
+                .constrainAs(editorBox) {
+                    top.linkTo(topToolBar.bottom)
+                    bottom.linkTo(bottomToolbar.top)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    width = Dimension.ratio(aspectRatio.toString())
+                    height = Dimension.fillToConstraints
+                }
+                .clipToBounds(),
             screenshotState = screenshotState
         ) {
 
@@ -169,10 +174,37 @@ fun TextModeScreen(
                 alpha = if (state.isTextFieldVisible) 0.3f else 1f
             )
 
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (state.isTextFieldVisible.not()) {
+                    DrawAllTransformableViews(
+                        centerAlignModifier = Modifier.align(Alignment.Center),
+                        transformableViewsList = state.transformableViewsList,
+                        onTransformableBoxEvent = {
+                            viewModel.onTransformableBoxEvent(it)
+                        }
+                    )
+                }
+            }
+
+        }
+
+        Box(
+            modifier = Modifier
+                .constrainAs(editorBoxBgStretched) {
+                    top.linkTo(topToolBar.bottom)
+                    bottom.linkTo(bottomToolbar.top)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    width = Dimension.fillToConstraints
+                    height = Dimension.fillToConstraints
+                }
+                .clipToBounds()
+        ) {
 
 
             if (state.isTextFieldVisible.not()) {
-                DrawAllTransformableViews(
+                BorderForSelectedViews(
+                    centerAlignModifier = Modifier.align(Alignment.Center),
                     transformableViewsList = state.transformableViewsList,
                     onTransformableBoxEvent = {
                         viewModel.onTransformableBoxEvent(it)
@@ -235,6 +267,7 @@ fun TextModeScreen(
 
 @Composable
 fun DrawAllTransformableViews(
+    centerAlignModifier: Modifier,
     transformableViewsList: ArrayList<TransformableViewType>,
     onTransformableBoxEvent: (event: TransformableBoxEvents) -> Unit
 ) {
@@ -242,7 +275,31 @@ fun DrawAllTransformableViews(
         when (mViewDetail) {
             is TransformableViewType.TextTransformable -> {
                 TransformableTextView(
+                    modifier = centerAlignModifier,
                     viewDetail = mViewDetail,
+                    onEvent = onTransformableBoxEvent
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+fun BorderForSelectedViews(
+    centerAlignModifier: Modifier,
+    transformableViewsList: ArrayList<TransformableViewType>,
+    onTransformableBoxEvent: (event: TransformableBoxEvents) -> Unit
+) {
+    transformableViewsList
+        .filter { it.getIsSelected() }
+        .forEach { mViewDetail ->
+        when (mViewDetail) {
+            is TransformableViewType.TextTransformable -> {
+                TransformableTextView(
+                    modifier = centerAlignModifier,
+                    viewDetail = mViewDetail,
+                    showBorderOnly = true,
                     onEvent = onTransformableBoxEvent
                 )
             }

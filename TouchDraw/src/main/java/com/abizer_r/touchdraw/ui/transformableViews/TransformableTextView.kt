@@ -19,6 +19,7 @@ import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxState
 @Composable
 fun TransformableTextView(
     modifier: Modifier = Modifier,
+    showBorderOnly: Boolean = false,
     viewDetail: TransformableViewType.TextTransformable,
     onEvent: (TransformableBoxEvents) -> Unit
 ) {
@@ -26,6 +27,7 @@ fun TransformableTextView(
     TransformableBox(
         modifier = modifier,
         viewState = viewDetail.viewState,
+        showBorderOnly = showBorderOnly,
         onEvent = onEvent
     ) {
         Text(
