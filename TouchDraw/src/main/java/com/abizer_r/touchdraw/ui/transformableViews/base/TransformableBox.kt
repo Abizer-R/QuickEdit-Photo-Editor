@@ -5,8 +5,10 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -16,6 +18,8 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -66,45 +70,56 @@ fun TransformableBox(
     ConstraintLayout(
         modifier = outerBoxModifier
     ) {
-        val (btnClose, contentBox) = createRefs()
+        val (btnClose, contentBox, btnScale) = createRefs()
 
-
-        val btnCloseAlpha = if (showBorderOnly) 1f else 0f
-        val btnCloseBackgroundColor = if (showBorderOnly) Color.Black else Color.Transparent
-        val btnCloseOffset = (4.dp * viewState.scale).coerceIn(4.dp, 10.dp)
-        Log.e("TEST_CLOSE", "TransformableBox: scale = ${viewState.scale}, btnCloseOffset = $btnCloseOffset", )
-        Image(
+        CloseButton(
             modifier = Modifier
                 .constrainAs(btnClose) {
                     top.linkTo(parent.top)
                     start.linkTo(parent.start)
-                }
-                .offset(
-                    x = btnCloseOffset,
-                    y = btnCloseOffset
-                )
-                .size(28.dp)
-                .scale(1 / viewState.scale) /* to keep the size of button constant */
-                .clip(CircleShape)
-                .background(btnCloseBackgroundColor)
-                .alpha(btnCloseAlpha)
-                .clickable {
-                    onEvent(
-                        TransformableBoxEvents.OnCloseClicked(viewState.id)
-                    )
                 },
-            imageVector = Icons.Default.Cancel,
-            contentScale = ContentScale.FillBounds,
-            contentDescription = null,
-            colorFilter = ColorFilter.tint(
-                color = Color.White
-            )
+            viewState = viewState,
+            showBorderOnly = showBorderOnly,
+            onEvent = onEvent
         )
+//        val btnCloseAlpha = if (showBorderOnly) 1f else 0f
+//        val btnCloseBackgroundColor = if (showBorderOnly) Color.Black else Color.Transparent
+//        val btnCloseOffset = (4.dp * viewState.scale).coerceIn(4.dp, 10.dp)
+//        Log.e("TEST_CLOSE", "TransformableBox: scale = ${viewState.scale}, btnCloseOffset = $btnCloseOffset", )
+//        Image(
+//            modifier = Modifier
+//                .constrainAs(btnClose) {
+//                    top.linkTo(parent.top)
+//                    start.linkTo(parent.start)
+//                }
+//                .offset(
+//                    x = btnCloseOffset,
+//                    y = btnCloseOffset
+//                )
+//                .size(28.dp)
+//                .scale(1 / viewState.scale) /* to keep the size of button constant */
+//                .clip(CircleShape)
+//                .background(btnCloseBackgroundColor)
+//                .alpha(btnCloseAlpha)
+//                .clickable {
+//                    onEvent(
+//                        TransformableBoxEvents.OnCloseClicked(viewState.id)
+//                    )
+//                },
+//            imageVector = Icons.Default.Cancel,
+//            contentScale = ContentScale.FillBounds,
+//            contentDescription = null,
+//            colorFilter = ColorFilter.tint(
+//                color = Color.White
+//            )
+//        )
 
 
         var innerBoxModifier = Modifier.constrainAs(contentBox) {
             top.linkTo(btnClose.bottom)
             start.linkTo(btnClose.end)
+            end.linkTo(btnScale.start)
+            bottom.linkTo(btnScale.top)
         }
 
         if (isSelected) {
@@ -134,7 +149,107 @@ fun TransformableBox(
         ) {
             content()
         }
+
+//        ScaleButton(
+//            modifier = Modifier
+//                .constrainAs(btnScale) {
+//                    end.linkTo(parent.end)
+//                    bottom.linkTo(parent.bottom)
+//                },
+//            viewState = viewState,
+//            showBorderOnly = showBorderOnly,
+//            onEvent = onEvent
+//        )
     }
+}
+
+@Composable
+fun CloseButton(
+    modifier: Modifier,
+    viewState: TransformableBoxState,
+    showBorderOnly: Boolean,
+    onEvent: (TransformableBoxEvents) -> Unit
+) {
+    val btnAlpha = if (showBorderOnly) 1f else 0f
+    val bgColor = if (showBorderOnly) MaterialTheme.colorScheme.onBackground else Color.Transparent
+    val iconTintColor = MaterialTheme.colorScheme.background
+    val btnOffset = (4.dp * viewState.scale).coerceIn(4.dp, 10.dp)
+
+    Image(
+        modifier = modifier
+            .offset(
+                x = btnOffset,
+                y = btnOffset
+            )
+            .size(28.dp)
+            .scale(1 / viewState.scale) /* to keep the size of button constant */
+            .clip(CircleShape)
+            .background(bgColor)
+            .alpha(btnAlpha)
+            .clickable {
+                onEvent(
+                    TransformableBoxEvents.OnCloseClicked(viewState.id)
+                )
+            },
+        imageVector = Icons.Default.Close,
+        contentScale = ContentScale.FillBounds,
+        contentDescription = null,
+        colorFilter = ColorFilter.tint(
+            color = iconTintColor
+        )
+    )
+}
+
+@Composable
+fun ScaleButton(
+    modifier: Modifier,
+    viewState: TransformableBoxState,
+    showBorderOnly: Boolean,
+    onEvent: (TransformableBoxEvents) -> Unit
+) {
+    val btnAlpha = if (showBorderOnly) 1f else 0f
+    val bgColor = if (showBorderOnly) MaterialTheme.colorScheme.onBackground else Color.Transparent
+    val iconTintColor = MaterialTheme.colorScheme.background
+    val btnOffset = (4.dp * viewState.scale).coerceIn(4.dp, 10.dp)
+
+    Image(
+        modifier = modifier
+            .offset(
+                x = -btnOffset,
+                y = -btnOffset
+            )
+            .size(28.dp)
+            .scale(1 / viewState.scale) /* to keep the size of button constant */
+            .clip(CircleShape)
+            .background(bgColor)
+            .rotate(80f)
+            .alpha(btnAlpha)
+            .pointerInput(Unit) {
+                detectDragGestures { change, dragAmount ->Log.e(
+                    "TEST_SCALE", "ScaleButton: dragDistance = ${dragAmount.getDistance() / viewState.scale}, dragAmount = $dragAmount")
+
+                    /**
+                     *
+                     * think about some logic to get the appropriate zoom amount
+                     *  according the drag direction and distance
+                     *  => x and y both positive = zoom out
+                     *  => x and y both negative = zoom in
+                     *  => else = ignore
+                     *
+                     *
+                     *
+                     */
+
+                }
+            }
+        ,
+        imageVector = Icons.Default.OpenInFull,
+        contentScale = ContentScale.Inside,
+        contentDescription = null,
+        colorFilter = ColorFilter.tint(
+            color = iconTintColor
+        )
+    )
 }
 
 
@@ -196,7 +311,6 @@ fun Modifier.detectGestures(
                 )
 
                 onEvent(
-
                     TransformableBoxEvents.OnZoom(
                         id = viewState.id,
                         zoomAmount = zoom
