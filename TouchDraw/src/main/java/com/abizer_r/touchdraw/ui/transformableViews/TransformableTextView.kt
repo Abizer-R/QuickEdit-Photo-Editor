@@ -34,7 +34,7 @@ fun TransformableTextView(
             text = viewDetail.text,
             style = TextStyle(
                 color = MaterialTheme.colorScheme.onBackground,
-                fontSize = MaterialTheme.typography.titleLarge.fontSize
+                fontSize = MaterialTheme.typography.displayMedium.fontSize
             )
         )
     }

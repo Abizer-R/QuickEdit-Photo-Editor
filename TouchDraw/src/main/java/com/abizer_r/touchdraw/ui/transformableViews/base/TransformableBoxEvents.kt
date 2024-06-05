@@ -8,6 +8,8 @@ sealed class TransformableBoxEvents {
     data class OnDrag(override val id: String, val dragAmount: Offset): TransformableBoxEvents()
     data class OnZoom(override val id: String, val zoomAmount: Float): TransformableBoxEvents()
     data class OnRotate(override val id: String, val rotationChange: Float): TransformableBoxEvents()
+    data class OnCloseClicked(override val id: String): TransformableBoxEvents()
+    data class OnTapped(override val id: String): TransformableBoxEvents()
 }
 
 //    data class OnTransform(val id: String, val newOffSet: Offset, val newScale: Float, val newRotation: Float): TransformableBoxEvents()

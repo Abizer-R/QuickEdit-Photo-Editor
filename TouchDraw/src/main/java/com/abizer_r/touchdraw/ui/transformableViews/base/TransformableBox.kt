@@ -2,35 +2,49 @@ package com.abizer_r.touchdraw.ui.transformableViews.base
 
 import android.content.res.Configuration
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
+import androidx.constraintlayout.compose.ConstraintLayout
 import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.touchdraw.ui.transformableViews.TransformableTextView
 import com.abizer_r.touchdraw.ui.transformableViews.TransformableViewType
+import com.abizer_r.touchdraw.utils.drawMode.pxToDp
 import com.abizer_r.touchdraw.utils.drawMode.toPx
 
 @Composable
@@ -43,15 +57,128 @@ fun TransformableBox(
 ) {
 
     val localDensity = LocalDensity.current
+    val isSelected = viewState.isSelected
 
-    var boxModifier = modifier
-        .offset(
-            (viewState.positionOffset.x / localDensity.density).dp,
-            (viewState.positionOffset.y / localDensity.density).dp,
+    val outerBoxModifier = modifier
+        .addTransformation(viewState, localDensity)
+//        .addTransformation(viewState, localDensity, onEvent)
+//
+    ConstraintLayout(
+        modifier = outerBoxModifier
+    ) {
+        val (btnClose, contentBox) = createRefs()
+
+
+        val btnCloseAlpha = if (showBorderOnly) 1f else 0f
+        val btnCloseBackgroundColor = if (showBorderOnly) Color.Black else Color.Transparent
+        val btnCloseOffset = (4.dp * viewState.scale).coerceIn(4.dp, 10.dp)
+        Log.e("TEST_CLOSE", "TransformableBox: scale = ${viewState.scale}, btnCloseOffset = $btnCloseOffset", )
+        Image(
+            modifier = Modifier
+                .constrainAs(btnClose) {
+                    top.linkTo(parent.top)
+                    start.linkTo(parent.start)
+                }
+                .offset(
+                    x = btnCloseOffset,
+                    y = btnCloseOffset
+                )
+                .size(28.dp)
+                .scale(1 / viewState.scale) /* to keep the size of button constant */
+                .clip(CircleShape)
+                .background(btnCloseBackgroundColor)
+                .alpha(btnCloseAlpha)
+                .clickable {
+                    onEvent(
+                        TransformableBoxEvents.OnCloseClicked(viewState.id)
+                    )
+                },
+            imageVector = Icons.Default.Cancel,
+            contentScale = ContentScale.FillBounds,
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(
+                color = Color.White
+            )
         )
-        .scale(viewState.scale)
-        .rotate(viewState.rotation)
-        .pointerInput(Unit) {
+
+
+        var innerBoxModifier = Modifier.constrainAs(contentBox) {
+            top.linkTo(btnClose.bottom)
+            start.linkTo(btnClose.end)
+        }
+
+        if (isSelected) {
+            // we need to keep the border width similar regardless the scale (zoom)
+            val borderStrokeWidth = 1.dp.toPx() / viewState.scale
+            val borderColor = if (showBorderOnly) Color.White else Color.Transparent
+            innerBoxModifier = innerBoxModifier.dashedBorder(
+                strokeWidthInPx = borderStrokeWidth,
+                color = borderColor,
+                cornerRadiusDp = 0.dp,
+                isDashedBorder = true,
+                dashOnOffSizePair = Pair(2.dp.toPx(), 2.dp.toPx())
+            )
+        }
+
+        val innerBoxPaddingHorizontal = (16.dp / viewState.scale).coerceIn(4.dp, 20.dp)
+        val innerBoxPaddingVertical = (6.dp / viewState.scale).coerceIn(2.dp, 6.dp)
+        Box(
+            modifier = innerBoxModifier
+                .detectGestures(viewState, onEvent)
+                .detectTap(viewState, onEvent)
+                .padding(
+                    horizontal = innerBoxPaddingHorizontal,
+                    vertical = innerBoxPaddingVertical
+                )
+                .alpha(if (showBorderOnly) 0f else 1f)
+        ) {
+            content()
+        }
+    }
+}
+
+
+fun Modifier.addTransformation(
+    viewState: TransformableBoxState,
+    localDensity: Density
+): Modifier = run {
+    this.then(
+        Modifier
+            .offset(
+                (viewState.positionOffset.x / localDensity.density).dp,
+                (viewState.positionOffset.y / localDensity.density).dp,
+            )
+            .scale(viewState.scale)
+            .rotate(viewState.rotation)
+
+    )
+}
+
+
+fun Modifier.detectTap(
+    viewState: TransformableBoxState,
+    onEvent: (TransformableBoxEvents) -> Unit
+): Modifier = run {
+    this.then(
+        Modifier.pointerInput(Unit) {
+            detectTapGestures {
+                Log.e("TEST_TransformBox", "detectTouch: TAPPED", )
+                onEvent(
+                    TransformableBoxEvents.OnTapped(
+                        id = viewState.id,
+                    )
+                )
+            }
+        }
+    )
+}
+
+fun Modifier.detectGestures(
+    viewState: TransformableBoxState,
+    onEvent: (TransformableBoxEvents) -> Unit,
+): Modifier = run {
+    this.then(
+        Modifier.pointerInput(Unit) {
             detectTransformGestures { centroid, pan, zoom, rotationChange ->
                 Log.e(
                     "TEST_TransformBox", "DraggableParentView: " +
@@ -86,24 +213,7 @@ fun TransformableBox(
 
             }
         }
-    if (viewState.isSelected) {
-        // we need to keep the border width similar regardless the scale (zoom)
-        val borderStrokeWidth = 1.dp.toPx() / viewState.scale
-        val borderColor = if (showBorderOnly) Color.White else Color.Transparent
-        boxModifier = boxModifier.dashedBorder(
-            strokeWidthInPx = borderStrokeWidth,
-            color = borderColor,
-            cornerRadiusDp = 0.dp,
-            isDashedBorder = true,
-            dashOnOffSizePair = Pair(2.dp.toPx(), 2.dp.toPx())
-        )
-    }
-    if (showBorderOnly) {
-        boxModifier = boxModifier.alpha(0f)
-    }
-    Box(modifier = boxModifier.padding(8.dp)) {
-        content()
-    }
+    )
 }
 
 @Composable
@@ -144,7 +254,7 @@ fun Modifier.dashedBorder(
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun PreviewTextItem() {
+fun PreviewTextItem_NO_BORDER() {
     SketchDraftTheme {
         Box(
             modifier = Modifier
@@ -156,12 +266,47 @@ fun PreviewTextItem() {
                     text = "Hello",
                     viewState = TransformableBoxState(
                         id = "",
-                        positionOffset = Offset(100f, 100f),
+                        positionOffset = Offset(0f, 0f),
                         scale = 1f,
                         rotation = 0f,
                         isSelected = true
                     )
                 ),
+                onEvent = {},
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun PreviewTextItem_WITH_BORDER() {
+    SketchDraftTheme {
+        Box(
+            modifier = Modifier
+                .size(300.dp, 100.dp)
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            val viewState = TransformableBoxState(
+                id = "",
+                positionOffset = Offset(0f, 0f),
+                scale = 1f,
+                rotation = 0f,
+                isSelected = true
+            )
+            TransformableTextView(
+                viewDetail = TransformableViewType.TextTransformable(
+                    text = "Hello",
+                    viewState = viewState
+                ),
+                onEvent = {},
+            )
+            TransformableTextView(
+                viewDetail = TransformableViewType.TextTransformable(
+                    text = "Hello",
+                    viewState = viewState
+                ),
+                showBorderOnly = true,
                 onEvent = {},
             )
         }

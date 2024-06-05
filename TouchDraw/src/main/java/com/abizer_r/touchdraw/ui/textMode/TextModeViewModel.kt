@@ -102,6 +102,7 @@ class TextModeViewModel @Inject constructor(
         val stateList = state.value.transformableViewsList
         val viewItem = stateList.find { it.getId() == mEvent.id } ?: return
         if (viewItem.getIsSelected().not()) {
+            Log.e("TEST_Select", "onTransformableBoxEvent: selecting item ${viewItem.getId()}", )
             updateViewSelection(viewItem.getId())
         }
         when(mEvent) {
@@ -121,6 +122,15 @@ class TextModeViewModel @Inject constructor(
                 viewItem.setRotation(
                     mRotation = viewItem.getRotation() + mEvent.rotationChange
                 )
+            }
+
+            is TransformableBoxEvents.OnCloseClicked -> {
+                stateList.remove(viewItem)
+            }
+
+            is TransformableBoxEvents.OnTapped -> {
+                // Main objective is to select the view when tapped
+                // it is already done above, so doing nothing here
             }
         }
         onEvent(TextModeEvent.UpdateTransformableViewsList(stateList))
