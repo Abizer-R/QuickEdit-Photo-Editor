@@ -27,7 +27,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -39,10 +41,9 @@ import com.abizer_r.touchdraw.ui.drawMode.stateHandling.TextModeEvent.*
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TextModeTopToolbar
 import com.abizer_r.touchdraw.ui.transformableViews.TransformableTextView
-import com.abizer_r.touchdraw.ui.transformableViews.TransformableViewType
+import com.abizer_r.touchdraw.ui.transformableViews.base.TextState
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxState
-import com.abizer_r.touchdraw.ui.transformableViews.getIsSelected
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
 import com.smarttoolfactory.screenshot.ImageResult
 import com.smarttoolfactory.screenshot.ScreenshotBox
@@ -119,18 +120,20 @@ fun TextModeScreen(
                 height = Dimension.wrapContent
             },
             onCloseClicked = {
-                if (state.isTextFieldVisible) {
+                if (state.textFieldState.isVisible) {
                     viewModel.onEvent(HideTextField)
                 } else {
                     onBackPressed()
                 }
             },
             onDoneClicked = {
-                if (state.isTextFieldVisible) {
+                if (state.textFieldState.isVisible) {
                     viewModel.onEvent(AddTransformableTextView(
-                        view = TransformableViewType.TextTransformable(
-                            text = state.textFieldValue,
-                            viewState = TransformableBoxState(id = UUID.randomUUID().toString())
+                        textViewState = TextState(
+                            id = state.textFieldState.textStateId ?: UUID.randomUUID().toString(),
+                            text = state.textFieldState.text,
+                            textColor = state.textFieldState.textColor,
+                            textAlign = state.textFieldState.textAlign
                         )
                     ))
                     viewModel.onEvent(HideTextField)
@@ -171,14 +174,14 @@ fun TextModeScreen(
                 bitmap = bitmap,
                 contentScale = ContentScale.Fit,
                 contentDescription = null,
-                alpha = if (state.isTextFieldVisible) 0.3f else 1f
+                alpha = if (state.textFieldState.isVisible) 0.3f else 1f
             )
 
             Box(modifier = Modifier.fillMaxSize()) {
-                if (state.isTextFieldVisible.not()) {
+                if (state.textFieldState.isVisible.not()) {
                     DrawAllTransformableViews(
                         centerAlignModifier = Modifier.align(Alignment.Center),
-                        transformableViewsList = state.transformableViewsList,
+                        transformableViewsList = state.transformableViewStateList,
                         onTransformableBoxEvent = {
                             viewModel.onTransformableBoxEvent(it)
                         }
@@ -202,10 +205,10 @@ fun TextModeScreen(
         ) {
 
 
-            if (state.isTextFieldVisible.not()) {
+            if (state.textFieldState.isVisible.not()) {
                 BorderForSelectedViews(
                     centerAlignModifier = Modifier.align(Alignment.Center),
-                    transformableViewsList = state.transformableViewsList,
+                    transformableViewsList = state.transformableViewStateList,
                     onTransformableBoxEvent = {
                         viewModel.onTransformableBoxEvent(it)
                     }
@@ -214,7 +217,7 @@ fun TextModeScreen(
 
         }
 
-        if (state.isTextFieldVisible) {
+        if (state.textFieldState.isVisible) {
             TextField(
                 modifier = Modifier
                     .constrainAs(textInputView) {
@@ -227,9 +230,12 @@ fun TextModeScreen(
                     }
                     .background(Color.Transparent)
                     .focusRequester(focusRequesterForTextField),
-                value = state.textFieldValue,
-                onValueChange = { mText ->
-                    viewModel.onEvent(UpdateTextFieldValue(mText))
+                value = TextFieldValue(
+                    text = state.textFieldState.text,
+                    selection = TextRange(state.textFieldState.text.length)
+                ),
+                onValueChange = { mValue ->
+                    viewModel.onEvent(UpdateTextFieldValue(mValue.text))
                 },
                 colors = TextModeUtils.getColorsForTextField(),
                 textStyle = TextStyle(
@@ -268,15 +274,15 @@ fun TextModeScreen(
 @Composable
 fun DrawAllTransformableViews(
     centerAlignModifier: Modifier,
-    transformableViewsList: ArrayList<TransformableViewType>,
+    transformableViewsList: ArrayList<TransformableBoxState>,
     onTransformableBoxEvent: (event: TransformableBoxEvents) -> Unit
 ) {
-    transformableViewsList.forEach { mViewDetail ->
-        when (mViewDetail) {
-            is TransformableViewType.TextTransformable -> {
+    transformableViewsList.forEach { mViewState ->
+        when (mViewState) {
+            is TextState -> {
                 TransformableTextView(
                     modifier = centerAlignModifier,
-                    viewDetail = mViewDetail,
+                    viewState = mViewState,
                     onEvent = onTransformableBoxEvent
                 )
             }
@@ -288,17 +294,17 @@ fun DrawAllTransformableViews(
 @Composable
 fun BorderForSelectedViews(
     centerAlignModifier: Modifier,
-    transformableViewsList: ArrayList<TransformableViewType>,
+    transformableViewsList: ArrayList<TransformableBoxState>,
     onTransformableBoxEvent: (event: TransformableBoxEvents) -> Unit
 ) {
     transformableViewsList
-        .filter { it.getIsSelected() }
-        .forEach { mViewDetail ->
-        when (mViewDetail) {
-            is TransformableViewType.TextTransformable -> {
+        .filter { it.isSelected }
+        .forEach { mViewState ->
+        when (mViewState) {
+            is TextState -> {
                 TransformableTextView(
                     modifier = centerAlignModifier,
-                    viewDetail = mViewDetail,
+                    viewState = mViewState,
                     showBorderOnly = true,
                     onEvent = onTransformableBoxEvent
                 )

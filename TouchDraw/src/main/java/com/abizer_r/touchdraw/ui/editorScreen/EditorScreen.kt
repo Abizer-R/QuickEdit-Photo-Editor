@@ -17,7 +17,6 @@ import androidx.constraintlayout.compose.Dimension
 import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.models.PathDetails
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TopToolBar
-import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableContainerState
 import com.smarttoolfactory.screenshot.rememberScreenshotState
 import java.util.Stack
 
@@ -41,9 +40,6 @@ fun EditorScreen() {
 //    var isTextToolSelected by remember { mutableStateOf(false) }
 
 
-    var transformableContainerState by remember {
-        mutableStateOf(TransformableContainerState())
-    }
 
 
 

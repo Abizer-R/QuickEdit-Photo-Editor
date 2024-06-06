@@ -1,34 +1,23 @@
 package com.abizer_r.touchdraw.ui.textMode
 
 import android.util.Log
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
 import com.abizer_r.touchdraw.ui.drawMode.stateHandling.TextModeEvent
 import com.abizer_r.touchdraw.ui.drawMode.stateHandling.TextModeState
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
+import com.abizer_r.touchdraw.ui.transformableViews.base.TextState
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
-import com.abizer_r.touchdraw.ui.transformableViews.getId
-import com.abizer_r.touchdraw.ui.transformableViews.getIsSelected
-import com.abizer_r.touchdraw.ui.transformableViews.getPositionOffset
-import com.abizer_r.touchdraw.ui.transformableViews.getRotation
-import com.abizer_r.touchdraw.ui.transformableViews.getScale
-import com.abizer_r.touchdraw.ui.transformableViews.setIsSelected
-import com.abizer_r.touchdraw.ui.transformableViews.setPositionOffset
-import com.abizer_r.touchdraw.ui.transformableViews.setRotation
-import com.abizer_r.touchdraw.ui.transformableViews.setScale
-import com.abizer_r.touchdraw.utils.drawMode.DrawingConstants
-import com.abizer_r.touchdraw.utils.drawMode.setOpacityIfPossible
-import com.abizer_r.touchdraw.utils.drawMode.setShapeTypeIfPossible
-import com.abizer_r.touchdraw.utils.drawMode.setWidthIfPossible
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -53,36 +42,58 @@ class TextModeViewModel @Inject constructor(
         when (event) {
             is TextModeEvent.ShowTextField -> {
                 _state.update { it.copy(
-                    isTextFieldVisible = true,
-                    textFieldValue = ""
+                    textFieldState = it.textFieldState.copy(
+                        isVisible = true,
+                        textStateId = event.TextFieldState.textStateId,
+                        text = event.TextFieldState.text,
+                        textAlign = event.TextFieldState.textAlign,
+                        textColor = event.TextFieldState.textColor
+                    )
                 ) }
             }
             is TextModeEvent.HideTextField -> {
                 shouldRequestFocus = false
-                _state.update { it.copy(isTextFieldVisible = false) }
+                _state.update { it.copy(
+                    textFieldState = it.textFieldState.copy(
+                        isVisible = false
+                    )
+                ) }
             }
 
             is TextModeEvent.UpdateTextFieldValue -> {
-                _state.update {
-                    it.copy(textFieldValue = event.textInput)
-                }
+                _state.update { it.copy(
+                    textFieldState = it.textFieldState.copy(
+                        text = event.textInput
+                    )
+                ) }
             }
 
             is TextModeEvent.UpdateTransformableViewsList -> {
                 _state.update {
                     it.copy(
-                        transformableViewsList = event.list,
+                        transformableViewStateList = event.list,
                         recompositionTrigger = it.recompositionTrigger + 1
                     )
                 }
             }
 
             is TextModeEvent.AddTransformableTextView -> {
-                val newList = state.value.transformableViewsList.also { list ->
-                    list.add(event.view)
+                val id = event.textViewState.id
+                val existingItem = state.value.transformableViewStateList.find { it.id == id }
+                if (existingItem != null) {
+                    (existingItem as TextState).apply {
+                        text = event.textViewState.text
+                        textAlign = event.textViewState.textAlign
+                        textColor = event.textViewState.textColor
+                    }
+                } else {
+                    val newList = state.value.transformableViewStateList.also { list ->
+                        list.add(event.textViewState)
+                    }
+                    _state.update {it.copy(transformableViewStateList = newList) }
                 }
-                _state.update {it.copy(transformableViewsList = newList) }
-                updateViewSelection(selectedViewId = event.view.getId())
+
+                updateViewSelection(selectedViewId = event.textViewState.id)
             }
 //            is DrawModeEvent.ToggleColorPicker -> {
 //                _state.update {
@@ -99,29 +110,28 @@ class TextModeViewModel @Inject constructor(
     }
 
     fun onTransformableBoxEvent(mEvent: TransformableBoxEvents) {
-        val stateList = state.value.transformableViewsList
-        val viewItem = stateList.find { it.getId() == mEvent.id } ?: return
-        if (viewItem.getIsSelected().not()) {
-            Log.e("TEST_Select", "onTransformableBoxEvent: selecting item ${viewItem.getId()}", )
-            updateViewSelection(viewItem.getId())
-        }
+        val stateList = state.value.transformableViewStateList
+        val viewItem = stateList.find { it.id == mEvent.id } ?: return
         when(mEvent) {
             is TransformableBoxEvents.OnDrag -> {
-                viewItem.setPositionOffset(
-                    mOffset = viewItem.getPositionOffset() + mEvent.dragAmount
-                )
+                viewItem.positionOffset += mEvent.dragAmount
+//                viewItem.setPositionOffset(
+//                    mOffset = viewItem.getPositionOffset() + mEvent.dragAmount
+//                )
             }
 
             is TransformableBoxEvents.OnZoom -> {
-                viewItem.setScale(
-                    mScale = (viewItem.getScale() * mEvent.zoomAmount).coerceIn(0.5f, 5f)
-                )
+                viewItem.scale = (viewItem.scale * mEvent.zoomAmount).coerceIn(0.5f, 5f)
+//                viewItem.setScale(
+//                    mScale = (viewItem.getScale() * mEvent.zoomAmount).coerceIn(0.5f, 5f)
+//                )
             }
 
             is TransformableBoxEvents.OnRotate -> {
-                viewItem.setRotation(
-                    mRotation = viewItem.getRotation() + mEvent.rotationChange
-                )
+                viewItem.rotation += mEvent.rotationChange
+//                viewItem.setRotation(
+//                    mRotation = viewItem.getRotation() + mEvent.rotationChange
+//                )
             }
 
             is TransformableBoxEvents.OnCloseClicked -> {
@@ -131,22 +141,37 @@ class TextModeViewModel @Inject constructor(
             is TransformableBoxEvents.OnTapped -> {
                 // Main objective is to select the view when tapped
                 // it is already done above, so doing nothing here
+                if (viewItem.isSelected && mEvent.textViewState != null) {
+                    shouldRequestFocus = true
+                    onEvent(TextModeEvent.ShowTextField(
+                        TextModeState.TextFieldState(
+                            textStateId = mEvent.id,
+                            text = mEvent.textViewState.text,
+                            textAlign = mEvent.textViewState.textAlign,
+                            textColor = mEvent.textViewState.textColor
+                        )
+                    ))
+                }
             }
+        }
+        if (viewItem.isSelected.not()) {
+            Log.e("TEST_Select", "onTransformableBoxEvent: selecting item ${viewItem.id}", )
+            updateViewSelection(viewItem.id)
         }
         onEvent(TextModeEvent.UpdateTransformableViewsList(stateList))
     }
 
     fun updateViewSelection(selectedViewId: String? = null) {
-        val transformableViewsList = state.value.transformableViewsList
+        val transformableViewsList = state.value.transformableViewStateList
         transformableViewsList.forEach {
             val isSelected = if (selectedViewId != null) {
-                it.getId() == selectedViewId
+                it.id == selectedViewId
             } else false
-            it.setIsSelected(isSelected)
+            it.isSelected = isSelected
         }
         _state.update {
             it.copy(
-                transformableViewsList = transformableViewsList,
+                transformableViewStateList = transformableViewsList,
                 recompositionTrigger = it.recompositionTrigger + 1
             )
         }
@@ -194,7 +219,7 @@ class TextModeViewModel @Inject constructor(
         when (selectedItem) {
             is BottomToolbarItem.AddItem -> {
                 shouldRequestFocus = true
-                onEvent(TextModeEvent.ShowTextField)
+                onEvent(TextModeEvent.ShowTextField(TextModeState.TextFieldState()))
             }
 
             else -> {}

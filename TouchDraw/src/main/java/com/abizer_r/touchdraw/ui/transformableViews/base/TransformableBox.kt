@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -47,7 +48,6 @@ import androidx.compose.ui.unit.max
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.touchdraw.ui.transformableViews.TransformableTextView
-import com.abizer_r.touchdraw.ui.transformableViews.TransformableViewType
 import com.abizer_r.touchdraw.utils.drawMode.pxToDp
 import com.abizer_r.touchdraw.utils.drawMode.toPx
 
@@ -280,7 +280,7 @@ fun Modifier.detectTap(
                 Log.e("TEST_TransformBox", "detectTouch: TAPPED", )
                 onEvent(
                     TransformableBoxEvents.OnTapped(
-                        id = viewState.id,
+                        id = viewState.id, textViewState = null
                     )
                 )
             }
@@ -376,15 +376,14 @@ fun PreviewTextItem_NO_BORDER() {
                 .background(MaterialTheme.colorScheme.background)
         ) {
             TransformableTextView(
-                viewDetail = TransformableViewType.TextTransformable(
+                viewState = TextState(
+                    id = "",
                     text = "Hello",
-                    viewState = TransformableBoxState(
-                        id = "",
-                        positionOffset = Offset(0f, 0f),
-                        scale = 1f,
-                        rotation = 0f,
-                        isSelected = true
-                    )
+                    textAlign = TextAlign.Center,
+                    positionOffset = Offset(100f, 100f),
+                    scale = 1f,
+                    rotation = 0f,
+                    textColor = MaterialTheme.colorScheme.onBackground
                 ),
                 onEvent = {},
             )
@@ -401,25 +400,21 @@ fun PreviewTextItem_WITH_BORDER() {
                 .size(300.dp, 100.dp)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            val viewState = TransformableBoxState(
+            val viewState = TextState(
                 id = "",
-                positionOffset = Offset(0f, 0f),
+                text = "Hello",
+                textAlign = TextAlign.Center,
+                positionOffset = Offset(100f, 100f),
                 scale = 1f,
                 rotation = 0f,
-                isSelected = true
+                textColor = MaterialTheme.colorScheme.onBackground
             )
             TransformableTextView(
-                viewDetail = TransformableViewType.TextTransformable(
-                    text = "Hello",
-                    viewState = viewState
-                ),
+                viewState = viewState,
                 onEvent = {},
             )
             TransformableTextView(
-                viewDetail = TransformableViewType.TextTransformable(
-                    text = "Hello",
-                    viewState = viewState
-                ),
+                viewState = viewState,
                 showBorderOnly = true,
                 onEvent = {},
             )

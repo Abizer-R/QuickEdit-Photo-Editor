@@ -1,13 +1,27 @@
 package com.abizer_r.touchdraw.ui.transformableViews.base
 
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import com.abizer_r.touchdraw.ui.transformableViews.TransformableViewType
 
-data class TransformableBoxState(
-    val id: String,
-    var positionOffset: Offset = Offset(0f, 0f),
-    var scale: Float = 1f,
-    var rotation: Float = 0f,
-    var isSelected: Boolean = true
-)
+abstract class TransformableBoxState {
+    abstract val id: String
+    abstract var positionOffset: Offset
+    abstract var scale: Float
+    abstract var rotation: Float
+    abstract var isSelected: Boolean
+}
+
+data class TextState(
+    override val id: String,
+    override var positionOffset: Offset = Offset(0f, 0f),
+    override var scale: Float = 1f,
+    override var rotation: Float = 0f,
+    override var isSelected: Boolean = true,
+    var text: String,
+    var textAlign: TextAlign,
+    var textColor: Color
+) : TransformableBoxState() {
+
+}

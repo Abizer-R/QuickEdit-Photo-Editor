@@ -1,17 +1,20 @@
 package com.abizer_r.touchdraw.ui.drawMode.stateHandling
 
-import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.models.PathDetails
-import com.abizer_r.touchdraw.ui.transformableViews.TransformableViewType
-import java.util.Stack
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxState
 
 data class TextModeState(
-    val isTextFieldVisible: Boolean = false,
-    val textFieldValue: String = "",
-    val transformableViewsList: ArrayList<TransformableViewType> = arrayListOf(),
+    val textFieldState: TextFieldState = TextFieldState(),
+//    val textFieldValue: String = "",
+    val transformableViewStateList: ArrayList<TransformableBoxState> = arrayListOf(),
     val recompositionTrigger: Long = 0
-
-//    val showBottomToolbarExtension: Boolean = false,
-//    val pathDetailStack: Stack<PathDetails> = Stack(),
-//    val redoStack: Stack<PathDetails> = Stack(),
-
-)
+) {
+    data class TextFieldState(
+        val isVisible: Boolean = false,
+        val textStateId: String? = null,
+        val text: String = "",
+        val textAlign: TextAlign = TextAlign.Center,
+        val textColor: Color = Color.White
+    )
+}
