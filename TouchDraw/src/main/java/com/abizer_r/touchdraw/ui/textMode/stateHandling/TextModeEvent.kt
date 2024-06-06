@@ -1,4 +1,4 @@
-package com.abizer_r.touchdraw.ui.drawMode.stateHandling
+package com.abizer_r.touchdraw.ui.textMode.stateHandling
 
 import com.abizer_r.touchdraw.ui.transformableViews.base.TextState
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxState

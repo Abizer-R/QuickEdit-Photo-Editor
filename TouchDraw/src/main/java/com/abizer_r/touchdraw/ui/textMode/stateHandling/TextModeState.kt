@@ -1,4 +1,4 @@
-package com.abizer_r.touchdraw.ui.drawMode.stateHandling
+package com.abizer_r.touchdraw.ui.textMode.stateHandling
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
@@ -11,7 +11,7 @@ data class TextModeState(
     val recompositionTrigger: Long = 0
 ) {
     data class TextFieldState(
-        val isVisible: Boolean = false,
+        val isVisible: Boolean = true,
         val textStateId: String? = null,
         val text: String = "",
         val textAlign: TextAlign = TextAlign.Center,

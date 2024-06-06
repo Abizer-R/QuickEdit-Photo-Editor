@@ -3,8 +3,8 @@ package com.abizer_r.touchdraw.ui.textMode
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import com.abizer_r.touchdraw.ui.drawMode.stateHandling.TextModeEvent
-import com.abizer_r.touchdraw.ui.drawMode.stateHandling.TextModeState
+import com.abizer_r.touchdraw.ui.textMode.stateHandling.TextModeEvent
+import com.abizer_r.touchdraw.ui.textMode.stateHandling.TextModeState
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
@@ -12,12 +12,9 @@ import com.abizer_r.touchdraw.ui.transformableViews.base.TextState
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,7 +28,7 @@ class TextModeViewModel @Inject constructor(
     private val _bottomToolbarState = MutableStateFlow(TextModeUtils.getDefaultBottomToolbarState())
     val bottomToolbarState: StateFlow<BottomToolbarState> = _bottomToolbarState
 
-    var shouldRequestFocus = false
+    var shouldRequestFocus = true
         private set
 
     var shouldGoToNextScreen = false
@@ -143,7 +140,8 @@ class TextModeViewModel @Inject constructor(
                 // it is already done above, so doing nothing here
                 if (viewItem.isSelected && mEvent.textViewState != null) {
                     shouldRequestFocus = true
-                    onEvent(TextModeEvent.ShowTextField(
+                    onEvent(
+                        TextModeEvent.ShowTextField(
                         TextModeState.TextFieldState(
                             textStateId = mEvent.id,
                             text = mEvent.textViewState.text,

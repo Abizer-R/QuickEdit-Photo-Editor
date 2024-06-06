@@ -37,7 +37,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.abizer_r.components.util.defaultErrorToast
-import com.abizer_r.touchdraw.ui.drawMode.stateHandling.TextModeEvent.*
+import com.abizer_r.touchdraw.ui.textMode.stateHandling.TextModeEvent.*
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TextModeTopToolbar
 import com.abizer_r.touchdraw.ui.transformableViews.TransformableTextView
