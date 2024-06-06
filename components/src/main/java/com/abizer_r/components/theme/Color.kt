@@ -13,4 +13,5 @@ val Pink40 = Color(0xFF7D5260)
 val DarkPanel = Color(0xFF232323)
 val DarkerGray = Color(0xFF171717)
 
+val TextInputBackgroundColor = Color(0xB3000000)
 val ToolBarBackgroundColor = DarkerGray
