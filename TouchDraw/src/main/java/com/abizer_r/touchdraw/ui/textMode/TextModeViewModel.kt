@@ -8,7 +8,7 @@ import com.abizer_r.touchdraw.ui.textMode.stateHandling.TextModeState
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
-import com.abizer_r.touchdraw.ui.transformableViews.base.TextState
+import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -41,10 +41,10 @@ class TextModeViewModel @Inject constructor(
                 _state.update { it.copy(
                     textFieldState = it.textFieldState.copy(
                         isVisible = true,
-                        textStateId = event.TextFieldState.textStateId,
-                        text = event.TextFieldState.text,
-                        textAlign = event.TextFieldState.textAlign,
-                        textColor = event.TextFieldState.textColor
+                        textStateId = event.textFieldState.textStateId,
+                        text = event.textFieldState.text,
+                        textAlign = event.textFieldState.textAlign,
+                        textColor = event.textFieldState.textColor
                     )
                 ) }
             }
@@ -74,23 +74,23 @@ class TextModeViewModel @Inject constructor(
                 }
             }
 
-            is TextModeEvent.AddTransformableTextView -> {
-                val id = event.textViewState.id
+            is TextModeEvent.AddTransformableTextBox -> {
+                val id = event.textBoxState.id
                 val existingItem = state.value.transformableViewStateList.find { it.id == id }
                 if (existingItem != null) {
-                    (existingItem as TextState).apply {
-                        text = event.textViewState.text
-                        textAlign = event.textViewState.textAlign
-                        textColor = event.textViewState.textColor
+                    (existingItem as TransformableTextBoxState).apply {
+                        text = event.textBoxState.text
+                        textAlign = event.textBoxState.textAlign
+                        textColor = event.textBoxState.textColor
                     }
                 } else {
                     val newList = state.value.transformableViewStateList.also { list ->
-                        list.add(event.textViewState)
+                        list.add(event.textBoxState)
                     }
                     _state.update {it.copy(transformableViewStateList = newList) }
                 }
 
-                updateViewSelection(selectedViewId = event.textViewState.id)
+                updateViewSelection(selectedViewId = event.textBoxState.id)
             }
 //            is DrawModeEvent.ToggleColorPicker -> {
 //                _state.update {

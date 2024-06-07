@@ -13,16 +13,15 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.abizer_r.components.theme.SketchDraftTheme
-import com.abizer_r.touchdraw.ui.transformableViews.base.TextState
+import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBox
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
-import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxState
 
 @Composable
-fun TransformableTextView(
+fun TransformableTextBox(
     modifier: Modifier = Modifier,
     showBorderOnly: Boolean = false,
-    viewState: TextState,
+    viewState: TransformableTextBoxState,
     onEvent: (TransformableBoxEvents) -> Unit
 ) {
 
@@ -61,8 +60,8 @@ fun PreviewItem() {
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            TransformableTextView(
-                viewState = TextState(
+            TransformableTextBox(
+                viewState = TransformableTextBoxState(
                     id = "",
                     text = "Hello",
                     textAlign = TextAlign.Center,

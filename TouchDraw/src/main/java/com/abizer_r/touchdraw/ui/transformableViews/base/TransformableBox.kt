@@ -8,16 +8,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material3.MaterialTheme
@@ -44,11 +40,9 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.abizer_r.components.theme.SketchDraftTheme
-import com.abizer_r.touchdraw.ui.transformableViews.TransformableTextView
-import com.abizer_r.touchdraw.utils.drawMode.pxToDp
+import com.abizer_r.touchdraw.ui.transformableViews.TransformableTextBox
 import com.abizer_r.touchdraw.utils.drawMode.toPx
 
 @Composable
@@ -375,8 +369,8 @@ fun PreviewTextItem_NO_BORDER() {
                 .size(300.dp, 100.dp)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            TransformableTextView(
-                viewState = TextState(
+            TransformableTextBox(
+                viewState = TransformableTextBoxState(
                     id = "",
                     text = "Hello",
                     textAlign = TextAlign.Center,
@@ -400,7 +394,7 @@ fun PreviewTextItem_WITH_BORDER() {
                 .size(300.dp, 100.dp)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            val viewState = TextState(
+            val viewState = TransformableTextBoxState(
                 id = "",
                 text = "Hello",
                 textAlign = TextAlign.Center,
@@ -409,11 +403,11 @@ fun PreviewTextItem_WITH_BORDER() {
                 rotation = 0f,
                 textColor = MaterialTheme.colorScheme.onBackground
             )
-            TransformableTextView(
+            TransformableTextBox(
                 viewState = viewState,
                 onEvent = {},
             )
-            TransformableTextView(
+            TransformableTextBox(
                 viewState = viewState,
                 showBorderOnly = true,
                 onEvent = {},

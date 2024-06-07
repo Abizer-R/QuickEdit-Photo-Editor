@@ -40,8 +40,8 @@ import com.abizer_r.components.util.defaultErrorToast
 import com.abizer_r.touchdraw.ui.textMode.stateHandling.TextModeEvent.*
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TextModeTopToolbar
-import com.abizer_r.touchdraw.ui.transformableViews.TransformableTextView
-import com.abizer_r.touchdraw.ui.transformableViews.base.TextState
+import com.abizer_r.touchdraw.ui.transformableViews.TransformableTextBox
+import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxState
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
@@ -128,8 +128,8 @@ fun TextModeScreen(
             },
             onDoneClicked = {
                 if (state.textFieldState.isVisible) {
-                    viewModel.onEvent(AddTransformableTextView(
-                        textViewState = TextState(
+                    viewModel.onEvent(AddTransformableTextBox(
+                        textBoxState = TransformableTextBoxState(
                             id = state.textFieldState.textStateId ?: UUID.randomUUID().toString(),
                             text = state.textFieldState.text,
                             textColor = state.textFieldState.textColor,
@@ -279,8 +279,8 @@ fun DrawAllTransformableViews(
 ) {
     transformableViewsList.forEach { mViewState ->
         when (mViewState) {
-            is TextState -> {
-                TransformableTextView(
+            is TransformableTextBoxState -> {
+                TransformableTextBox(
                     modifier = centerAlignModifier,
                     viewState = mViewState,
                     onEvent = onTransformableBoxEvent
@@ -301,8 +301,8 @@ fun BorderForSelectedViews(
         .filter { it.isSelected }
         .forEach { mViewState ->
         when (mViewState) {
-            is TextState -> {
-                TransformableTextView(
+            is TransformableTextBoxState -> {
+                TransformableTextBox(
                     modifier = centerAlignModifier,
                     viewState = mViewState,
                     showBorderOnly = true,
