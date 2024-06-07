@@ -12,9 +12,12 @@ import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxSta
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,6 +35,19 @@ class TextModeViewModel @Inject constructor(
         private set
 
     var shouldGoToNextScreen = false
+
+    init {
+//        debugTrackViewListSize()
+    }
+
+    private fun debugTrackViewListSize() {
+        GlobalScope.launch {
+            while (true) {
+                delay(1000)
+                Log.e("TEST_TEXT_MODE", ": viewList size = ${state.value.transformableViewStateList.size}", )
+            }
+        }
+    }
 
 //    private var lastCaptureRequest: Long = Calendar.getInstance().timeInMillis
 

@@ -75,6 +75,8 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.7")
     // Below dependency allows us to create viewModels scoped to a particular composable screen inside a NavHost (ie in navigation)
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")   // This
+
+    implementation("com.github.skydoves:cloudy:0.1.2")
 }
 
 kapt {

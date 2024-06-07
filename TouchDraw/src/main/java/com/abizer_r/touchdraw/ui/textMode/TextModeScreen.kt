@@ -45,6 +45,7 @@ import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxSta
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxState
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
+import com.skydoves.cloudy.Cloudy
 import com.smarttoolfactory.screenshot.ImageResult
 import com.smarttoolfactory.screenshot.ScreenshotBox
 import com.smarttoolfactory.screenshot.rememberScreenshotState
@@ -164,17 +165,13 @@ fun TextModeScreen(
             screenshotState = screenshotState
         ) {
 
-            Image(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pointerInteropFilter {
-                        viewModel.updateViewSelection(null)
-                        true
-                    },
-                bitmap = bitmap,
-                contentScale = ContentScale.Fit,
-                contentDescription = null,
-                alpha = if (state.textFieldState.isVisible) 0.3f else 1f
+            BitmapBackground(
+                modifier = Modifier.fillMaxSize(),
+                imageBitmap = bitmap,
+                isTextFieldVisible = state.textFieldState.isVisible,
+                onBgClicked = {
+                    viewModel.updateViewSelection(null)
+                }
             )
 
             Box(modifier = Modifier.fillMaxSize()) {
@@ -267,6 +264,51 @@ fun TextModeScreen(
 //                    viewModel.shouldRequestFocus = true
 //                }
             }
+        )
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun BitmapBackground(
+    modifier: Modifier,
+    imageBitmap: ImageBitmap,
+    isTextFieldVisible: Boolean,
+    onBgClicked: () -> Unit
+) {
+    /**
+     * WORK AROUND - depending on case (textField visible or not), adding/removing a "Cloudy" composable
+     * REASON - Seems like the "Cloudy" composable is converting the view to bitmap before blurring (or something like that)
+     *          So, when the textField is not visible, there is a permanent image of the newly created textBox with the selection layout.
+     *          This creates a bug, and I'm not able to figure out how to prevent this
+     */
+    if (isTextFieldVisible) {
+        Cloudy(
+            modifier = modifier,
+            radius = 15
+        ) {
+            Image(
+                modifier = Modifier.fillMaxSize(),
+                bitmap = imageBitmap,
+                contentScale = ContentScale.Inside,
+                contentDescription = null,
+                alpha = 0.3f
+            )
+        }
+
+    } else {
+        Image(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInteropFilter {
+                    onBgClicked()
+//                        viewModel.updateViewSelection(null)
+                    true
+                },
+            bitmap = imageBitmap,
+            contentScale = ContentScale.Fit,
+            contentDescription = null,
+            alpha = 1f
         )
     }
 }
