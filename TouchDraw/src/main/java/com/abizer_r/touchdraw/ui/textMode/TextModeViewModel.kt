@@ -54,10 +54,11 @@ class TextModeViewModel @Inject constructor(
             }
 
             is TextModeEvent.ShowTextField -> {
+                Log.e("TEST_BLUR", "PlaceHolder Text: ", )
                 _state.update { it.copy(
-                    shouldRequestFocus = true,
                     textFieldState = event.textFieldState.copy(
-                        isVisible = true
+                        isVisible = true,
+                        shouldRequestFocus = true
                     )
                 ) }
             }
@@ -72,9 +73,9 @@ class TextModeViewModel @Inject constructor(
 
             is TextModeEvent.HideTextField -> {
                 _state.update { it.copy(
-                    shouldRequestFocus = false,
                     textFieldState = it.textFieldState.copy(
-                        isVisible = false
+                        isVisible = false,
+                        shouldRequestFocus = false
                     )
                 ) }
             }

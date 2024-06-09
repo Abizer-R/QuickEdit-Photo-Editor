@@ -2,60 +2,37 @@ package com.abizer_r.touchdraw.ui.textMode
 
 import android.graphics.Bitmap
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.input.pointer.pointerInteropFilter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import com.abizer_r.components.R
-import com.abizer_r.components.ui.tool_items.ColorListFullWidth
-import com.abizer_r.components.util.ColorUtils
+import com.abizer_r.components.ui.blurBackground.BlurBitmapBackground
 import com.abizer_r.components.util.defaultErrorToast
 import com.abizer_r.touchdraw.ui.textMode.stateHandling.TextModeEvent.*
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TextModeTopToolbar
-import com.abizer_r.touchdraw.ui.textMode.stateHandling.TextModeEvent
-import com.abizer_r.touchdraw.ui.textMode.stateHandling.TextModeState
 import com.abizer_r.touchdraw.ui.textMode.stateHandling.getSelectedColor
-import com.abizer_r.touchdraw.ui.transformableViews.TransformableTextBox
+import com.abizer_r.touchdraw.ui.textMode.textEditor.TextEditorLayout
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
-import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
-import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxState
-import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
-import com.skydoves.cloudy.Cloudy
+import com.abizer_r.touchdraw.utils.textMode.TextModeUtils.BorderForSelectedViews
+import com.abizer_r.touchdraw.utils.textMode.TextModeUtils.DrawAllTransformableViews
 import com.smarttoolfactory.screenshot.ImageResult
 import com.smarttoolfactory.screenshot.ScreenshotBox
 import com.smarttoolfactory.screenshot.rememberScreenshotState
@@ -174,10 +151,11 @@ fun TextModeScreen(
             screenshotState = screenshotState
         ) {
 
-            BitmapBackground(
+            BlurBitmapBackground(
                 modifier = Modifier.fillMaxSize(),
                 imageBitmap = bitmap,
-                isTextFieldVisible = state.textFieldState.isVisible,
+                shouldBlur = state.textFieldState.isVisible,
+                blurRadius = 15,
                 onBgClicked = {
                     viewModel.updateViewSelection(null)
                 }
@@ -224,7 +202,7 @@ fun TextModeScreen(
         }
 
         if (state.textFieldState.isVisible) {
-            TextInputLayout(
+            TextEditorLayout(
                 modifier = Modifier
                     .constrainAs(textInputView) {
                         top.linkTo(topToolBar.bottom)
@@ -234,7 +212,7 @@ fun TextModeScreen(
                         width = Dimension.fillToConstraints
                         height = Dimension.fillToConstraints
                     },
-                textModeState = state,
+                textFieldState = state.textFieldState,
                 onTextModeEvent = {
                     viewModel.onEvent(it)
                 }
@@ -256,179 +234,6 @@ fun TextModeScreen(
                 }
             )
 
-        }
-    }
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-fun BitmapBackground(
-    modifier: Modifier,
-    imageBitmap: ImageBitmap,
-    isTextFieldVisible: Boolean,
-    onBgClicked: () -> Unit
-) {
-    /**
-     * WORK AROUND - depending on case (textField visible or not), adding/removing a "Cloudy" composable
-     * REASON - Seems like the "Cloudy" composable is converting the view to bitmap before blurring (or something like that)
-     *          So, when the textField is not visible, there is a permanent image of the newly created textBox with the selection layout.
-     *          This creates a bug, and I'm not able to figure out how to prevent this
-     */
-    if (isTextFieldVisible) {
-        Cloudy(
-            modifier = modifier,
-            radius = 15
-        ) {
-            Image(
-                modifier = Modifier.fillMaxSize(),
-                bitmap = imageBitmap,
-                contentScale = ContentScale.Inside,
-                contentDescription = null,
-                alpha = 0.3f
-            )
-        }
-
-    } else {
-        Image(
-            modifier = Modifier
-                .fillMaxSize()
-                .pointerInteropFilter {
-                    onBgClicked()
-//                        viewModel.updateViewSelection(null)
-                    true
-                },
-            bitmap = imageBitmap,
-            contentScale = ContentScale.Fit,
-            contentDescription = null,
-            alpha = 1f
-        )
-    }
-}
-
-@Composable
-fun TextInputLayout(
-    modifier: Modifier,
-    textModeState: TextModeState,
-    onTextModeEvent: (TextModeEvent) -> Unit
-) {
-    val focusRequesterForTextField = remember { FocusRequester() }
-    val textFieldState = textModeState.textFieldState
-    val textFontSize = MaterialTheme.typography.headlineMedium.fontSize
-
-    ConstraintLayout(
-        modifier = modifier
-    ) {
-        val (textField, placeHolderText, colorList) = createRefs()
-        TextField(
-            modifier = Modifier
-                .constrainAs(textField) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.wrapContent
-                    height = Dimension.wrapContent
-                }
-                .background(Color.Transparent)
-//                .background(Color.Red)
-                .focusRequester(focusRequesterForTextField),
-            value = TextFieldValue(
-                text = textFieldState.text,
-                selection = TextRange(textFieldState.text.length)
-            ),
-            onValueChange = { mValue ->
-                onTextModeEvent(UpdateTextFieldValue(mValue.text))
-            },
-            colors = TextModeUtils.getColorsForTextField(
-                cursorColor = textFieldState.getSelectedColor()
-            ),
-            textStyle = TextStyle(
-                color = textFieldState.getSelectedColor(),
-                textAlign = textFieldState.textAlign,
-                fontSize = textFontSize
-            ),
-        )
-
-        if (textFieldState.text.isEmpty()) {
-            Text(
-                modifier = Modifier
-                    .constrainAs(placeHolderText) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                        width = Dimension.wrapContent
-                        height = Dimension.wrapContent
-                    },
-                text = stringResource(id = R.string.enter_your_text),
-                textAlign = textFieldState.textAlign,
-                color = textFieldState.getSelectedColor(),
-                fontSize = textFontSize
-            )
-        }
-
-        if (textModeState.shouldRequestFocus) {
-            LaunchedEffect(key1 = Unit) {
-                delay(100)  /* Delay to allow textField to become visible */
-                focusRequesterForTextField.requestFocus()
-            }
-        }
-
-
-        ColorListFullWidth(
-            modifier = Modifier.constrainAs(colorList) {
-                bottom.linkTo(parent.bottom)
-                width = Dimension.matchParent
-                height = Dimension.wrapContent
-            },
-            colorList = textFieldState.textColorList,
-            selectedIndex = textFieldState.selectedColorIndex,
-            onItemClicked = { index, color ->
-                onTextModeEvent(SelectTextColor(index, color))
-            }
-        )
-
-    }
-}
-
-@Composable
-fun DrawAllTransformableViews(
-    centerAlignModifier: Modifier,
-    transformableViewsList: ArrayList<TransformableBoxState>,
-    onTransformableBoxEvent: (event: TransformableBoxEvents) -> Unit
-) {
-    transformableViewsList.forEach { mViewState ->
-        when (mViewState) {
-            is TransformableTextBoxState -> {
-                TransformableTextBox(
-                    modifier = centerAlignModifier,
-                    viewState = mViewState,
-                    onEvent = onTransformableBoxEvent
-                )
-            }
-        }
-    }
-}
-
-
-@Composable
-fun BorderForSelectedViews(
-    centerAlignModifier: Modifier,
-    transformableViewsList: ArrayList<TransformableBoxState>,
-    onTransformableBoxEvent: (event: TransformableBoxEvents) -> Unit
-) {
-    transformableViewsList
-        .filter { it.isSelected }
-        .forEach { mViewState ->
-        when (mViewState) {
-            is TransformableTextBoxState -> {
-                TransformableTextBox(
-                    modifier = centerAlignModifier,
-                    viewState = mViewState,
-                    showBorderOnly = true,
-                    onEvent = onTransformableBoxEvent
-                )
-            }
         }
     }
 }

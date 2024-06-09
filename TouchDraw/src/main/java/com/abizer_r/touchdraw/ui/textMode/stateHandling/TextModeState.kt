@@ -10,12 +10,12 @@ data class TextModeState(
 //    val textFieldValue: String = "",
     val transformableViewStateList: ArrayList<TransformableBoxState> = arrayListOf(),
     val shouldGoToNextScreen: Boolean = false,
-    val shouldRequestFocus: Boolean = true, /* initial value is true as the textField is visible initially */
     val recompositionTrigger: Long = 0
 ) {
     data class TextFieldState(
         val isVisible: Boolean = true,
         val textStateId: String? = null,
+        val shouldRequestFocus: Boolean = true, /* initial value is true as the textField is visible initially */
         val text: String = "",
         val textAlign: TextAlign = TextAlign.Center,
         val textColorList: ArrayList<Color> = ColorUtils.defaultColorList,
