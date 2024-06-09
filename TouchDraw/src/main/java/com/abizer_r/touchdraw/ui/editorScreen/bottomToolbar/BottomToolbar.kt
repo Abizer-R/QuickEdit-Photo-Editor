@@ -166,8 +166,9 @@ fun ToolbarItem(
             ))
         }
 
+        val imageSize = if (labelText.isNotBlank()) 24.dp else 32.dp
         Image(
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(imageSize),
             contentDescription = null,
             imageVector = imageVector,
             colorFilter = ColorFilter.tint(

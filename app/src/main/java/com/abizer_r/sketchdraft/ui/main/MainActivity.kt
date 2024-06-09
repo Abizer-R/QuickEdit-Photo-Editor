@@ -61,9 +61,9 @@ fun MainScreen() {
 
             }
             composable(route = "textMode") { entry ->
+                val bitmap = mainActivityViewModel.bitmap?.asImageBitmap() ?: return@composable
                 TextModeScreen(
-                    bitmap = mainActivityViewModel.bitmap?.asImageBitmap()
-                        ?: ImageBitmap.imageResource(id = R.drawable.placeholder_image_1),
+                    bitmap = bitmap,
                     onBackPressed = {
                         navController.popBackStack()
                     },

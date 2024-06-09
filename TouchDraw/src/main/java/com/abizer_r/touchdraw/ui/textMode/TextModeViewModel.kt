@@ -8,6 +8,7 @@ import com.abizer_r.touchdraw.ui.textMode.stateHandling.TextModeState
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
+import com.abizer_r.touchdraw.ui.textMode.stateHandling.getIndexFromColor
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
@@ -31,11 +32,6 @@ class TextModeViewModel @Inject constructor(
     private val _bottomToolbarState = MutableStateFlow(TextModeUtils.getDefaultBottomToolbarState())
     val bottomToolbarState: StateFlow<BottomToolbarState> = _bottomToolbarState
 
-    var shouldRequestFocus = true
-        private set
-
-    var shouldGoToNextScreen = false
-
     init {
 //        debugTrackViewListSize()
     }
@@ -53,20 +49,30 @@ class TextModeViewModel @Inject constructor(
 
     fun onEvent(event: TextModeEvent) {
         when (event) {
+            is TextModeEvent.UpdateShouldGoToNextScreen -> {
+                _state.update { it.copy( shouldGoToNextScreen = event.shouldGoToNextScreen ) }
+            }
+
             is TextModeEvent.ShowTextField -> {
                 _state.update { it.copy(
-                    textFieldState = it.textFieldState.copy(
-                        isVisible = true,
-                        textStateId = event.textFieldState.textStateId,
-                        text = event.textFieldState.text,
-                        textAlign = event.textFieldState.textAlign,
-                        textColor = event.textFieldState.textColor
+                    shouldRequestFocus = true,
+                    textFieldState = event.textFieldState.copy(
+                        isVisible = true
                     )
                 ) }
             }
-            is TextModeEvent.HideTextField -> {
-                shouldRequestFocus = false
+
+            is TextModeEvent.SelectTextColor -> {
                 _state.update { it.copy(
+                    textFieldState = it.textFieldState.copy(
+                        selectedColorIndex = event.index
+                    )
+                ) }
+            }
+
+            is TextModeEvent.HideTextField -> {
+                _state.update { it.copy(
+                    shouldRequestFocus = false,
                     textFieldState = it.textFieldState.copy(
                         isVisible = false
                     )
@@ -108,17 +114,7 @@ class TextModeViewModel @Inject constructor(
 
                 updateViewSelection(selectedViewId = event.textBoxState.id)
             }
-//            is DrawModeEvent.ToggleColorPicker -> {
-//                _state.update {
-//                    it.copy(showColorPicker = it.showColorPicker.not())
-//                }
-//                _bottomToolbarState.update {
-//                    it.copy(selectedColor = event.selectedColor ?: it.selectedColor)
-//                }
-//            }
 
-
-            else -> {}
         }
     }
 
@@ -128,23 +124,14 @@ class TextModeViewModel @Inject constructor(
         when(mEvent) {
             is TransformableBoxEvents.OnDrag -> {
                 viewItem.positionOffset += mEvent.dragAmount
-//                viewItem.setPositionOffset(
-//                    mOffset = viewItem.getPositionOffset() + mEvent.dragAmount
-//                )
             }
 
             is TransformableBoxEvents.OnZoom -> {
                 viewItem.scale = (viewItem.scale * mEvent.zoomAmount).coerceIn(0.5f, 5f)
-//                viewItem.setScale(
-//                    mScale = (viewItem.getScale() * mEvent.zoomAmount).coerceIn(0.5f, 5f)
-//                )
             }
 
             is TransformableBoxEvents.OnRotate -> {
                 viewItem.rotation += mEvent.rotationChange
-//                viewItem.setRotation(
-//                    mRotation = viewItem.getRotation() + mEvent.rotationChange
-//                )
             }
 
             is TransformableBoxEvents.OnCloseClicked -> {
@@ -155,16 +142,19 @@ class TextModeViewModel @Inject constructor(
                 // Main objective is to select the view when tapped
                 // it is already done above, so doing nothing here
                 if (viewItem.isSelected && mEvent.textViewState != null) {
-                    shouldRequestFocus = true
+                    val currTextFieldState = state.value.textFieldState
                     onEvent(
                         TextModeEvent.ShowTextField(
-                        TextModeState.TextFieldState(
-                            textStateId = mEvent.id,
-                            text = mEvent.textViewState.text,
-                            textAlign = mEvent.textViewState.textAlign,
-                            textColor = mEvent.textViewState.textColor
+                            textFieldState = currTextFieldState.copy(
+                                textStateId = mEvent.id,
+                                text = mEvent.textViewState.text,
+                                textAlign = mEvent.textViewState.textAlign,
+                                selectedColorIndex = currTextFieldState.getIndexFromColor(
+                                    mEvent.textViewState.textColor
+                                )
+                            )
                         )
-                    ))
+                    )
                 }
             }
         }
@@ -198,33 +188,6 @@ class TextModeViewModel @Inject constructor(
                 onBottomToolbarItemClicked(event.toolbarItem)
             }
 
-//            is BottomToolbarEvent.UpdateOpacity -> {
-//                _bottomToolbarState.update {
-//                    it.copy(
-//                        selectedItem = it.selectedItem.setOpacityIfPossible(event.newOpacity),
-//                        recompositionTriggerValue = it.recompositionTriggerValue + 1
-//                    )
-//                }
-//            }
-//
-//            is BottomToolbarEvent.UpdateWidth -> {
-//                _bottomToolbarState.update {
-//                    it.copy(
-//                        selectedItem = it.selectedItem.setWidthIfPossible(event.newWidth),
-//                        recompositionTriggerValue = it.recompositionTriggerValue + 1
-//                    )
-//                }
-//            }
-//
-//            is BottomToolbarEvent.UpdateShapeType -> {
-//                _bottomToolbarState.update {
-//                    it.copy(
-//                        selectedItem = it.selectedItem.setShapeTypeIfPossible(event.newShapeType),
-//                        recompositionTriggerValue = it.recompositionTriggerValue + 1
-//                    )
-//                }
-//            }
-
             else -> {}
         }
     }
@@ -232,7 +195,6 @@ class TextModeViewModel @Inject constructor(
     private fun onBottomToolbarItemClicked(selectedItem: BottomToolbarItem) {
         when (selectedItem) {
             is BottomToolbarItem.AddItem -> {
-                shouldRequestFocus = true
                 onEvent(TextModeEvent.ShowTextField(TextModeState.TextFieldState()))
             }
 

@@ -6,8 +6,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -27,6 +30,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
@@ -36,10 +40,16 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.abizer_r.components.R
+import com.abizer_r.components.ui.tool_items.ColorListFullWidth
+import com.abizer_r.components.util.ColorUtils
 import com.abizer_r.components.util.defaultErrorToast
 import com.abizer_r.touchdraw.ui.textMode.stateHandling.TextModeEvent.*
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TextModeTopToolbar
+import com.abizer_r.touchdraw.ui.textMode.stateHandling.TextModeEvent
+import com.abizer_r.touchdraw.ui.textMode.stateHandling.TextModeState
+import com.abizer_r.touchdraw.ui.textMode.stateHandling.getSelectedColor
 import com.abizer_r.touchdraw.ui.transformableViews.TransformableTextBox
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
@@ -73,7 +83,6 @@ fun TextModeScreen(
         lifecycleOwner = lifeCycleOwner
     )
 
-    val focusRequesterForTextField = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     DisposableEffect(key1 = Unit) {
@@ -87,12 +96,12 @@ fun TextModeScreen(
     when (screenshotState.imageState.value) {
         ImageResult.Initial -> {}
         is ImageResult.Error -> {
-            viewModel.shouldGoToNextScreen = false
+            viewModel.onEvent(UpdateShouldGoToNextScreen(false))
             context.defaultErrorToast()
         }
         is ImageResult.Success -> {
-            if (viewModel.shouldGoToNextScreen) {
-                viewModel.shouldGoToNextScreen = false
+            if (state.shouldGoToNextScreen) {
+                viewModel.onEvent(UpdateShouldGoToNextScreen(false))
                 screenshotState.bitmap?.let { mBitmap ->
                     onDoneClicked(mBitmap)
                 } ?: context.defaultErrorToast()
@@ -133,13 +142,13 @@ fun TextModeScreen(
                         textBoxState = TransformableTextBoxState(
                             id = state.textFieldState.textStateId ?: UUID.randomUUID().toString(),
                             text = state.textFieldState.text,
-                            textColor = state.textFieldState.textColor,
+                            textColor = state.textFieldState.getSelectedColor(),
                             textAlign = state.textFieldState.textAlign
                         )
                     ))
                     viewModel.onEvent(HideTextField)
                 } else {
-                    viewModel.shouldGoToNextScreen = true
+                    viewModel.onEvent(UpdateShouldGoToNextScreen(true))
                     lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
                         viewModel.updateViewSelection(null)
                         delay(200)  /* Delay to update the selection in ui */
@@ -215,56 +224,39 @@ fun TextModeScreen(
         }
 
         if (state.textFieldState.isVisible) {
-            TextField(
+            TextInputLayout(
                 modifier = Modifier
                     .constrainAs(textInputView) {
                         top.linkTo(topToolBar.bottom)
                         bottom.linkTo(parent.bottom)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
-                        width = Dimension.wrapContent
-                        height = Dimension.wrapContent
-                    }
-                    .background(Color.Transparent)
-                    .focusRequester(focusRequesterForTextField),
-                value = TextFieldValue(
-                    text = state.textFieldState.text,
-                    selection = TextRange(state.textFieldState.text.length)
-                ),
-                onValueChange = { mValue ->
-                    viewModel.onEvent(UpdateTextFieldValue(mValue.text))
-                },
-                colors = TextModeUtils.getColorsForTextField(),
-                textStyle = TextStyle(
-                    textAlign = TextAlign.Center,
-                    fontSize = MaterialTheme.typography.headlineMedium.fontSize
-                )
-            )
-            if (viewModel.shouldRequestFocus) {
-                LaunchedEffect(key1 = Unit) {
-                    focusRequesterForTextField.requestFocus()
+                        width = Dimension.fillToConstraints
+                        height = Dimension.fillToConstraints
+                    },
+                textModeState = state,
+                onTextModeEvent = {
+                    viewModel.onEvent(it)
                 }
-            }
+            )
+
         }
 
 
-        BottomToolBar(
-            modifier = Modifier.constrainAs(bottomToolbar) {
-                bottom.linkTo(parent.bottom)
-                width = Dimension.matchParent
-                height = Dimension.wrapContent
-            },
-            bottomToolbarState = bottomToolbarState,
-            onEvent = {
-                viewModel.onBottomToolbarEvent(it)
-//                if (
-//                    it is BottomToolbarEvent.OnItemClicked &&
-//                    it.toolbarItem == BottomToolbarItem.AddItem
-//                ) {
-//                    viewModel.shouldRequestFocus = true
-//                }
-            }
-        )
+        if (state.textFieldState.isVisible.not()) {
+            BottomToolBar(
+                modifier = Modifier.constrainAs(bottomToolbar) {
+                    bottom.linkTo(parent.bottom)
+                    width = Dimension.matchParent
+                    height = Dimension.wrapContent
+                },
+                bottomToolbarState = bottomToolbarState,
+                onEvent = {
+                    viewModel.onBottomToolbarEvent(it)
+                }
+            )
+
+        }
     }
 }
 
@@ -310,6 +302,92 @@ fun BitmapBackground(
             contentDescription = null,
             alpha = 1f
         )
+    }
+}
+
+@Composable
+fun TextInputLayout(
+    modifier: Modifier,
+    textModeState: TextModeState,
+    onTextModeEvent: (TextModeEvent) -> Unit
+) {
+    val focusRequesterForTextField = remember { FocusRequester() }
+    val textFieldState = textModeState.textFieldState
+    val textFontSize = MaterialTheme.typography.headlineMedium.fontSize
+
+    ConstraintLayout(
+        modifier = modifier
+    ) {
+        val (textField, placeHolderText, colorList) = createRefs()
+        TextField(
+            modifier = Modifier
+                .constrainAs(textField) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    width = Dimension.wrapContent
+                    height = Dimension.wrapContent
+                }
+                .background(Color.Transparent)
+//                .background(Color.Red)
+                .focusRequester(focusRequesterForTextField),
+            value = TextFieldValue(
+                text = textFieldState.text,
+                selection = TextRange(textFieldState.text.length)
+            ),
+            onValueChange = { mValue ->
+                onTextModeEvent(UpdateTextFieldValue(mValue.text))
+            },
+            colors = TextModeUtils.getColorsForTextField(
+                cursorColor = textFieldState.getSelectedColor()
+            ),
+            textStyle = TextStyle(
+                color = textFieldState.getSelectedColor(),
+                textAlign = textFieldState.textAlign,
+                fontSize = textFontSize
+            ),
+        )
+
+        if (textFieldState.text.isEmpty()) {
+            Text(
+                modifier = Modifier
+                    .constrainAs(placeHolderText) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        width = Dimension.wrapContent
+                        height = Dimension.wrapContent
+                    },
+                text = stringResource(id = R.string.enter_your_text),
+                textAlign = textFieldState.textAlign,
+                color = textFieldState.getSelectedColor(),
+                fontSize = textFontSize
+            )
+        }
+
+        if (textModeState.shouldRequestFocus) {
+            LaunchedEffect(key1 = Unit) {
+                delay(100)  /* Delay to allow textField to become visible */
+                focusRequesterForTextField.requestFocus()
+            }
+        }
+
+
+        ColorListFullWidth(
+            modifier = Modifier.constrainAs(colorList) {
+                bottom.linkTo(parent.bottom)
+                width = Dimension.matchParent
+                height = Dimension.wrapContent
+            },
+            colorList = textFieldState.textColorList,
+            selectedIndex = textFieldState.selectedColorIndex,
+            onItemClicked = { index, color ->
+                onTextModeEvent(SelectTextColor(index, color))
+            }
+        )
+
     }
 }
 

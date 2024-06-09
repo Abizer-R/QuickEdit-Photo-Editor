@@ -12,8 +12,11 @@ import com.abizer_r.touchdraw.utils.drawMode.DrawingConstants
 object TextModeUtils {
 
     @Composable
-    fun getColorsForTextField(): TextFieldColors {
+    fun getColorsForTextField(
+        cursorColor: Color
+    ): TextFieldColors {
         return TextFieldDefaults.colors(
+            cursorColor = cursorColor,
             focusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
