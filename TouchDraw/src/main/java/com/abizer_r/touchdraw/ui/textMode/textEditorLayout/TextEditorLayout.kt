@@ -1,4 +1,4 @@
-package com.abizer_r.touchdraw.ui.textMode.textEditor
+package com.abizer_r.touchdraw.ui.textMode.textEditorLayout
 
 import android.util.Log
 import androidx.compose.foundation.background
@@ -20,9 +20,10 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.abizer_r.components.R
 import com.abizer_r.components.ui.tool_items.ColorListFullWidth
-import com.abizer_r.touchdraw.ui.textMode.stateHandling.TextModeEvent
-import com.abizer_r.touchdraw.ui.textMode.stateHandling.TextModeState
-import com.abizer_r.touchdraw.ui.textMode.stateHandling.getSelectedColor
+import com.abizer_r.components.util.ImmutableList
+import com.abizer_r.touchdraw.ui.textMode.TextModeEvent
+import com.abizer_r.touchdraw.ui.textMode.TextModeState
+import com.abizer_r.touchdraw.ui.textMode.getSelectedColor
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
 import kotlinx.coroutines.delay
 
@@ -32,8 +33,35 @@ fun TextEditorLayout(
     textFieldState: TextModeState.TextFieldState,
     onTextModeEvent: (TextModeEvent) -> Unit
 ) {
+
+
+    /**
+     *
+     *
+     *
+     *
+     *
+     * TODO: make the TextEditorLayout a separate screen which will do following
+     * -> input: initial TextEditorState
+     * -> output: final TextEditorState
+     *
+     *
+     *
+     *
+     *
+     */
+
+
     val focusRequesterForTextField = remember { FocusRequester() }
     val textFontSize = MaterialTheme.typography.headlineMedium.fontSize
+
+    val onColorItemClicked = remember<(Int, Color) -> Unit> {{ index, color ->
+        onTextModeEvent(TextModeEvent.SelectTextColor(index, color))
+    }}
+
+    val onTextFieldValueChange = remember<(TextFieldValue) -> Unit> {{ mValue ->
+        onTextModeEvent(TextModeEvent.UpdateTextFieldValue(mValue.text))
+    }}
 
     ConstraintLayout(
         modifier = modifier
@@ -56,9 +84,7 @@ fun TextEditorLayout(
                 text = textFieldState.text,
                 selection = TextRange(textFieldState.text.length)
             ),
-            onValueChange = { mValue ->
-                onTextModeEvent(TextModeEvent.UpdateTextFieldValue(mValue.text))
-            },
+            onValueChange = onTextFieldValueChange,
             colors = TextModeUtils.getColorsForTextField(
                 cursorColor = textFieldState.getSelectedColor()
             ),
@@ -103,11 +129,9 @@ fun TextEditorLayout(
                 width = Dimension.matchParent
                 height = Dimension.wrapContent
             },
-            colorList = textFieldState.textColorList,
+            colorList = ImmutableList(textFieldState.textColorList),
             selectedIndex = textFieldState.selectedColorIndex,
-            onItemClicked = { index, color ->
-                onTextModeEvent(TextModeEvent.SelectTextColor(index, color))
-            }
+            onItemClicked = onColorItemClicked
         )
 
     }

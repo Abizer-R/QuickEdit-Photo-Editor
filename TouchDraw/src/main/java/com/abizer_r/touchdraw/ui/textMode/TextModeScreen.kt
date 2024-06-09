@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -25,11 +26,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.abizer_r.components.ui.blurBackground.BlurBitmapBackground
 import com.abizer_r.components.util.defaultErrorToast
-import com.abizer_r.touchdraw.ui.textMode.stateHandling.TextModeEvent.*
+import com.abizer_r.touchdraw.ui.textMode.TextModeEvent.*
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TextModeTopToolbar
-import com.abizer_r.touchdraw.ui.textMode.stateHandling.getSelectedColor
-import com.abizer_r.touchdraw.ui.textMode.textEditor.TextEditorLayout
+import com.abizer_r.touchdraw.ui.textMode.textEditorLayout.TextEditorLayout
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils.BorderForSelectedViews
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils.DrawAllTransformableViews
@@ -91,6 +91,35 @@ fun TextModeScreen(
         onBackPressed()
     }
 
+    val onCloseClickedLambda = remember<() -> Unit> {{
+        if (state.textFieldState.isVisible) {
+            viewModel.onEvent(HideTextField)
+        } else {
+            onBackPressed()
+        }
+    }}
+
+    val onDoneClickedLambda = remember<() -> Unit> {{
+        if (state.textFieldState.isVisible) {
+            viewModel.onEvent(AddTransformableTextBox(
+                textBoxState = TransformableTextBoxState(
+                    id = state.textFieldState.textStateId ?: UUID.randomUUID().toString(),
+                    text = state.textFieldState.text,
+                    textColor = state.textFieldState.getSelectedColor(),
+                    textAlign = state.textFieldState.textAlign
+                )
+            ))
+            viewModel.onEvent(HideTextField)
+        } else {
+            viewModel.onEvent(UpdateShouldGoToNextScreen(true))
+            lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                viewModel.updateViewSelection(null)
+                delay(200)  /* Delay to update the selection in ui */
+                screenshotState.capture()
+            }
+        }
+    }}
+
 
     ConstraintLayout(
         modifier = modifier
@@ -106,33 +135,8 @@ fun TextModeScreen(
                 width = Dimension.matchParent
                 height = Dimension.wrapContent
             },
-            onCloseClicked = {
-                if (state.textFieldState.isVisible) {
-                    viewModel.onEvent(HideTextField)
-                } else {
-                    onBackPressed()
-                }
-            },
-            onDoneClicked = {
-                if (state.textFieldState.isVisible) {
-                    viewModel.onEvent(AddTransformableTextBox(
-                        textBoxState = TransformableTextBoxState(
-                            id = state.textFieldState.textStateId ?: UUID.randomUUID().toString(),
-                            text = state.textFieldState.text,
-                            textColor = state.textFieldState.getSelectedColor(),
-                            textAlign = state.textFieldState.textAlign
-                        )
-                    ))
-                    viewModel.onEvent(HideTextField)
-                } else {
-                    viewModel.onEvent(UpdateShouldGoToNextScreen(true))
-                    lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-                        viewModel.updateViewSelection(null)
-                        delay(200)  /* Delay to update the selection in ui */
-                        screenshotState.capture()
-                    }
-                }
-            }
+            onCloseClicked = onCloseClickedLambda,
+            onDoneClicked = onDoneClickedLambda
         )
         val aspectRatio = bitmap.let {
             bitmap.width.toFloat() / bitmap.height.toFloat()

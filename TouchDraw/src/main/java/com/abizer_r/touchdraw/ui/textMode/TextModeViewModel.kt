@@ -3,12 +3,9 @@ package com.abizer_r.touchdraw.ui.textMode
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import com.abizer_r.touchdraw.ui.textMode.stateHandling.TextModeEvent
-import com.abizer_r.touchdraw.ui.textMode.stateHandling.TextModeState
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
-import com.abizer_r.touchdraw.ui.textMode.stateHandling.getIndexFromColor
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils

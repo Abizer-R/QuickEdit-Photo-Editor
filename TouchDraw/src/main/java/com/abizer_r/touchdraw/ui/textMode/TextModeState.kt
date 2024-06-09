@@ -1,4 +1,4 @@
-package com.abizer_r.touchdraw.ui.textMode.stateHandling
+package com.abizer_r.touchdraw.ui.textMode
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign

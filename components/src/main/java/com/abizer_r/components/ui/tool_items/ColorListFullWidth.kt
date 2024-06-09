@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.components.theme.ToolBarBackgroundColor
+import com.abizer_r.components.util.ColorUtils
+import com.abizer_r.components.util.ImmutableList
 
 /**
  * The total size of this item is the adding of [itemSize] and [selectedBorderWidth]
@@ -33,7 +35,7 @@ import com.abizer_r.components.theme.ToolBarBackgroundColor
 fun ColorListFullWidth(
     modifier: Modifier = Modifier,
     backgroundColor: Color = ToolBarBackgroundColor,
-    colorList: ArrayList<Color>,
+    colorList: ImmutableList<Color>,
     selectedIndex: Int,
     onItemClicked: (position: Int, color: Color) -> Unit
 ) {
@@ -46,7 +48,7 @@ fun ColorListFullWidth(
             .background(backgroundColor)
             .horizontalScroll(scrollState),
     ) {
-        colorList.forEachIndexed { index, color -> 
+        colorList.items.forEachIndexed { index, color ->
             SelectableColor(
                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
                 itemColor = color,
@@ -69,9 +71,7 @@ fun ColorListFullWidth(
 fun Preview_ColorList() {
     SketchDraftTheme {
         ColorListFullWidth(
-            colorList = arrayListOf(
-                Color.Black, Color.White, Color.Blue, Color.Yellow
-            ),
+            colorList = ImmutableList(ColorUtils.defaultColorList),
             selectedIndex = 2,
             onItemClicked = { _, _ -> }
         )

@@ -1,4 +1,4 @@
-package com.abizer_r.touchdraw.ui.textMode.stateHandling
+package com.abizer_r.touchdraw.ui.textMode
 
 import androidx.compose.ui.graphics.Color
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
