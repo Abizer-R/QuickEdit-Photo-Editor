@@ -1,7 +1,12 @@
 package com.abizer_r.touchdraw.ui.editorScreen
 
 import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.view.View
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -11,49 +16,86 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.window.DialogProperties
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import com.abizer_r.components.R
 import com.abizer_r.components.theme.SketchDraftTheme
+import com.abizer_r.components.util.defaultErrorToast
+import com.abizer_r.touchdraw.ui.drawMode.DrawModeViewModel
+import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.DrawingCanvas
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.models.PathDetails
+import com.abizer_r.touchdraw.ui.drawMode.stateHandling.DrawModeEvent
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TopToolBar
+import com.abizer_r.touchdraw.ui.textMode.TextModeEvent
+import com.abizer_r.touchdraw.ui.textMode.TextModeViewModel
+import com.abizer_r.touchdraw.utils.drawMode.CustomLayerTypeComposable
+import com.abizer_r.touchdraw.utils.drawMode.getOpacityOrNull
+import com.abizer_r.touchdraw.utils.drawMode.getShapeTypeOrNull
+import com.abizer_r.touchdraw.utils.drawMode.getWidthOrNull
+import com.abizer_r.touchdraw.utils.editorScreen.EditorScreenUtils
+import com.smarttoolfactory.screenshot.ImageResult
+import com.smarttoolfactory.screenshot.ScreenshotBox
 import com.smarttoolfactory.screenshot.rememberScreenshotState
+import io.mhssn.colorpicker.ColorPickerDialog
+import io.mhssn.colorpicker.ColorPickerType
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Stack
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun EditorScreen() {
-
+fun EditorScreen(
+    bitmap: Bitmap,
+    editorScreenState: EditorScreenState,
+    bottomToolbarState: BottomToolbarState = EditorScreenUtils.getDefaultBottomToolbarState(),
+    enableUndo: Boolean = false,
+    enableRedo: Boolean = false,
+    onUndo: () -> Unit = {},
+    onRedo: () -> Unit = {},
+    goToDrawModeScreen: (bitmap: Bitmap) -> Unit,
+    goToTextModeScreen: (bitmap: Bitmap) -> Unit,
+) {
     val colorOnBackground = MaterialTheme.colorScheme.onBackground
+    val backgroundColor = MaterialTheme.colorScheme.background
 
-    /**
-     * In EditorState
-     */
-    var showColorPicker by remember { mutableStateOf(false) }
-    var showBottomToolbarExtension by remember { mutableStateOf(false) }
-    val pathDetailStack = remember { Stack<PathDetails>() }
-    val redoStack = remember { Stack<PathDetails>() }
-    var pathDetailStackStateTrigger by remember {
-        mutableStateOf(Triple(0f, pathDetailStack, redoStack))
-    }
-
-//    var isTextToolSelected by remember { mutableStateOf(false) }
-
-
-
-
-
-    val screenshotState = rememberScreenshotState()
-    val screenShotImageResult by remember {
-        screenshotState.imageState
-    }
+    val onBottomToolbarItemClicked = remember<(BottomToolbarEvent) -> Unit> {{ toolbarEvent ->
+        if (toolbarEvent is BottomToolbarEvent.OnItemClicked) {
+            when (toolbarEvent.toolbarItem) {
+                BottomToolbarItem.DrawMode -> {
+                    goToDrawModeScreen(bitmap)
+                }
+                BottomToolbarItem.TextMode -> {
+                    goToTextModeScreen(bitmap)
+                }
+                else -> {}
+            }
+        }
+    }}
 
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(backgroundColor)
     ) {
-        val (topToolbar, bottomToolbar, bottomToolbarExtension, editorLayout, textInputScreen) = createRefs()
+        val (topToolbar, bottomToolbar, bgImage) = createRefs()
 
         TopToolBar(
             modifier = Modifier.constrainAs(topToolbar) {
@@ -61,182 +103,51 @@ fun EditorScreen() {
                 width = Dimension.matchParent
                 height = Dimension.wrapContent
             },
-            enableUndo = pathDetailStackStateTrigger.second.isNotEmpty(),
-            enableRedo = redoStack.isNotEmpty(),
-            onUndo = {
-                /**
-                 * TODO: include the transformable views in undo-redo as well
-                 */
-                if (pathDetailStack.isNotEmpty()) {
-                    redoStack.push(pathDetailStack.pop())
-                }
-                pathDetailStackStateTrigger = pathDetailStackStateTrigger.copy(
-                    first = pathDetailStackStateTrigger.first + 1
-                )
-            },
-            onRedo = {
-                if (redoStack.isNotEmpty()) {
-                    pathDetailStack.push(redoStack.pop())
-                }
-                pathDetailStackStateTrigger = pathDetailStackStateTrigger.copy(
-                    first = pathDetailStackStateTrigger.first + 1
-                )
-            }
+            enableUndo = enableUndo,
+            enableRedo = enableRedo,
+            showCloseAndDone = false,
+            onUndo = onUndo,
+            onRedo = onRedo
         )
 
-//        ScreenshotBox(screenshotState = screenshotState) {
-//            DrawModeScreen(
-//                modifier = Modifier.constrainAs(editorLayout) {
-//                    top.linkTo(topToolbar.bottom)
-//                    bottom.linkTo(bottomToolbar.top)
-//                    width = Dimension.matchParent
-//                    height = Dimension.fillToConstraints
-//                },
-//                pathDetailStack = pathDetailStack,
-//                selectedColor = bottomToolbarState.selectedColor,
-//                currentTool = bottomToolbarState.selectedItem,
-//                transformableViewsList = transformableContainerState.transformableViewsList,
-//                onDrawingEvent = {
-//                    when (it) {
-//                        is DrawModeEvent.AddNewPath -> {
-//                            pathDetailStack.push(it.pathDetail)
-//                            redoStack.clear()
-//                            pathDetailStackStateTrigger = pathDetailStackStateTrigger.copy(
-//                                first = pathDetailStackStateTrigger.first + 1
-//                            )
-//                        }
-//                    }
-//                },
-//                onTransformViewEvent = { mEvent ->
-//                    val stateList = transformableContainerState.transformableViewsList
-//                    when(mEvent) {
-//                        is TransformableBoxEvents.OnDrag -> {
-//                            val index = stateList.indexOfFirst { mEvent.id == it.getId() }
-//                            if (index >= 0 && index < stateList.size) {
-//                                stateList[index] = stateList[index].setPositionOffset(
-//                                    stateList[index].getPositionOffset() + mEvent.dragAmount
-//                                )
-//                            }
-//                        }
-//
-//                        is TransformableBoxEvents.OnZoom -> {
-//                            val index = stateList.indexOfFirst { mEvent.id == it.getId() }
-//                            if (index >= 0 && index < stateList.size) {
-//                                stateList[index] = stateList[index].setScale(
-//                                    (stateList[index].getScale() * mEvent.zoomAmount).coerceIn(0.5f, 5f)
-//                                )
-//                            }
-//                        }
-//
-//                        is TransformableBoxEvents.OnRotate -> {
-//                            val index = stateList.indexOfFirst { mEvent.id == it.getId() }
-//                            if (index >= 0 && index < stateList.size) {
-//                                stateList[index] = stateList[index].setRotation(
-//                                    stateList[index].getRotation() + mEvent.rotationChange
-//                                )
-//                            }
-//                        }
-//                    }
-//
-//                    transformableContainerState = transformableContainerState.copy(
-//                        transformableViewsList = stateList,
-//                        triggerRecomposition = transformableContainerState.triggerRecomposition + 1
-//                    )
-//
-//                    Log.e("TEST_event2", "childrenList = ${transformableContainerState.transformableViewsList}", )
-//                }
-//            )
-//
-//        }
+        val aspectRatio = bitmap?.let {
+            bitmap.width.toFloat() / bitmap.height.toFloat()
+        }
+        val screenShotBoxWidth = if (aspectRatio != null) {
+            Dimension.ratio(aspectRatio.toString())
+        } else Dimension.fillToConstraints
+        Box(
+            modifier = Modifier.constrainAs(bgImage) {
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                top.linkTo(topToolbar.bottom)
+                bottom.linkTo(bottomToolbar.top)
+                width = screenShotBoxWidth
+                height = Dimension.fillToConstraints
+            }
+        ) {
+
+            Image(
+                modifier = Modifier
+                    .fillMaxSize(),
+                bitmap = bitmap.asImageBitmap(),
+                contentScale = ContentScale.Fit,
+                contentDescription = null,
+                alpha = 1f
+            )
+        }
 
 
-//        BottomToolBar(
-//            modifier = Modifier.constrainAs(bottomToolbar) {
-//                bottom.linkTo(parent.bottom)
-//                width = Dimension.matchParent
-//                height = Dimension.wrapContent
-//            },
-//            bottomToolbarState = bottomToolbarState,
-//            onEvent = {
-//                when (it) {
-//                    is BottomToolbarEvent.OnItemClicked -> {
-//                        when (it.toolbarItem) {
-//                            is BottomToolbarItem.ColorItem -> {
-//                                showColorPicker = true
-//                            }
-//
-//                            is BottomToolbarItem.TextMode -> {
-//                                isTextToolSelected = isTextToolSelected.not()
-//                                screenshotState.capture()
-//                                onTextToolClicked()
-//                            }
-//
-//                            // Clicked on already selected item
-//                            bottomToolbarState.selectedItem -> {
-//                                showBottomToolbarExtension = showBottomToolbarExtension.not()
-//                            }
-//
-//                            // clicked on another item
-//                            else -> {
-//                                showBottomToolbarExtension = false
-//                                bottomToolbarState = bottomToolbarState.copy(
-//                                    selectedItem = it.toolbarItem
-//                                )
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        )
-//
-//        if (showBottomToolbarExtension) {
-//            ToolbarExtensionView(
-//                modifier = Modifier
-//                    .constrainAs(bottomToolbarExtension) {
-//                        bottom.linkTo(bottomToolbar.top)
-//                        width = Dimension.matchParent
-//                    }
-//                    .padding(bottom = 2.dp) /* added padding to get a visual separation between BottomToolbar and extension */
-//                    .clickable { }, /* added clickable{} to avoid triggering touchEvent in DrawingCanvas when clicking anywhere on toolbarExtension */
-//                width = bottomToolbarState.selectedItem.getWidthOrNull(),
-//                onWidthChange = { mWidth ->
-//                    bottomToolbarState = bottomToolbarState.copy(
-//                        selectedItem = bottomToolbarState.selectedItem.setWidthIfPossible(mWidth),
-//                        recompositionTriggerValue = bottomToolbarState.recompositionTriggerValue + 1
-//                    )
-//                },
-//                opacity = bottomToolbarState.selectedItem.getOpacityOrNull(),
-//                onOpacityChange = { mOpacity ->
-//                    bottomToolbarState = bottomToolbarState.copy(
-//                        selectedItem = bottomToolbarState.selectedItem.setOpacityIfPossible(mOpacity),
-//                        recompositionTriggerValue = bottomToolbarState.recompositionTriggerValue + 1
-//                    )
-//                },
-//                shapeType = bottomToolbarState.selectedItem.getShapeTypeOrNull(),
-//                onShapeTypeChange = { mShapeType ->
-//                    bottomToolbarState = bottomToolbarState.copy(
-//                        selectedItem = bottomToolbarState.selectedItem.setShapeTypeIfPossible(mShapeType),
-//                        recompositionTriggerValue = bottomToolbarState.recompositionTriggerValue + 1
-//                    )
-//                }
-//            )
-//        }
-//
-//
-//        ColorPickerDialog(
-//            show = showColorPicker,
-//            type = ColorPickerType.Circle(showAlphaBar = false),
-//            properties = DialogProperties(),
-//            onDismissRequest = {
-//                showColorPicker = false
-//            },
-//            onPickedColor = { selectedColor ->
-//                showColorPicker = false
-//                bottomToolbarState = bottomToolbarState.copy(
-//                    selectedColor = selectedColor
-//                )
-//            }
-//        )
+        BottomToolBar(
+            modifier = Modifier.constrainAs(bottomToolbar) {
+                bottom.linkTo(parent.bottom)
+                width = Dimension.matchParent
+                height = Dimension.wrapContent
+            },
+            bottomToolbarState = bottomToolbarState,
+            onEvent = onBottomToolbarItemClicked
+        )
+
 
     }
 }
@@ -247,6 +158,12 @@ fun EditorScreen() {
 @Composable
 fun PreviewEditorScreen() {
     SketchDraftTheme {
-        EditorScreen()
+        EditorScreen(
+            bitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_2).asAndroidBitmap(),
+            editorScreenState = EditorScreenState(),
+//            bottomToolbarState = EditorScreenUtils.getDefaultBottomToolbarState(),
+            goToTextModeScreen = {},
+            goToDrawModeScreen = {}
+        )
     }
 }

@@ -41,7 +41,7 @@ object DrawModeUtils {
             BottomToolbarItem.EraserTool(
                 width = DrawingConstants.DEFAULT_STROKE_WIDTH
             ),
-            BottomToolbarItem.TextMode
+//            BottomToolbarItem.TextMode
         )
     }
 

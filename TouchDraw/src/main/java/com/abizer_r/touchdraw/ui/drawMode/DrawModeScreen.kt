@@ -3,6 +3,7 @@ package com.abizer_r.touchdraw.ui.drawMode
 import ToolbarExtensionView
 import android.graphics.Bitmap
 import android.view.View
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -28,6 +30,9 @@ import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TopToolBar
+import com.abizer_r.touchdraw.ui.textMode.TextModeEvent
+import com.abizer_r.touchdraw.ui.textMode.getSelectedColor
+import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.touchdraw.utils.drawMode.CustomLayerTypeComposable
 import com.abizer_r.touchdraw.utils.drawMode.getOpacityOrNull
 import com.abizer_r.touchdraw.utils.drawMode.getShapeTypeOrNull
@@ -40,12 +45,14 @@ import io.mhssn.colorpicker.ColorPickerType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun DrawModeScreen(
     bitmap: Bitmap? = null,
-    goToTextModeScreen: (bitmap: Bitmap) -> Unit
+    onDoneClicked: (bitmap: Bitmap) -> Unit,
+    onBackPressed: () -> Unit
 ) {
 
     val context = LocalContext.current
@@ -74,11 +81,27 @@ fun DrawModeScreen(
             if (viewModel.shouldGoToNextScreen) {
                 viewModel.shouldGoToNextScreen = false
                 screenshotState.bitmap?.let { mBitmap ->
-                    goToTextModeScreen(mBitmap)
+                    onDoneClicked(mBitmap)
                 } ?: context.defaultErrorToast()
             }
         }
     }
+
+    BackHandler {
+        onBackPressed()
+    }
+
+    val onCloseClickedLambda = remember<() -> Unit> {{
+        onBackPressed()
+    }}
+
+    val onDoneClickedLambda = remember<() -> Unit> {{
+        viewModel.handleStateBeforeCaptureScreenshot()
+        lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+            delay(200)  /* Delay to update the ToolbarExtensionView Visibility in ui */
+            screenshotState.capture()
+        }
+    }}
 
     ConstraintLayout(
         modifier = Modifier
@@ -100,7 +123,9 @@ fun DrawModeScreen(
             },
             onRedo = {
                 viewModel.onEvent(DrawModeEvent.OnRedo)
-            }
+            },
+            onCloseClicked = onCloseClickedLambda,
+            onDoneClicked = onDoneClickedLambda
         )
 
         val aspectRatio = bitmap?.let {

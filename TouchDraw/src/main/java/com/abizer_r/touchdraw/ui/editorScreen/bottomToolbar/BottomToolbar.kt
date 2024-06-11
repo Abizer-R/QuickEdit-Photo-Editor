@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material3.MaterialTheme
@@ -50,6 +51,7 @@ import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarI
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
 import com.abizer_r.touchdraw.utils.drawMode.DrawModeUtils
 import com.abizer_r.touchdraw.utils.drawMode.DrawingConstants
+import com.abizer_r.touchdraw.utils.editorScreen.EditorScreenUtils
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
 
 @Composable
@@ -114,6 +116,17 @@ fun ToolbarItem(
     }
 
     val (imageVector, labelText) = when (toolbarItem) {
+
+        is BottomToolbarItem.DrawMode -> Pair(
+            Icons.Default.Brush,
+            stringResource(id = R.string.draw)
+
+        )
+        is BottomToolbarItem.TextMode -> Pair(
+            Icons.Default.TextFields,
+            stringResource(id = R.string.text)
+        )
+
         is BottomToolbarItem.EraserTool -> Pair(
             ImageVector.vectorResource(id = R.drawable.ic_eraser),
             stringResource(id = R.string.eraser)
@@ -122,11 +135,6 @@ fun ToolbarItem(
         is BottomToolbarItem.ShapeTool -> Pair(
             Icons.Default.Category,
             stringResource(id = R.string.shape)
-        )
-
-        is BottomToolbarItem.TextMode -> Pair(
-            Icons.Default.TextFields,
-            stringResource(id = R.string.text)
         )
 
         is BottomToolbarItem.BrushTool -> Pair(
@@ -224,6 +232,17 @@ fun ColorToolbarItem(
     }
 }
 
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun EditorScreen_BottomToolbar() {
+    SketchDraftTheme {
+        BottomToolBar(
+            modifier = Modifier.fillMaxWidth(),
+            bottomToolbarState = EditorScreenUtils.getDefaultBottomToolbarState(),
+            onEvent = {}
+        )
+    }
+}
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
