@@ -42,13 +42,15 @@ class TextModeViewModel @Inject constructor(
         }
     }
 
-//    private var lastCaptureRequest: Long = Calendar.getInstance().timeInMillis
+    var shouldGoToNextScreen = false
+
+    fun handleStateBeforeCaptureScreenshot() {
+        shouldGoToNextScreen = true
+        updateViewSelection(null)
+    }
 
     fun onEvent(event: TextModeEvent) {
         when (event) {
-            is TextModeEvent.UpdateShouldGoToNextScreen -> {
-                _state.update { it.copy( shouldGoToNextScreen = event.shouldGoToNextScreen ) }
-            }
 
             is TextModeEvent.ShowTextField -> {
                 Log.e("TEST_BLUR", "PlaceHolder Text: ", )

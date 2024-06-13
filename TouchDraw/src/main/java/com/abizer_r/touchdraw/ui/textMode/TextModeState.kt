@@ -9,7 +9,6 @@ data class TextModeState(
     val textFieldState: TextFieldState = TextFieldState(),
 //    val textFieldValue: String = "",
     val transformableViewStateList: ArrayList<TransformableBoxState> = arrayListOf(),
-    val shouldGoToNextScreen: Boolean = false,
     val recompositionTrigger: Long = 0
 ) {
     data class TextFieldState(

@@ -1,6 +1,7 @@
 package com.abizer_r.touchdraw.ui.textMode
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -73,12 +74,12 @@ fun TextModeScreen(
     when (screenshotState.imageState.value) {
         ImageResult.Initial -> {}
         is ImageResult.Error -> {
-            viewModel.onEvent(UpdateShouldGoToNextScreen(false))
+            viewModel.shouldGoToNextScreen = false
             context.defaultErrorToast()
         }
         is ImageResult.Success -> {
-            if (state.shouldGoToNextScreen) {
-                viewModel.onEvent(UpdateShouldGoToNextScreen(false))
+            if (viewModel.shouldGoToNextScreen) {
+                viewModel.shouldGoToNextScreen = false
                 screenshotState.bitmap?.let { mBitmap ->
                     onDoneClicked(mBitmap)
                 } ?: context.defaultErrorToast()
@@ -111,9 +112,8 @@ fun TextModeScreen(
             ))
             viewModel.onEvent(HideTextField)
         } else {
-            viewModel.onEvent(UpdateShouldGoToNextScreen(true))
+            viewModel.handleStateBeforeCaptureScreenshot()
             lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-                viewModel.updateViewSelection(null)
                 delay(200)  /* Delay to update the selection in ui */
                 screenshotState.capture()
             }
