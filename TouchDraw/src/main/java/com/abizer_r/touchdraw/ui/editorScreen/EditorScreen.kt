@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +32,7 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.abizer_r.components.R
 import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.components.util.defaultErrorToast
@@ -58,42 +60,78 @@ import io.mhssn.colorpicker.ColorPickerType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.EmptyStackException
 import java.util.Stack
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun EditorScreen(
-    bitmap: Bitmap,
-    editorScreenState: EditorScreenState,
-    bottomToolbarState: BottomToolbarState = EditorScreenUtils.getDefaultBottomToolbarState(),
-    enableUndo: Boolean = false,
-    enableRedo: Boolean = false,
-    onUndo: () -> Unit = {},
-    onRedo: () -> Unit = {},
-    goToDrawModeScreen: (bitmap: Bitmap) -> Unit,
-    goToTextModeScreen: (bitmap: Bitmap) -> Unit,
+    modifier: Modifier = Modifier,
+    initialEditorScreenState: EditorScreenState,
+    goToDrawModeScreen: (finalEditorState: EditorScreenState) -> Unit,
+    goToTextModeScreen: (finalEditorState: EditorScreenState) -> Unit,
 ) {
-    val colorOnBackground = MaterialTheme.colorScheme.onBackground
-    val backgroundColor = MaterialTheme.colorScheme.background
+    if (initialEditorScreenState.bitmapStack.isEmpty()) {
+        throw Exception("EmptyStackException: The bitmapStack of initial state should contain at least one bitmap")
+    }
 
-    val onBottomToolbarItemClicked = remember<(BottomToolbarEvent) -> Unit> {{ toolbarEvent ->
-        if (toolbarEvent is BottomToolbarEvent.OnItemClicked) {
-            when (toolbarEvent.toolbarItem) {
-                BottomToolbarItem.DrawMode -> {
-                    goToDrawModeScreen(bitmap)
+    val context = LocalContext.current
+    val lifeCycleOwner = LocalLifecycleOwner.current
+
+    val viewModel: EditorScreenViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle(
+        lifecycleOwner = lifeCycleOwner
+    )
+
+    LaunchedEffect(key1 = Unit) {
+        viewModel.updateInitialState(initialEditorScreenState)
+    }
+
+    if (state.bitmapStack.isNotEmpty()) {
+        // Adding this check because the default state in viewModel will have empty stack
+        // After updating the initialEditorScreenState, we will have non-empty stack
+        val currentBitmap = viewModel.getCurrentBitmap()
+
+        val onBottomToolbarEvent = remember<(BottomToolbarEvent) -> Unit> {{ toolbarEvent ->
+            if (toolbarEvent is BottomToolbarEvent.OnItemClicked) {
+                when (toolbarEvent.toolbarItem) {
+                    BottomToolbarItem.DrawMode -> {
+                        goToDrawModeScreen(state)
+                    }
+                    BottomToolbarItem.TextMode -> {
+                        goToTextModeScreen(state)
+                    }
+                    else -> {}
                 }
-                BottomToolbarItem.TextMode -> {
-                    goToTextModeScreen(bitmap)
-                }
-                else -> {}
             }
-        }
-    }}
+        }}
 
+        EditorScreenLayout(
+            modifier = modifier,
+            currentBitmap = currentBitmap,
+            undoEnabled = viewModel.undoEnabled(),
+            redoEnabled = viewModel.redoEnabled(),
+            onUndo = viewModel::onUndo,
+            onRedo = viewModel::onRedo,
+            onBottomToolbarEvent = onBottomToolbarEvent
+        )
+    }
+
+}
+
+@Composable
+private fun EditorScreenLayout(
+    modifier: Modifier,
+    currentBitmap: Bitmap,
+    undoEnabled: Boolean,
+    redoEnabled: Boolean,
+    onUndo: () -> Unit,
+    onRedo: () -> Unit,
+    onBottomToolbarEvent: (BottomToolbarEvent) -> Unit
+) {
     ConstraintLayout(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
-            .background(backgroundColor)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         val (topToolbar, bottomToolbar, bgImage) = createRefs()
 
@@ -103,15 +141,15 @@ fun EditorScreen(
                 width = Dimension.matchParent
                 height = Dimension.wrapContent
             },
-            enableUndo = enableUndo,
-            enableRedo = enableRedo,
+            undoEnabled = undoEnabled,
+            redoEnabled = redoEnabled,
             showCloseAndDone = false,
             onUndo = onUndo,
             onRedo = onRedo
         )
 
-        val aspectRatio = bitmap?.let {
-            bitmap.width.toFloat() / bitmap.height.toFloat()
+        val aspectRatio = currentBitmap?.let {
+            currentBitmap.width.toFloat() / currentBitmap.height.toFloat()
         }
         val screenShotBoxWidth = if (aspectRatio != null) {
             Dimension.ratio(aspectRatio.toString())
@@ -130,7 +168,7 @@ fun EditorScreen(
             Image(
                 modifier = Modifier
                     .fillMaxSize(),
-                bitmap = bitmap.asImageBitmap(),
+                bitmap = currentBitmap.asImageBitmap(),
                 contentScale = ContentScale.Fit,
                 contentDescription = null,
                 alpha = 1f
@@ -144,8 +182,8 @@ fun EditorScreen(
                 width = Dimension.matchParent
                 height = Dimension.wrapContent
             },
-            bottomToolbarState = bottomToolbarState,
-            onEvent = onBottomToolbarItemClicked
+            bottomToolbarState = EditorScreenUtils.getDefaultBottomToolbarState(),
+            onEvent = onBottomToolbarEvent
         )
 
 
@@ -158,12 +196,14 @@ fun EditorScreen(
 @Composable
 fun PreviewEditorScreen() {
     SketchDraftTheme {
-        EditorScreen(
-            bitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_2).asAndroidBitmap(),
-            editorScreenState = EditorScreenState(),
-//            bottomToolbarState = EditorScreenUtils.getDefaultBottomToolbarState(),
-            goToTextModeScreen = {},
-            goToDrawModeScreen = {}
+        EditorScreenLayout(
+            modifier = Modifier,
+            currentBitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_2).asAndroidBitmap(),
+            undoEnabled = false,
+            redoEnabled = false,
+            onUndo = {},
+            onRedo = {},
+            onBottomToolbarEvent = {}
         )
     }
 }

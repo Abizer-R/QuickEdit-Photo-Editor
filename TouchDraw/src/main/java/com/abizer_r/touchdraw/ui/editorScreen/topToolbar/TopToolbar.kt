@@ -28,8 +28,8 @@ import com.abizer_r.components.theme.ToolBarBackgroundColor
 @Composable
 fun TopToolBar(
     modifier: Modifier,
-    enableUndo: Boolean = false,
-    enableRedo: Boolean = false,
+    undoEnabled: Boolean = false,
+    redoEnabled: Boolean = false,
     showCloseAndDone: Boolean = true,
     onUndo: () -> Unit,
     onRedo: () -> Unit,
@@ -75,7 +75,7 @@ fun TopToolBar(
             contentDescription = null,
             imageVector = Icons.Default.Undo,
             colorFilter = ColorFilter.tint(
-                color = if (enableUndo) {
+                color = if (undoEnabled) {
                     MaterialTheme.colorScheme.onBackground
                 } else Color.DarkGray
             )
@@ -94,7 +94,7 @@ fun TopToolBar(
             contentDescription = null,
             imageVector = Icons.Default.Redo,
             colorFilter = ColorFilter.tint(
-                color = if (enableRedo) {
+                color = if (redoEnabled) {
                     MaterialTheme.colorScheme.onBackground
                 } else Color.DarkGray
             )
@@ -131,7 +131,7 @@ fun PreviewTopToolbar() {
     SketchDraftTheme {
         TopToolBar(
             modifier = Modifier.fillMaxWidth(),
-            enableUndo = true,
+            undoEnabled = true,
             onUndo = {},
             onRedo = {},
             onCloseClicked = {},
@@ -147,7 +147,7 @@ fun PreviewTopToolbar2() {
     SketchDraftTheme {
         TopToolBar(
             modifier = Modifier.fillMaxWidth(),
-            enableUndo = true,
+            undoEnabled = true,
             showCloseAndDone = false,
             onUndo = {},
             onRedo = {},

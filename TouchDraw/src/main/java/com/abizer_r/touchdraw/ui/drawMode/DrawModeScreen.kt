@@ -116,8 +116,8 @@ fun DrawModeScreen(
                 width = Dimension.matchParent
                 height = Dimension.wrapContent
             },
-            enableUndo = state.pathDetailStack.isNotEmpty(),
-            enableRedo = state.redoStack.isNotEmpty(),
+            undoEnabled = state.pathDetailStack.isNotEmpty(),
+            redoEnabled = state.redoStack.isNotEmpty(),
             onUndo = {
                 viewModel.onEvent(DrawModeEvent.OnUndo)
             },
@@ -171,17 +171,7 @@ fun DrawModeScreen(
                 height = Dimension.wrapContent
             },
             bottomToolbarState = bottomToolbarState,
-            onEvent = {
-                if (it is BottomToolbarEvent.OnItemClicked && it.toolbarItem is BottomToolbarItem.TextMode) {
-                    viewModel.handleStateBeforeCaptureScreenshot()
-                    lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-                        delay(200)  /* Delay to update the ToolbarExtensionView Visibility in ui */
-                        screenshotState.capture()
-                    }
-                } else {
-                    viewModel.onBottomToolbarEvent(it)
-                }
-            }
+            onEvent = viewModel::onBottomToolbarEvent
         )
 
         if (state.showBottomToolbarExtension) {
