@@ -61,22 +61,6 @@ fun DrawingCanvas(
 
     Canvas(
         modifier = modifier
-            .onGloballyPositioned {
-                if (it.size.width > bitmapReqSize.width && it.size.height > bitmapReqSize.height) {
-                    bitmapReqSize = it.size
-                }
-            }
-            .drawBehind {
-                bitmap?.let { mBitmap ->
-                    drawIntoCanvas { mCanvas ->
-                        val destRect = android.graphics.Rect(0, 0, bitmapReqSize.width, bitmapReqSize.height)
-                        mCanvas.nativeCanvas.drawBitmap(
-                            mBitmap, null, destRect, Paint()
-                        )
-                    }
-                }
-
-            }
             .pointerInteropFilter {
                 when (it.action) {
                     MotionEvent.ACTION_DOWN -> {

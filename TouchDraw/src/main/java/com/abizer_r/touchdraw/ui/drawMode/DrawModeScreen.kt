@@ -2,8 +2,10 @@ package com.abizer_r.touchdraw.ui.drawMode
 
 import ToolbarExtensionView
 import android.graphics.Bitmap
+import android.util.Log
 import android.view.View
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +16,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
@@ -50,7 +54,7 @@ import java.util.UUID
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun DrawModeScreen(
-    bitmap: Bitmap? = null,
+    bitmap: Bitmap,
     onDoneClicked: (bitmap: Bitmap) -> Unit,
     onBackPressed: () -> Unit
 ) {
@@ -146,13 +150,19 @@ fun DrawModeScreen(
             screenshotState = screenshotState
         ) {
 
+            Image(
+                modifier = Modifier.fillMaxSize(),
+                bitmap = bitmap.asImageBitmap(),
+                contentScale = ContentScale.Fit,
+                contentDescription = null
+            )
+
             CustomLayerTypeComposable(
                 layerType = View.LAYER_TYPE_HARDWARE,
                 modifier = Modifier.fillMaxSize()
             ) {
                 DrawingCanvas(
                     modifier = Modifier.fillMaxSize(),
-                    bitmap = bitmap,
                     pathDetailStack = state.pathDetailStack,
                     selectedColor = bottomToolbarState.selectedColor,
                     currentTool = bottomToolbarState.selectedItem,
