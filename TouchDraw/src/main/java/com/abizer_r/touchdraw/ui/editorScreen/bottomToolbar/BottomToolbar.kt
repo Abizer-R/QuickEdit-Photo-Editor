@@ -41,6 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.abizer_r.components.R
 import com.abizer_r.components.theme.SketchDraftTheme
@@ -64,6 +65,7 @@ fun BottomToolBar(
     LazyRow(
         modifier = modifier
             .fillMaxWidth()
+            .padding(vertical = 4.dp)
             .background(ToolBarBackgroundColor)
     ) {
         itemsIndexed(bottomToolbarState.toolbarItems) { index, mToolbarItem ->
@@ -97,11 +99,14 @@ fun ToolbarItem(
     isSelected: Boolean,
     onEvent: (BottomToolbarEvent) -> Unit
 ) {
+    val labelFontSize = MaterialTheme.typography.bodySmall.fontSize
+
     if (toolbarItem is BottomToolbarItem.ColorItem) {
         ColorToolbarItem(
             modifier = modifier,
             selectedColor = selectedColor,
             colorItem = toolbarItem,
+            labelFontSize = labelFontSize,
             onEvent = onEvent
         )
         return
@@ -174,21 +179,27 @@ fun ToolbarItem(
             ))
         }
 
-        val imageSize = if (labelText.isNotBlank()) 24.dp else 32.dp
+        val verticalPaddingBeforeSize = if (labelText.isBlank()) 8.dp else 0.dp
+        val imageSize = if (labelText.isNotBlank()) 28.dp else 36.dp
         Image(
-            modifier = Modifier.size(imageSize),
+            modifier = Modifier
+                .padding(vertical = verticalPaddingBeforeSize)
+                .size(imageSize),
             contentDescription = null,
             imageVector = imageVector,
             colorFilter = ColorFilter.tint(
                 color = MaterialTheme.colorScheme.onBackground
             )
         )
+        Spacer(modifier = Modifier.size(
+            if (labelText.isNotBlank()) 4.dp else 0.dp
+        ))
 
         if (labelText.isNotBlank()) {
             Text(
                 style = TextStyle(
                     color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = MaterialTheme.typography.labelSmall.fontSize
+                    fontSize = labelFontSize,
                 ),
                 text = labelText
             )
@@ -201,6 +212,7 @@ fun ColorToolbarItem(
     modifier: Modifier = Modifier,
     selectedColor: Color,
     colorItem: BottomToolbarItem.ColorItem,
+    labelFontSize: TextUnit,
     onEvent: (BottomToolbarEvent) -> Unit
 ) {
     Column(
@@ -216,16 +228,18 @@ fun ColorToolbarItem(
                 .background(color = MaterialTheme.colorScheme.onBackground)
                 .padding(1.dp)
                 .clip(CircleShape)
-                .size(23.dp)
+                .size(26.dp)
                 .clickable {
                     onEvent(BottomToolbarEvent.OnItemClicked(colorItem))
                 }
         )
 
+        Spacer(modifier = Modifier.size(4.dp))
+
         Text(
             style = TextStyle(
                 color = MaterialTheme.colorScheme.onBackground,
-                fontSize = MaterialTheme.typography.bodySmall.fontSize
+                fontSize = labelFontSize
             ),
             text = stringResource(id = R.string.color)
         )
