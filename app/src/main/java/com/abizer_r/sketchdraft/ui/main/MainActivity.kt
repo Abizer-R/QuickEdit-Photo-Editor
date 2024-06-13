@@ -59,7 +59,10 @@ fun MainScreen() {
 
     val sharedEditorViewModel: SharedEditorViewModel = hiltViewModel()
     LaunchedEffect(key1 = Unit) {
-        sharedEditorViewModel.addBitmapToStack(initialBitmap)
+        sharedEditorViewModel.addBitmapToStack(
+            initialBitmap,
+            triggerRecomposition = true,
+        )
     }
 
     val lifeCycleOwner = LocalLifecycleOwner.current
@@ -129,7 +132,9 @@ fun MainScreenNavigation(
                 },
                 onDoneClicked = {
                     Log.d("TEST_RECOMP", "DrawModeScreen: addBitmapToStack, bitmap = $it")
-                    sharedEditorViewModel.addBitmapToStack(it.copy(Bitmap.Config.ARGB_8888, false))
+                    sharedEditorViewModel.addBitmapToStack(
+                        bitmap = it.copy(Bitmap.Config.ARGB_8888, false),
+                    )
                     navController.navigate(
                         "editorScreen",
                         navOptions = NavOptions.Builder()
@@ -147,7 +152,9 @@ fun MainScreenNavigation(
                 },
                 onDoneClicked = {
                     Log.d("TEST_RECOMP", "TextModeScreen: addBitmapToStack, bitmap = $it", )
-                    sharedEditorViewModel.addBitmapToStack(it.copy(Bitmap.Config.ARGB_8888, false))
+                    sharedEditorViewModel.addBitmapToStack(
+                        bitmap = it.copy(Bitmap.Config.ARGB_8888, false),
+                    )
                     navController.navigate(
                         "editorScreen",
                         navOptions = NavOptions.Builder()

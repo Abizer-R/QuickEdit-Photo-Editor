@@ -26,6 +26,8 @@ class SharedEditorViewModel @Inject constructor(
     private val _recompositionTrigger = MutableStateFlow<Long>(0)
     val recompositionTrigger: StateFlow<Long> = _recompositionTrigger
 
+    private var latestTimeForAddingBitmapToStack: Long = 0
+
     /**
      * Call this function after making sure that the bitmapStack won't be empty
      */
@@ -38,11 +40,24 @@ class SharedEditorViewModel @Inject constructor(
     }
 
     fun addBitmapToStack(
-        initialBitmap: Bitmap,
-        triggerRecomposition: Boolean = false
+        bitmap: Bitmap,
+        triggerRecomposition: Boolean = false,
+        addSafelyWithoutMultipleTriggers: Boolean = true
     ) {
-        bitmapStack.push(initialBitmap)
-        _recompositionTrigger.update { recompositionTrigger.value + 1 }
+        val currTime = System.currentTimeMillis()
+        if (addSafelyWithoutMultipleTriggers) {
+            val timeDiff = currTime - latestTimeForAddingBitmapToStack
+            if (timeDiff < 1000) {
+                return
+            }
+        }
+        latestTimeForAddingBitmapToStack = currTime
+
+        bitmapStack.push(bitmap)
+        if (triggerRecomposition) {
+            // trigger recomposition while adding initialBitmap in MainScreen
+            _recompositionTrigger.update { recompositionTrigger.value + 1 }
+        }
     }
 
     fun updateStacksFromEditorState(finalEditorState: EditorScreenState) {
