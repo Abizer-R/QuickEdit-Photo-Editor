@@ -22,7 +22,8 @@ object DrawModeUtils {
         return BottomToolbarState(
             toolbarItems = toolbarListItems,
             selectedItem = toolbarListItems[1],
-            selectedColor = defaultColorSelected
+            selectedColor = defaultColorSelected,
+            showColorPickerIcon = true
         )
     }
 

@@ -3,6 +3,7 @@ package com.abizer_r.touchdraw.ui.transformableViews.base
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 
 abstract class TransformableBoxState {
     abstract val id: String
@@ -20,7 +21,8 @@ data class TransformableTextBoxState(
     override var isSelected: Boolean = true,
     var text: String,
     var textAlign: TextAlign,
-    var textColor: Color
+    var textColor: Color,
+    val textFont: TextUnit
 ) : TransformableBoxState() {
 
 }

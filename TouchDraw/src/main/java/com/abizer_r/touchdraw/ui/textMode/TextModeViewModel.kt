@@ -70,6 +70,22 @@ class TextModeViewModel @Inject constructor(
                 ) }
             }
 
+            is TextModeEvent.SelectTextAlign -> {
+                _state.update { it.copy(
+                    textFieldState = it.textFieldState.copy(
+                        textAlign = event.textAlign
+                    )
+                )}
+            }
+
+            is TextModeEvent.UpdateTextFont -> {
+                _state.update { it.copy(
+                    textFieldState = it.textFieldState.copy(
+                        textFont = event.textFont
+                    )
+                )}
+            }
+
             is TextModeEvent.HideTextField -> {
                 _state.update { it.copy(
                     textFieldState = it.textFieldState.copy(

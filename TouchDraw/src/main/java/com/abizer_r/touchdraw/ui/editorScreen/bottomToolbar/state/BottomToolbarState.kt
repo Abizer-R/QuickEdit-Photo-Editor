@@ -6,5 +6,6 @@ data class BottomToolbarState(
     val toolbarItems: ArrayList<BottomToolbarItem> = arrayListOf(),
     val selectedItem: BottomToolbarItem = BottomToolbarItem.NONE,
     val selectedColor: Color = Color.White,
+    val showColorPickerIcon: Boolean = true,
     val recompositionTriggerValue: Int = 0
 )

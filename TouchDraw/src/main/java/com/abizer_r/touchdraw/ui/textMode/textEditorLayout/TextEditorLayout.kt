@@ -1,7 +1,9 @@
 package com.abizer_r.touchdraw.ui.textMode.textEditorLayout
 
+import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -16,15 +18,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.abizer_r.components.R
-import com.abizer_r.components.ui.tool_items.ColorListFullWidth
+import com.abizer_r.components.theme.SketchDraftTheme
+import com.abizer_r.components.util.ColorUtils
+import com.abizer_r.touchdraw.utils.textMode.colorList.ColorListFullWidth
 import com.abizer_r.components.util.ImmutableList
 import com.abizer_r.touchdraw.ui.textMode.TextModeEvent
 import com.abizer_r.touchdraw.ui.textMode.TextModeState
 import com.abizer_r.touchdraw.ui.textMode.getSelectedColor
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
+import com.abizer_r.touchdraw.utils.textMode.alignmentOptions.TextAlignOptions
 import kotlinx.coroutines.delay
 
 @Composable
@@ -53,10 +60,13 @@ fun TextEditorLayout(
 
 
     val focusRequesterForTextField = remember { FocusRequester() }
-    val textFontSize = MaterialTheme.typography.headlineMedium.fontSize
 
     val onColorItemClicked = remember<(Int, Color) -> Unit> {{ index, color ->
         onTextModeEvent(TextModeEvent.SelectTextColor(index, color))
+    }}
+
+    val onTextAlignItemClicked = remember<(Int, TextAlign) -> Unit> {{ index, textAlign ->
+        onTextModeEvent(TextModeEvent.SelectTextAlign(index, textAlign))
     }}
 
     val onTextFieldValueChange = remember<(TextFieldValue) -> Unit> {{ mValue ->
@@ -66,7 +76,7 @@ fun TextEditorLayout(
     ConstraintLayout(
         modifier = modifier
     ) {
-        val (textField, placeHolderText, colorList) = createRefs()
+        val (textField, placeHolderText, colorList, textAlignOptions) = createRefs()
         TextField(
             modifier = Modifier
                 .constrainAs(textField) {
@@ -74,7 +84,7 @@ fun TextEditorLayout(
                     bottom.linkTo(parent.bottom)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                    width = Dimension.wrapContent
+                    width = Dimension.matchParent
                     height = Dimension.wrapContent
                 }
                 .background(Color.Transparent)
@@ -91,7 +101,7 @@ fun TextEditorLayout(
             textStyle = TextStyle(
                 color = textFieldState.getSelectedColor(),
                 textAlign = textFieldState.textAlign,
-                fontSize = textFontSize
+                fontSize = textFieldState.textFont
             ),
         )
 
@@ -105,13 +115,13 @@ fun TextEditorLayout(
                         bottom.linkTo(parent.bottom)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
-                        width = Dimension.wrapContent
+                        width = Dimension.matchParent
                         height = Dimension.wrapContent
                     },
                 text = stringResource(id = R.string.enter_your_text),
                 textAlign = textFieldState.textAlign,
                 color = textFieldState.getSelectedColor(),
-                fontSize = textFontSize
+                fontSize = textFieldState.textFont
             )
         }
 
@@ -130,8 +140,35 @@ fun TextEditorLayout(
                 height = Dimension.wrapContent
             },
             colorList = ImmutableList(textFieldState.textColorList),
+            backgroundColor = Color.Transparent,
             selectedIndex = textFieldState.selectedColorIndex,
             onItemClicked = onColorItemClicked
+        )
+
+        TextAlignOptions(
+            modifier = Modifier.constrainAs(textAlignOptions) {
+                bottom.linkTo(colorList.top)
+                start.linkTo(parent.start)
+            },
+            selectedAlignment = textFieldState.textAlign,
+            optionList = TextModeUtils.getTextAlignOptions(),
+            backgroundColor = Color.Transparent,
+            onItemClicked = onTextAlignItemClicked
+        )
+
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun Preview_TextEditorLayout() {
+    SketchDraftTheme {
+        TextEditorLayout(
+            modifier = Modifier.fillMaxSize(),
+            textFieldState = TextModeState.TextFieldState(
+                textFont = MaterialTheme.typography.headlineMedium.fontSize // defaultTextFont in "TextModeScreen"
+            ),
+            onTextModeEvent = {}
         )
 
     }

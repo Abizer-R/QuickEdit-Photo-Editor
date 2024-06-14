@@ -5,6 +5,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
@@ -87,4 +88,12 @@ object TextModeUtils {
             BottomToolbarItem.AddItem
         )
     }
+
+    val DEFAULT_TEXT_ALIGN = TextAlign.Center
+
+    fun getTextAlignOptions() = arrayListOf(
+        TextAlign.Start,
+        TextAlign.Center,
+        TextAlign.End
+    )
 }

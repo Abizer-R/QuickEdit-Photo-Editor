@@ -1,4 +1,4 @@
-package com.abizer_r.components.ui.tool_items
+package com.abizer_r.touchdraw.utils.textMode.colorList
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image

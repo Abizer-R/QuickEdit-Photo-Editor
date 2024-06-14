@@ -45,7 +45,10 @@ class DrawModeViewModel @Inject constructor(
                     it.copy(showColorPicker = it.showColorPicker.not())
                 }
                 _bottomToolbarState.update {
-                    it.copy(selectedColor = event.selectedColor ?: it.selectedColor)
+                    it.copy(
+                        selectedColor = event.selectedColor ?: it.selectedColor,
+                        showColorPickerIcon = false
+                    )
                 }
             }
 

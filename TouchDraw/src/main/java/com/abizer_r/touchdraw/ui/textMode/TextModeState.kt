@@ -2,6 +2,8 @@ package com.abizer_r.touchdraw.ui.textMode
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.sp
 import com.abizer_r.components.util.ColorUtils
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxState
 
@@ -17,6 +19,7 @@ data class TextModeState(
         val shouldRequestFocus: Boolean = true, /* initial value is true as the textField is visible initially */
         val text: String = "",
         val textAlign: TextAlign = TextAlign.Center,
+        val textFont: TextUnit = 24.sp, /* This has to be updated when initiating TextModeScreen */
         val textColorList: ArrayList<Color> = ColorUtils.defaultColorList,
         val selectedColorIndex: Int = 0
     )

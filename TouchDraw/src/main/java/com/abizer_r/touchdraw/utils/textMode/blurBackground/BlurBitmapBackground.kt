@@ -1,4 +1,4 @@
-package com.abizer_r.components.ui.blurBackground
+package com.abizer_r.touchdraw.utils.textMode.blurBackground
 
 import android.content.res.Configuration
 import android.util.Log

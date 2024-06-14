@@ -377,7 +377,8 @@ fun PreviewTextItem_NO_BORDER() {
                     positionOffset = Offset(100f, 100f),
                     scale = 1f,
                     rotation = 0f,
-                    textColor = MaterialTheme.colorScheme.onBackground
+                    textColor = MaterialTheme.colorScheme.onBackground,
+                    textFont = MaterialTheme.typography.headlineMedium.fontSize // defaultTextFont in "TextModeScreen"
                 ),
                 onEvent = {},
             )
@@ -401,7 +402,8 @@ fun PreviewTextItem_WITH_BORDER() {
                 positionOffset = Offset(100f, 100f),
                 scale = 1f,
                 rotation = 0f,
-                textColor = MaterialTheme.colorScheme.onBackground
+                textColor = MaterialTheme.colorScheme.onBackground,
+                textFont = MaterialTheme.typography.headlineMedium.fontSize // defaultTextFont in "TextModeScreen"
             )
             TransformableTextBox(
                 viewState = viewState,

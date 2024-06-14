@@ -25,6 +25,8 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.outlined.Brush
+import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,9 +36,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
@@ -83,6 +87,7 @@ fun BottomToolBar(
                 ),
                 toolbarItem = mToolbarItem,
                 selectedColor = bottomToolbarState.selectedColor,
+                showColorPickerIcon = bottomToolbarState.showColorPickerIcon,
                 isSelected = mToolbarItem == bottomToolbarState.selectedItem,
                 onEvent = onEvent
             )
@@ -95,6 +100,7 @@ fun BottomToolBar(
 fun ToolbarItem(
     modifier: Modifier = Modifier,
     selectedColor: Color,
+    showColorPickerIcon: Boolean,
     toolbarItem: BottomToolbarItem,
     isSelected: Boolean,
     onEvent: (BottomToolbarEvent) -> Unit
@@ -105,6 +111,7 @@ fun ToolbarItem(
         ColorToolbarItem(
             modifier = modifier,
             selectedColor = selectedColor,
+            showColorPickerIcon = showColorPickerIcon,
             colorItem = toolbarItem,
             labelFontSize = labelFontSize,
             onEvent = onEvent
@@ -123,7 +130,7 @@ fun ToolbarItem(
     val (imageVector, labelText) = when (toolbarItem) {
 
         is BottomToolbarItem.DrawMode -> Pair(
-            Icons.Default.Brush,
+            Icons.Outlined.Brush,
             stringResource(id = R.string.draw)
 
         )
@@ -138,7 +145,7 @@ fun ToolbarItem(
         )
 
         is BottomToolbarItem.ShapeTool -> Pair(
-            Icons.Default.Category,
+            Icons.Outlined.Category,
             stringResource(id = R.string.shape)
         )
 
@@ -211,6 +218,7 @@ fun ToolbarItem(
 fun ColorToolbarItem(
     modifier: Modifier = Modifier,
     selectedColor: Color,
+    showColorPickerIcon: Boolean,
     colorItem: BottomToolbarItem.ColorItem,
     labelFontSize: TextUnit,
     onEvent: (BottomToolbarEvent) -> Unit
@@ -220,19 +228,33 @@ fun ColorToolbarItem(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Image(
-            painter = ColorPainter(selectedColor),
-            contentDescription = null,
-            modifier = Modifier
-                .clip(CircleShape)
-                .background(color = MaterialTheme.colorScheme.onBackground)
-                .padding(1.dp)
-                .clip(CircleShape)
-                .size(26.dp)
-                .clickable {
-                    onEvent(BottomToolbarEvent.OnItemClicked(colorItem))
-                }
-        )
+
+        if (showColorPickerIcon) {
+            Image(
+                bitmap = ImageBitmap.imageResource(id = R.drawable.ic_color_picker),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(26.dp)
+                    .clickable {
+                        onEvent(BottomToolbarEvent.OnItemClicked(colorItem))
+                    }
+            )
+        } else {
+            Image(
+                painter = ColorPainter(selectedColor),
+                contentDescription = null,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(color = MaterialTheme.colorScheme.onBackground)
+                    .padding(1.dp)
+                    .clip(CircleShape)
+                    .size(26.dp)
+                    .clickable {
+                        onEvent(BottomToolbarEvent.OnItemClicked(colorItem))
+                    }
+            )
+        }
+        
 
         Spacer(modifier = Modifier.size(4.dp))
 

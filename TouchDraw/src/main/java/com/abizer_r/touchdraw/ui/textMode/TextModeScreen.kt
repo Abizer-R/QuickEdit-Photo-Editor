@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -25,7 +26,7 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import com.abizer_r.components.ui.blurBackground.BlurBitmapBackground
+import com.abizer_r.touchdraw.utils.textMode.blurBackground.BlurBitmapBackground
 import com.abizer_r.components.util.defaultErrorToast
 import com.abizer_r.touchdraw.ui.textMode.TextModeEvent.*
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
@@ -92,6 +93,15 @@ fun TextModeScreen(
         onBackPressed()
     }
 
+    val defaultTextFont = MaterialTheme.typography.headlineMedium.fontSize
+    LaunchedEffect(key1 = Unit) {
+        viewModel.onEvent(
+            TextModeEvent.UpdateTextFont(
+                textFont = defaultTextFont
+            )
+        )
+    }
+
     val onCloseClickedLambda = remember<() -> Unit> {{
         if (state.textFieldState.isVisible) {
             viewModel.onEvent(HideTextField)
@@ -107,7 +117,8 @@ fun TextModeScreen(
                     id = state.textFieldState.textStateId ?: UUID.randomUUID().toString(),
                     text = state.textFieldState.text,
                     textColor = state.textFieldState.getSelectedColor(),
-                    textAlign = state.textFieldState.textAlign
+                    textAlign = state.textFieldState.textAlign,
+                    textFont = state.textFieldState.textFont
                 )
             ))
             viewModel.onEvent(HideTextField)

@@ -44,7 +44,7 @@ fun TransformableTextBox(
             text = viewState.text,
             style = TextStyle(
                 color = viewState.textColor,
-                fontSize = MaterialTheme.typography.displayMedium.fontSize,
+                fontSize = viewState.textFont,
                 textAlign = viewState.textAlign
             )
         )
@@ -68,7 +68,8 @@ fun PreviewItem() {
                     positionOffset = Offset(100f, 100f),
                     scale = 1f,
                     rotation = 0f,
-                    textColor = MaterialTheme.colorScheme.onBackground
+                    textColor = MaterialTheme.colorScheme.onBackground,
+                    textFont = MaterialTheme.typography.headlineMedium.fontSize // defaultTextFont in "TextModeScreen"
                 ),
                 onEvent = {},
             )
