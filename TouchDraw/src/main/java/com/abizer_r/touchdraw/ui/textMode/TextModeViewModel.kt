@@ -3,6 +3,7 @@ package com.abizer_r.touchdraw.ui.textMode
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
@@ -52,8 +53,10 @@ class TextModeViewModel @Inject constructor(
     fun onEvent(event: TextModeEvent) {
         when (event) {
 
-            is TextModeEvent.ShowTextField -> {
+            is TextModeEvent.ShowTextField -> viewModelScope.launch {
                 Log.e("TEST_BLUR", "PlaceHolder Text: ", )
+                _state.update { it.copy(showBlurredBg = true) }
+                delay(200)  /* delay to let Cloudy library make actual bitmap blurry, before textEditor is shown */
                 _state.update { it.copy(
                     textFieldState = event.textFieldState.copy(
                         isVisible = true,
@@ -86,7 +89,8 @@ class TextModeViewModel @Inject constructor(
                 )}
             }
 
-            is TextModeEvent.HideTextField -> {
+            is TextModeEvent.HideTextField -> viewModelScope.launch {
+                _state.update { it.copy(showBlurredBg = false) }
                 _state.update { it.copy(
                     textFieldState = it.textFieldState.copy(
                         isVisible = false,

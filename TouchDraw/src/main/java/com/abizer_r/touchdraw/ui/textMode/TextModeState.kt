@@ -9,7 +9,7 @@ import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxState
 
 data class TextModeState(
     val textFieldState: TextFieldState = TextFieldState(),
-//    val textFieldValue: String = "",
+    val showBlurredBg: Boolean = true,
     val transformableViewStateList: ArrayList<TransformableBoxState> = arrayListOf(),
     val recompositionTrigger: Long = 0
 ) {

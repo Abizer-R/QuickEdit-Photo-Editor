@@ -40,9 +40,9 @@ fun BlurBitmapBackground(
             Image(
                 modifier = Modifier.fillMaxSize(),
                 bitmap = imageBitmap,
-                contentScale = ContentScale.Inside,
+                contentScale = ContentScale.Fit,
                 contentDescription = null,
-                alpha = 0.3f
+                alpha = 0.5f
             )
         }
 
