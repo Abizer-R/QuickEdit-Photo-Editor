@@ -69,6 +69,7 @@ fun EditorScreen(
     initialEditorScreenState: EditorScreenState,
     goToDrawModeScreen: (finalEditorState: EditorScreenState) -> Unit,
     goToTextModeScreen: (finalEditorState: EditorScreenState) -> Unit,
+    goToEffectsModeScreen: (finalEditorState: EditorScreenState) -> Unit,
 ) {
     if (initialEditorScreenState.bitmapStack.isEmpty()) {
         throw Exception("EmptyStackException: The bitmapStack of initial state should contain at least one bitmap")
@@ -99,6 +100,9 @@ fun EditorScreen(
                     }
                     BottomToolbarItem.TextMode -> {
                         goToTextModeScreen(state)
+                    }
+                    BottomToolbarItem.EffectsMode -> {
+                        goToEffectsModeScreen(state)
                     }
                     else -> {}
                 }

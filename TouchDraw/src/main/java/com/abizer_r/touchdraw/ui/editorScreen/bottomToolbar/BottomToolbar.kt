@@ -138,6 +138,10 @@ fun ToolbarItem(
             Icons.Default.TextFields,
             stringResource(id = R.string.text)
         )
+        is BottomToolbarItem.EffectsMode -> Pair(
+            ImageVector.vectorResource(id = com.abizer_r.touchdraw.R.drawable.ic_effects),
+            stringResource(id = R.string.effects)
+        )
 
         is BottomToolbarItem.EraserTool -> Pair(
             ImageVector.vectorResource(id = R.drawable.ic_eraser),
@@ -158,6 +162,11 @@ fun ToolbarItem(
             Icons.Default.AddCircleOutline,
             ""
         )
+    }
+
+    val paddingAfterSize = when (toolbarItem) {
+        is BottomToolbarItem.EffectsMode -> 1.dp
+        else -> 0.dp
     }
 
 
@@ -191,7 +200,8 @@ fun ToolbarItem(
         Image(
             modifier = Modifier
                 .padding(vertical = verticalPaddingBeforeSize)
-                .size(imageSize),
+                .size(imageSize)
+                .padding(paddingAfterSize),
             contentDescription = null,
             imageVector = imageVector,
             colorFilter = ColorFilter.tint(

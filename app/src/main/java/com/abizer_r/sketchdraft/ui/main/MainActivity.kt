@@ -32,6 +32,7 @@ import com.abizer_r.touchdraw.ui.SharedEditorViewModel
 import com.abizer_r.touchdraw.ui.drawMode.DrawModeScreen
 import com.abizer_r.touchdraw.ui.editorScreen.EditorScreen
 import com.abizer_r.touchdraw.ui.editorScreen.EditorScreenState
+import com.abizer_r.touchdraw.ui.effectsMode.EffectsModeScreen
 import com.abizer_r.touchdraw.ui.textMode.TextModeScreen
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Stack
@@ -121,9 +122,14 @@ fun MainScreenNavigation(
                     sharedEditorViewModel.updateStacksFromEditorState(finalEditorState)
                     navController.navigate("textMode")
                 },
+                goToEffectsModeScreen = { finalEditorState ->
+                    sharedEditorViewModel.updateStacksFromEditorState(finalEditorState)
+                    navController.navigate("effectsMode")
+                },
             )
 
         }
+
         composable(route = "drawMode") { entry ->
             DrawModeScreen(
                 bitmap = sharedEditorViewModel.getCurrentBitmap(),
@@ -144,6 +150,7 @@ fun MainScreenNavigation(
                 }
             )
         }
+
         composable(route = "textMode") { entry ->
             TextModeScreen(
                 bitmap = sharedEditorViewModel.getCurrentBitmap().asImageBitmap(),
@@ -152,6 +159,26 @@ fun MainScreenNavigation(
                 },
                 onDoneClicked = {
                     Log.d("TEST_RECOMP", "TextModeScreen: addBitmapToStack, bitmap = $it", )
+                    sharedEditorViewModel.addBitmapToStack(
+                        bitmap = it.copy(Bitmap.Config.ARGB_8888, false),
+                    )
+                    navController.navigate(
+                        "editorScreen",
+                        navOptions = NavOptions.Builder()
+                            .setPopUpTo(route = "editorScreen", inclusive = true)
+                            .build()
+                    )
+                }
+            )
+        }
+
+        composable(route = "effectsMode") { entry ->
+            EffectsModeScreen(
+                bitmap = sharedEditorViewModel.getCurrentBitmap(),
+                onBackPressed = {
+                    navController.navigateUp()
+                },
+                onDoneClicked = {
                     sharedEditorViewModel.addBitmapToStack(
                         bitmap = it.copy(Bitmap.Config.ARGB_8888, false),
                     )
