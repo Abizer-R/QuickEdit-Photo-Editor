@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.touchdraw.ui.transformableViews.TransformableTextBox
+import com.abizer_r.touchdraw.utils.drawMode.DrawModeUtils
 import com.abizer_r.touchdraw.utils.drawMode.toPx
 
 @Composable
@@ -219,8 +220,11 @@ fun ScaleButton(
             .rotate(80f)
             .alpha(btnAlpha)
             .pointerInput(Unit) {
-                detectDragGestures { change, dragAmount ->Log.e(
-                    "TEST_SCALE", "ScaleButton: dragDistance = ${dragAmount.getDistance() / viewState.scale}, dragAmount = $dragAmount")
+                detectDragGestures { change, dragAmount ->
+                    Log.e(
+                        "TEST_SCALE",
+                        "ScaleButton: dragDistance = ${dragAmount.getDistance() / viewState.scale}, dragAmount = $dragAmount"
+                    )
 
                     /**
                      *
@@ -297,10 +301,12 @@ fun Modifier.detectGestures(
                             "\nrotation: $rotationChange"
                 )
 
+                val dragAmount = pan * viewState.scale
+                val rotatedDragAmount = DrawModeUtils.rotateOffset(dragAmount, viewState.rotation)
                 onEvent(
                     TransformableBoxEvents.OnDrag(
                         id = viewState.id,
-                        dragAmount = pan * viewState.scale  // multiply with scale to get the actual drag amount (see commit message)
+                        dragAmount = rotatedDragAmount  // multiply with scale to get the actual drag amount (see commit message)
                     )
                 )
 
