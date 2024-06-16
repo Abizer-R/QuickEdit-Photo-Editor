@@ -3,9 +3,11 @@
     <string name="brush">Brush</string>
     <string name="shape">Shape</string>
     <string name="eraser">Eraser</string>
+    <string name="draw">Draw</string>
     <string name="text">Text</string>
     <string name="width">Width</string>
     <string name="opacity">Opacity</string>
     <string name="done">Done</string>
     <string name="something_went_wrong">Something went wrong</string>
+    <string name="enter_your_text">Enter your text</string>
 </resources>

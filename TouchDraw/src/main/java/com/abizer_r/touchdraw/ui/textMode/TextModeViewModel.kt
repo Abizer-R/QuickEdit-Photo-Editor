@@ -1,34 +1,22 @@
 package com.abizer_r.touchdraw.ui.textMode
 
 import android.util.Log
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
-import com.abizer_r.touchdraw.ui.drawMode.stateHandling.TextModeEvent
-import com.abizer_r.touchdraw.ui.drawMode.stateHandling.TextModeState
+import androidx.lifecycle.viewModelScope
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
+import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
-import com.abizer_r.touchdraw.ui.transformableViews.getId
-import com.abizer_r.touchdraw.ui.transformableViews.getIsSelected
-import com.abizer_r.touchdraw.ui.transformableViews.getPositionOffset
-import com.abizer_r.touchdraw.ui.transformableViews.getRotation
-import com.abizer_r.touchdraw.ui.transformableViews.getScale
-import com.abizer_r.touchdraw.ui.transformableViews.setIsSelected
-import com.abizer_r.touchdraw.ui.transformableViews.setPositionOffset
-import com.abizer_r.touchdraw.ui.transformableViews.setRotation
-import com.abizer_r.touchdraw.ui.transformableViews.setScale
-import com.abizer_r.touchdraw.utils.drawMode.DrawingConstants
-import com.abizer_r.touchdraw.utils.drawMode.setOpacityIfPossible
-import com.abizer_r.touchdraw.utils.drawMode.setShapeTypeIfPossible
-import com.abizer_r.touchdraw.utils.drawMode.setWidthIfPossible
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -42,86 +30,128 @@ class TextModeViewModel @Inject constructor(
     private val _bottomToolbarState = MutableStateFlow(TextModeUtils.getDefaultBottomToolbarState())
     val bottomToolbarState: StateFlow<BottomToolbarState> = _bottomToolbarState
 
-    var shouldRequestFocus = false
-        private set
+    init {
+//        debugTrackViewListSize()
+    }
+
+    private fun debugTrackViewListSize() {
+        GlobalScope.launch {
+            while (true) {
+                delay(1000)
+                Log.e("TEST_TEXT_MODE", ": viewList size = ${state.value.transformableViewStateList.size}", )
+            }
+        }
+    }
 
     var shouldGoToNextScreen = false
 
-//    private var lastCaptureRequest: Long = Calendar.getInstance().timeInMillis
+    fun handleStateBeforeCaptureScreenshot() {
+        shouldGoToNextScreen = true
+        updateViewSelection(null)
+    }
 
     fun onEvent(event: TextModeEvent) {
         when (event) {
-            is TextModeEvent.ShowTextField -> {
+
+            is TextModeEvent.ShowTextField -> viewModelScope.launch {
+                Log.e("TEST_BLUR", "PlaceHolder Text: ", )
+                _state.update { it.copy(showBlurredBg = true) }
+                delay(200)  /* delay to let Cloudy library make actual bitmap blurry, before textEditor is shown */
                 _state.update { it.copy(
-                    isTextFieldVisible = true,
-                    textFieldValue = ""
+                    textFieldState = event.textFieldState.copy(
+                        isVisible = true,
+                        shouldRequestFocus = true
+                    )
                 ) }
             }
-            is TextModeEvent.HideTextField -> {
-                shouldRequestFocus = false
-                _state.update { it.copy(isTextFieldVisible = false) }
+
+            is TextModeEvent.SelectTextColor -> {
+                _state.update { it.copy(
+                    textFieldState = it.textFieldState.copy(
+                        selectedColorIndex = event.index
+                    )
+                ) }
+            }
+
+            is TextModeEvent.SelectTextAlign -> {
+                _state.update { it.copy(
+                    textFieldState = it.textFieldState.copy(
+                        textAlign = event.textAlign
+                    )
+                )}
+            }
+
+            is TextModeEvent.UpdateTextFont -> {
+                _state.update { it.copy(
+                    textFieldState = it.textFieldState.copy(
+                        textFont = event.textFont
+                    )
+                )}
+            }
+
+            is TextModeEvent.HideTextField -> viewModelScope.launch {
+                _state.update { it.copy(showBlurredBg = false) }
+                _state.update { it.copy(
+                    textFieldState = it.textFieldState.copy(
+                        isVisible = false,
+                        shouldRequestFocus = false
+                    )
+                ) }
             }
 
             is TextModeEvent.UpdateTextFieldValue -> {
-                _state.update {
-                    it.copy(textFieldValue = event.textInput)
-                }
+                _state.update { it.copy(
+                    textFieldState = it.textFieldState.copy(
+                        text = event.textInput
+                    )
+                ) }
             }
 
             is TextModeEvent.UpdateTransformableViewsList -> {
                 _state.update {
                     it.copy(
-                        transformableViewsList = event.list,
+                        transformableViewStateList = event.list,
                         recompositionTrigger = it.recompositionTrigger + 1
                     )
                 }
             }
 
-            is TextModeEvent.AddTransformableTextView -> {
-                val newList = state.value.transformableViewsList.also { list ->
-                    list.add(event.view)
+            is TextModeEvent.AddTransformableTextBox -> {
+                val id = event.textBoxState.id
+                val existingItem = state.value.transformableViewStateList.find { it.id == id }
+                if (existingItem != null) {
+                    (existingItem as TransformableTextBoxState).apply {
+                        text = event.textBoxState.text
+                        textAlign = event.textBoxState.textAlign
+                        textColor = event.textBoxState.textColor
+                    }
+                } else {
+                    val newList = state.value.transformableViewStateList.also { list ->
+                        list.add(event.textBoxState)
+                    }
+                    _state.update {it.copy(transformableViewStateList = newList) }
                 }
-                _state.update {it.copy(transformableViewsList = newList) }
-                updateViewSelection(selectedViewId = event.view.getId())
+
+                updateViewSelection(selectedViewId = event.textBoxState.id)
             }
-//            is DrawModeEvent.ToggleColorPicker -> {
-//                _state.update {
-//                    it.copy(showColorPicker = it.showColorPicker.not())
-//                }
-//                _bottomToolbarState.update {
-//                    it.copy(selectedColor = event.selectedColor ?: it.selectedColor)
-//                }
-//            }
 
-
-            else -> {}
         }
     }
 
     fun onTransformableBoxEvent(mEvent: TransformableBoxEvents) {
-        val stateList = state.value.transformableViewsList
-        val viewItem = stateList.find { it.getId() == mEvent.id } ?: return
-        if (viewItem.getIsSelected().not()) {
-            Log.e("TEST_Select", "onTransformableBoxEvent: selecting item ${viewItem.getId()}", )
-            updateViewSelection(viewItem.getId())
-        }
+        val stateList = state.value.transformableViewStateList
+        val viewItem = stateList.find { it.id == mEvent.id } ?: return
         when(mEvent) {
             is TransformableBoxEvents.OnDrag -> {
-                viewItem.setPositionOffset(
-                    mOffset = viewItem.getPositionOffset() + mEvent.dragAmount
-                )
+                viewItem.positionOffset += mEvent.dragAmount
             }
 
             is TransformableBoxEvents.OnZoom -> {
-                viewItem.setScale(
-                    mScale = (viewItem.getScale() * mEvent.zoomAmount).coerceIn(0.5f, 5f)
-                )
+                viewItem.scale = (viewItem.scale * mEvent.zoomAmount).coerceIn(0.5f, 5f)
             }
 
             is TransformableBoxEvents.OnRotate -> {
-                viewItem.setRotation(
-                    mRotation = viewItem.getRotation() + mEvent.rotationChange
-                )
+                viewItem.rotation += mEvent.rotationChange
             }
 
             is TransformableBoxEvents.OnCloseClicked -> {
@@ -131,22 +161,41 @@ class TextModeViewModel @Inject constructor(
             is TransformableBoxEvents.OnTapped -> {
                 // Main objective is to select the view when tapped
                 // it is already done above, so doing nothing here
+                if (viewItem.isSelected && mEvent.textViewState != null) {
+                    val currTextFieldState = state.value.textFieldState
+                    onEvent(
+                        TextModeEvent.ShowTextField(
+                            textFieldState = currTextFieldState.copy(
+                                textStateId = mEvent.id,
+                                text = mEvent.textViewState.text,
+                                textAlign = mEvent.textViewState.textAlign,
+                                selectedColorIndex = currTextFieldState.getIndexFromColor(
+                                    mEvent.textViewState.textColor
+                                )
+                            )
+                        )
+                    )
+                }
             }
+        }
+        if (viewItem.isSelected.not()) {
+            Log.e("TEST_Select", "onTransformableBoxEvent: selecting item ${viewItem.id}", )
+            updateViewSelection(viewItem.id)
         }
         onEvent(TextModeEvent.UpdateTransformableViewsList(stateList))
     }
 
     fun updateViewSelection(selectedViewId: String? = null) {
-        val transformableViewsList = state.value.transformableViewsList
+        val transformableViewsList = state.value.transformableViewStateList
         transformableViewsList.forEach {
             val isSelected = if (selectedViewId != null) {
-                it.getId() == selectedViewId
+                it.id == selectedViewId
             } else false
-            it.setIsSelected(isSelected)
+            it.isSelected = isSelected
         }
         _state.update {
             it.copy(
-                transformableViewsList = transformableViewsList,
+                transformableViewStateList = transformableViewsList,
                 recompositionTrigger = it.recompositionTrigger + 1
             )
         }
@@ -159,33 +208,6 @@ class TextModeViewModel @Inject constructor(
                 onBottomToolbarItemClicked(event.toolbarItem)
             }
 
-//            is BottomToolbarEvent.UpdateOpacity -> {
-//                _bottomToolbarState.update {
-//                    it.copy(
-//                        selectedItem = it.selectedItem.setOpacityIfPossible(event.newOpacity),
-//                        recompositionTriggerValue = it.recompositionTriggerValue + 1
-//                    )
-//                }
-//            }
-//
-//            is BottomToolbarEvent.UpdateWidth -> {
-//                _bottomToolbarState.update {
-//                    it.copy(
-//                        selectedItem = it.selectedItem.setWidthIfPossible(event.newWidth),
-//                        recompositionTriggerValue = it.recompositionTriggerValue + 1
-//                    )
-//                }
-//            }
-//
-//            is BottomToolbarEvent.UpdateShapeType -> {
-//                _bottomToolbarState.update {
-//                    it.copy(
-//                        selectedItem = it.selectedItem.setShapeTypeIfPossible(event.newShapeType),
-//                        recompositionTriggerValue = it.recompositionTriggerValue + 1
-//                    )
-//                }
-//            }
-
             else -> {}
         }
     }
@@ -193,8 +215,7 @@ class TextModeViewModel @Inject constructor(
     private fun onBottomToolbarItemClicked(selectedItem: BottomToolbarItem) {
         when (selectedItem) {
             is BottomToolbarItem.AddItem -> {
-                shouldRequestFocus = true
-                onEvent(TextModeEvent.ShowTextField)
+                onEvent(TextModeEvent.ShowTextField(TextModeState.TextFieldState()))
             }
 
             else -> {}

@@ -8,16 +8,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material3.MaterialTheme
@@ -38,17 +34,16 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.abizer_r.components.theme.SketchDraftTheme
-import com.abizer_r.touchdraw.ui.transformableViews.TransformableTextView
-import com.abizer_r.touchdraw.ui.transformableViews.TransformableViewType
-import com.abizer_r.touchdraw.utils.drawMode.pxToDp
+import com.abizer_r.touchdraw.ui.transformableViews.TransformableTextBox
+import com.abizer_r.touchdraw.utils.drawMode.DrawModeUtils
 import com.abizer_r.touchdraw.utils.drawMode.toPx
 
 @Composable
@@ -225,8 +220,11 @@ fun ScaleButton(
             .rotate(80f)
             .alpha(btnAlpha)
             .pointerInput(Unit) {
-                detectDragGestures { change, dragAmount ->Log.e(
-                    "TEST_SCALE", "ScaleButton: dragDistance = ${dragAmount.getDistance() / viewState.scale}, dragAmount = $dragAmount")
+                detectDragGestures { change, dragAmount ->
+                    Log.e(
+                        "TEST_SCALE",
+                        "ScaleButton: dragDistance = ${dragAmount.getDistance() / viewState.scale}, dragAmount = $dragAmount"
+                    )
 
                     /**
                      *
@@ -280,7 +278,7 @@ fun Modifier.detectTap(
                 Log.e("TEST_TransformBox", "detectTouch: TAPPED", )
                 onEvent(
                     TransformableBoxEvents.OnTapped(
-                        id = viewState.id,
+                        id = viewState.id, textViewState = null
                     )
                 )
             }
@@ -303,10 +301,12 @@ fun Modifier.detectGestures(
                             "\nrotation: $rotationChange"
                 )
 
+                val dragAmount = pan * viewState.scale
+                val rotatedDragAmount = DrawModeUtils.rotateOffset(dragAmount, viewState.rotation)
                 onEvent(
                     TransformableBoxEvents.OnDrag(
                         id = viewState.id,
-                        dragAmount = pan * viewState.scale  // multiply with scale to get the actual drag amount (see commit message)
+                        dragAmount = rotatedDragAmount  // multiply with scale to get the actual drag amount (see commit message)
                     )
                 )
 
@@ -375,16 +375,16 @@ fun PreviewTextItem_NO_BORDER() {
                 .size(300.dp, 100.dp)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            TransformableTextView(
-                viewDetail = TransformableViewType.TextTransformable(
+            TransformableTextBox(
+                viewState = TransformableTextBoxState(
+                    id = "",
                     text = "Hello",
-                    viewState = TransformableBoxState(
-                        id = "",
-                        positionOffset = Offset(0f, 0f),
-                        scale = 1f,
-                        rotation = 0f,
-                        isSelected = true
-                    )
+                    textAlign = TextAlign.Center,
+                    positionOffset = Offset(100f, 100f),
+                    scale = 1f,
+                    rotation = 0f,
+                    textColor = MaterialTheme.colorScheme.onBackground,
+                    textFont = MaterialTheme.typography.headlineMedium.fontSize // defaultTextFont in "TextModeScreen"
                 ),
                 onEvent = {},
             )
@@ -401,25 +401,22 @@ fun PreviewTextItem_WITH_BORDER() {
                 .size(300.dp, 100.dp)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            val viewState = TransformableBoxState(
+            val viewState = TransformableTextBoxState(
                 id = "",
-                positionOffset = Offset(0f, 0f),
+                text = "Hello",
+                textAlign = TextAlign.Center,
+                positionOffset = Offset(100f, 100f),
                 scale = 1f,
                 rotation = 0f,
-                isSelected = true
+                textColor = MaterialTheme.colorScheme.onBackground,
+                textFont = MaterialTheme.typography.headlineMedium.fontSize // defaultTextFont in "TextModeScreen"
             )
-            TransformableTextView(
-                viewDetail = TransformableViewType.TextTransformable(
-                    text = "Hello",
-                    viewState = viewState
-                ),
+            TransformableTextBox(
+                viewState = viewState,
                 onEvent = {},
             )
-            TransformableTextView(
-                viewDetail = TransformableViewType.TextTransformable(
-                    text = "Hello",
-                    viewState = viewState
-                ),
+            TransformableTextBox(
+                viewState = viewState,
                 showBorderOnly = true,
                 onEvent = {},
             )

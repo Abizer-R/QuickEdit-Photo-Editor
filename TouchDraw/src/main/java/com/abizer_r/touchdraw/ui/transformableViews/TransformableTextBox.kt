@@ -10,31 +10,42 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.abizer_r.components.theme.SketchDraftTheme
+import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBox
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
-import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxState
 
 @Composable
-fun TransformableTextView(
+fun TransformableTextBox(
     modifier: Modifier = Modifier,
     showBorderOnly: Boolean = false,
-    viewDetail: TransformableViewType.TextTransformable,
+    viewState: TransformableTextBoxState,
     onEvent: (TransformableBoxEvents) -> Unit
 ) {
 
     TransformableBox(
         modifier = modifier,
-        viewState = viewDetail.viewState,
+        viewState = viewState,
         showBorderOnly = showBorderOnly,
-        onEvent = onEvent
+        onEvent = {
+            // Intercepting events to modify required ones
+            when (it) {
+                is TransformableBoxEvents.OnTapped -> onEvent(
+                    TransformableBoxEvents.OnTapped(it.id, viewState)
+                )
+
+                else -> onEvent(it)
+            }
+        }
     ) {
         Text(
-            text = viewDetail.text,
+            text = viewState.text,
             style = TextStyle(
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = MaterialTheme.typography.displayMedium.fontSize
+                color = viewState.textColor,
+                fontSize = viewState.textFont,
+                textAlign = viewState.textAlign
             )
         )
     }
@@ -49,15 +60,16 @@ fun PreviewItem() {
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            TransformableTextView(
-                viewDetail = TransformableViewType.TextTransformable(
+            TransformableTextBox(
+                viewState = TransformableTextBoxState(
+                    id = "",
                     text = "Hello",
-                    viewState = TransformableBoxState(
-                        id = "",
-                        positionOffset = Offset(100f, 100f),
-                        scale = 1f,
-                        rotation = 0f
-                    )
+                    textAlign = TextAlign.Center,
+                    positionOffset = Offset(100f, 100f),
+                    scale = 1f,
+                    rotation = 0f,
+                    textColor = MaterialTheme.colorScheme.onBackground,
+                    textFont = MaterialTheme.typography.headlineMedium.fontSize // defaultTextFont in "TextModeScreen"
                 ),
                 onEvent = {},
             )

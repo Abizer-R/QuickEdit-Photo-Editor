@@ -14,10 +14,14 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.toSize
 import com.abizer_r.touchdraw.ui.drawMode.stateHandling.DrawModeEvent
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.AbstractShape
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.models.PathDetails
@@ -47,19 +51,16 @@ fun DrawingCanvas(
     var drawPathAction by remember { mutableStateOf<Any?>(null) }
     var previousY: Float? = remember { null }
 
+    var bitmapReqSize by remember {
+        mutableStateOf(
+            bitmap?.let {
+                IntSize(bitmap.width, bitmap.height)
+            } ?: IntSize.Zero
+        )
+    }
+
     Canvas(
         modifier = modifier
-            .drawBehind {
-                bitmap?.let { mBitmap ->
-                    drawIntoCanvas { mCanvas ->
-                        val destRect = android.graphics.Rect(0, 0, mBitmap.width, mBitmap.height)
-                        mCanvas.nativeCanvas.drawBitmap(
-                            mBitmap, null, destRect, Paint()
-                        )
-                    }
-                }
-
-            }
             .pointerInteropFilter {
                 when (it.action) {
                     MotionEvent.ACTION_DOWN -> {

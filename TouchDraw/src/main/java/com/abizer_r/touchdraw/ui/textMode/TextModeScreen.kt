@@ -1,14 +1,15 @@
 package com.abizer_r.touchdraw.ui.textMode
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -18,8 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.input.pointer.pointerInteropFilter
@@ -27,23 +26,22 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.abizer_r.touchdraw.utils.textMode.blurBackground.BlurBitmapBackground
 import com.abizer_r.components.util.defaultErrorToast
-import com.abizer_r.touchdraw.ui.drawMode.stateHandling.TextModeEvent.*
+import com.abizer_r.touchdraw.ui.textMode.TextModeEvent.*
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TextModeTopToolbar
-import com.abizer_r.touchdraw.ui.transformableViews.TransformableTextView
-import com.abizer_r.touchdraw.ui.transformableViews.TransformableViewType
-import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
-import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxState
-import com.abizer_r.touchdraw.ui.transformableViews.getIsSelected
-import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
+import com.abizer_r.touchdraw.ui.textMode.textEditorLayout.TextEditorLayout
+import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
+import com.abizer_r.touchdraw.utils.textMode.TextModeUtils.BorderForSelectedViews
+import com.abizer_r.touchdraw.utils.textMode.TextModeUtils.DrawAllTransformableViews
+import com.skydoves.cloudy.Cloudy
 import com.smarttoolfactory.screenshot.ImageResult
 import com.smarttoolfactory.screenshot.ScreenshotBox
 import com.smarttoolfactory.screenshot.rememberScreenshotState
@@ -71,7 +69,6 @@ fun TextModeScreen(
         lifecycleOwner = lifeCycleOwner
     )
 
-    val focusRequesterForTextField = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     DisposableEffect(key1 = Unit) {
@@ -103,6 +100,48 @@ fun TextModeScreen(
         onBackPressed()
     }
 
+    val defaultTextFont = MaterialTheme.typography.headlineMedium.fontSize
+    LaunchedEffect(key1 = Unit) {
+        viewModel.onEvent(
+            TextModeEvent.UpdateTextFont(
+                textFont = defaultTextFont
+            )
+        )
+    }
+
+    val onCloseClickedLambda = remember<() -> Unit> {{
+        if (state.textFieldState.isVisible) {
+            viewModel.onEvent(HideTextField)
+        } else {
+            onBackPressed()
+        }
+    }}
+
+    val onDoneClickedLambda = remember<() -> Unit> {{
+        if (state.textFieldState.isVisible) {
+            viewModel.onEvent(AddTransformableTextBox(
+                textBoxState = TransformableTextBoxState(
+                    id = state.textFieldState.textStateId ?: UUID.randomUUID().toString(),
+                    text = state.textFieldState.text,
+                    textColor = state.textFieldState.getSelectedColor(),
+                    textAlign = state.textFieldState.textAlign,
+                    textFont = state.textFieldState.textFont
+                )
+            ))
+            viewModel.onEvent(HideTextField)
+        } else {
+            viewModel.handleStateBeforeCaptureScreenshot()
+            lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                delay(200)  /* Delay to update the selection in ui */
+                screenshotState.capture()
+            }
+        }
+    }}
+
+    val onBgClickedLambda = remember<() -> Unit> {{
+        viewModel.updateViewSelection(null)
+    }}
+
 
     ConstraintLayout(
         modifier = modifier
@@ -118,31 +157,8 @@ fun TextModeScreen(
                 width = Dimension.matchParent
                 height = Dimension.wrapContent
             },
-            onCloseClicked = {
-                if (state.isTextFieldVisible) {
-                    viewModel.onEvent(HideTextField)
-                } else {
-                    onBackPressed()
-                }
-            },
-            onDoneClicked = {
-                if (state.isTextFieldVisible) {
-                    viewModel.onEvent(AddTransformableTextView(
-                        view = TransformableViewType.TextTransformable(
-                            text = state.textFieldValue,
-                            viewState = TransformableBoxState(id = UUID.randomUUID().toString())
-                        )
-                    ))
-                    viewModel.onEvent(HideTextField)
-                } else {
-                    viewModel.shouldGoToNextScreen = true
-                    lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-                        viewModel.updateViewSelection(null)
-                        delay(200)  /* Delay to update the selection in ui */
-                        screenshotState.capture()
-                    }
-                }
-            }
+            onCloseClicked = onCloseClickedLambda,
+            onDoneClicked = onDoneClickedLambda
         )
         val aspectRatio = bitmap.let {
             bitmap.width.toFloat() / bitmap.height.toFloat()
@@ -161,24 +177,19 @@ fun TextModeScreen(
             screenshotState = screenshotState
         ) {
 
-            Image(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pointerInteropFilter {
-                        viewModel.updateViewSelection(null)
-                        true
-                    },
-                bitmap = bitmap,
-                contentScale = ContentScale.Fit,
-                contentDescription = null,
-                alpha = if (state.isTextFieldVisible) 0.3f else 1f
+            BlurBitmapBackground(
+                modifier = Modifier.fillMaxSize(),
+                imageBitmap = bitmap,
+                shouldBlur = state.showBlurredBg,
+                blurRadius = 15,
+                onBgClicked = onBgClickedLambda
             )
 
             Box(modifier = Modifier.fillMaxSize()) {
-                if (state.isTextFieldVisible.not()) {
+                if (state.showBlurredBg.not() && state.textFieldState.isVisible.not()) {
                     DrawAllTransformableViews(
                         centerAlignModifier = Modifier.align(Alignment.Center),
-                        transformableViewsList = state.transformableViewsList,
+                        transformableViewsList = state.transformableViewStateList,
                         onTransformableBoxEvent = {
                             viewModel.onTransformableBoxEvent(it)
                         }
@@ -202,10 +213,10 @@ fun TextModeScreen(
         ) {
 
 
-            if (state.isTextFieldVisible.not()) {
+            if (state.showBlurredBg.not() && state.textFieldState.isVisible.not()) {
                 BorderForSelectedViews(
                     centerAlignModifier = Modifier.align(Alignment.Center),
-                    transformableViewsList = state.transformableViewsList,
+                    transformableViewsList = state.transformableViewStateList,
                     onTransformableBoxEvent = {
                         viewModel.onTransformableBoxEvent(it)
                     }
@@ -214,95 +225,39 @@ fun TextModeScreen(
 
         }
 
-        if (state.isTextFieldVisible) {
-            TextField(
+        if (state.textFieldState.isVisible) {
+            TextEditorLayout(
                 modifier = Modifier
                     .constrainAs(textInputView) {
                         top.linkTo(topToolBar.bottom)
                         bottom.linkTo(parent.bottom)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
-                        width = Dimension.wrapContent
-                        height = Dimension.wrapContent
-                    }
-                    .background(Color.Transparent)
-                    .focusRequester(focusRequesterForTextField),
-                value = state.textFieldValue,
-                onValueChange = { mText ->
-                    viewModel.onEvent(UpdateTextFieldValue(mText))
-                },
-                colors = TextModeUtils.getColorsForTextField(),
-                textStyle = TextStyle(
-                    textAlign = TextAlign.Center,
-                    fontSize = MaterialTheme.typography.headlineMedium.fontSize
-                )
-            )
-            if (viewModel.shouldRequestFocus) {
-                LaunchedEffect(key1 = Unit) {
-                    focusRequesterForTextField.requestFocus()
+                        width = Dimension.fillToConstraints
+                        height = Dimension.fillToConstraints
+                    },
+                textFieldState = state.textFieldState,
+                onTextModeEvent = {
+                    viewModel.onEvent(it)
                 }
-            }
+            )
+
         }
 
 
-        BottomToolBar(
-            modifier = Modifier.constrainAs(bottomToolbar) {
-                bottom.linkTo(parent.bottom)
-                width = Dimension.matchParent
-                height = Dimension.wrapContent
-            },
-            bottomToolbarState = bottomToolbarState,
-            onEvent = {
-                viewModel.onBottomToolbarEvent(it)
-//                if (
-//                    it is BottomToolbarEvent.OnItemClicked &&
-//                    it.toolbarItem == BottomToolbarItem.AddItem
-//                ) {
-//                    viewModel.shouldRequestFocus = true
-//                }
-            }
-        )
-    }
-}
+        if (state.showBlurredBg.not() && state.textFieldState.isVisible.not()) {
+            BottomToolBar(
+                modifier = Modifier.constrainAs(bottomToolbar) {
+                    bottom.linkTo(parent.bottom)
+                    width = Dimension.matchParent
+                    height = Dimension.wrapContent
+                },
+                bottomToolbarState = bottomToolbarState,
+                onEvent = {
+                    viewModel.onBottomToolbarEvent(it)
+                }
+            )
 
-@Composable
-fun DrawAllTransformableViews(
-    centerAlignModifier: Modifier,
-    transformableViewsList: ArrayList<TransformableViewType>,
-    onTransformableBoxEvent: (event: TransformableBoxEvents) -> Unit
-) {
-    transformableViewsList.forEach { mViewDetail ->
-        when (mViewDetail) {
-            is TransformableViewType.TextTransformable -> {
-                TransformableTextView(
-                    modifier = centerAlignModifier,
-                    viewDetail = mViewDetail,
-                    onEvent = onTransformableBoxEvent
-                )
-            }
-        }
-    }
-}
-
-
-@Composable
-fun BorderForSelectedViews(
-    centerAlignModifier: Modifier,
-    transformableViewsList: ArrayList<TransformableViewType>,
-    onTransformableBoxEvent: (event: TransformableBoxEvents) -> Unit
-) {
-    transformableViewsList
-        .filter { it.getIsSelected() }
-        .forEach { mViewDetail ->
-        when (mViewDetail) {
-            is TransformableViewType.TextTransformable -> {
-                TransformableTextView(
-                    modifier = centerAlignModifier,
-                    viewDetail = mViewDetail,
-                    showBorderOnly = true,
-                    onEvent = onTransformableBoxEvent
-                )
-            }
         }
     }
 }

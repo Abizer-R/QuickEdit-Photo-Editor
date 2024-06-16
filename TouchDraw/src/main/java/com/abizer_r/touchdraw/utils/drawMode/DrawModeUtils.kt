@@ -1,9 +1,15 @@
 package com.abizer_r.touchdraw.utils.drawMode
 
+import android.graphics.RectF
+import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Matrix
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import androidx.core.graphics.transform
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.BrushShape
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.AbstractShape
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.LineShape
@@ -12,6 +18,8 @@ import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.Recta
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
+import kotlin.math.cos
+import kotlin.math.sin
 
 object DrawModeUtils {
 
@@ -22,7 +30,8 @@ object DrawModeUtils {
         return BottomToolbarState(
             toolbarItems = toolbarListItems,
             selectedItem = toolbarListItems[1],
-            selectedColor = defaultColorSelected
+            selectedColor = defaultColorSelected,
+            showColorPickerIcon = true
         )
     }
 
@@ -41,8 +50,25 @@ object DrawModeUtils {
             BottomToolbarItem.EraserTool(
                 width = DrawingConstants.DEFAULT_STROKE_WIDTH
             ),
-            BottomToolbarItem.TextMode
+//            BottomToolbarItem.TextMode
         )
+    }
+
+    /**
+     * This function uses trigonometric functions to compute the new offset values after rotation.
+     * new_x = x * cos(θ) - y * sin(θ)
+     * new_y = x * sin(θ) + y * cos(θ)
+     */
+    fun rotateOffset(
+        offset: Offset,
+        angleDegrees: Float
+    ): Offset {
+        val angleRadians = Math.toRadians(angleDegrees.toDouble())
+        val cosAngle = cos(angleRadians)
+        val sinAngle = sin(angleRadians)
+        val x = offset.x * cosAngle - offset.y * sinAngle
+        val y = offset.x * sinAngle + offset.y * cosAngle
+        return Offset(x.toFloat(), y.toFloat())
     }
 
 }
