@@ -22,40 +22,33 @@ object EffectsModeUtils {
         val filterFile = arrayListOf<String>()
         filterFile.addAll(
             listOf(
-                "acv/afterglow.acv",
-                "acv/alice_in_wonderland.acv",
-                "acv/ambers.acv",
-                "acv/aurora.acv",
-                "acv/blue_poppies.acv",
-                "acv/blue_yellow_field.acv",
-                "acv/carousel.acv",
-                "acv/cold_desert.acv",
-                "acv/cold_heart.acv",
-                "acv/digital_film.acv",
-                "acv/documentary.acv",
-                "acv/electric.acv",
-                "acv/ghosts_in_your_head.acv",
-                "acv/good_luck_charm.acv",
-                "acv/green_envy.acv",
-                "acv/hummingbirds.acv",
-                "acv/kiss_kiss.acv",
-                "acv/left_hand_blues.acv",
-                "acv/light_parades.acv",
-                "acv/lullabye.acv",
-                "acv/moth_wings.acv",
-                "acv/moth_wings.acv",
-                "acv/old_postcards_01.acv",
-                "acv/old_postcards_02.acv",
-                "acv/peacock_feathers.acv",
-                "acv/pistol.acv",
-                "acv/ragdoll.acv",
-                "acv/rose_thorns_01.acv",
-                "acv/rose_thorns_02.acv",
-                "acv/set_you_free.acv",
-                "acv/snow_white.acv",
-                "acv/toes_in_the_ocean.acv",
-                "acv/wild_at_heart.acv",
-                "acv/window_warmth.acv")
+                "acv/Fade.acv",
+                "acv/Pistol.acv",
+                "acv/Cinnamon_darkness.acv",
+                "acv/Blue_Poppies.acv",
+                "acv/Brighten.acv",
+                "acv/Darken.acv",
+                "acv/Contrast.acv",
+                "acv/Matte.acv",
+                "acv/Softness.acv",
+                "acv/Carousel.acv",
+                "acv/Electric.acv",
+                "acv/Peacock_Feathers.acv",
+                "acv/Good_Luck_Charm.acv",
+                "acv/Lullabye.acv",
+                "acv/Moth_Wings.acv",
+                "acv/Old_Postcards_1.acv",
+                "acv/Old_Postcards_2.acv",
+                "acv/Toes_In_The_Ocean.acv",
+
+                // NEW ONES
+                "acv/Mark_Galer_Grading.acv",
+                "acv/Curve_1.acv",
+                "acv/Curve_2.acv",
+                "acv/Curve_3.acv",
+                "acv/Curve_Le_Fabuleux_Coleur_de_Amelie.acv",
+                "acv/Tropical_Beach.acv",
+            )
         )
 
         val gpuImage = GPUImage(context)
@@ -91,7 +84,7 @@ object EffectsModeUtils {
                 effectList.add(
                     EffectItem(
                         previewBitmap = gpuImage.bitmapWithFilterApplied,
-                        label = fileName.drop(4).dropLast(4)
+                        label = fileName.drop(4).dropLast(4).replace("_", " ")
                     )
                 )
 

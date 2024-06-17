@@ -55,7 +55,7 @@ fun MainScreen() {
      * This should be passed dynamically
      */
     val initialBitmap = ImageBitmap.imageResource(
-        id = com.abizer_r.components.R.drawable.placeholder_image_2
+        id = com.abizer_r.components.R.drawable.placeholder_image_3
     ).asAndroidBitmap()
 
     val sharedEditorViewModel: SharedEditorViewModel = hiltViewModel()
