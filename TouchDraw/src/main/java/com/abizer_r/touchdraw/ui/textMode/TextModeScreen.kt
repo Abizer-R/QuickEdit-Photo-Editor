@@ -151,6 +151,8 @@ fun TextModeScreen(
     ) {
         val (topToolBar, bottomToolbar, editorBox, editorBoxBgStretched, textInputView) = createRefs()
 
+        val isEditorVisibleAndBgBlurred = state.showBlurredBg.not() && state.textFieldState.isVisible.not()
+
         TextModeTopToolbar(
             modifier = Modifier.constrainAs(topToolBar) {
                 top.linkTo(parent.top)
@@ -167,7 +169,10 @@ fun TextModeScreen(
             modifier = Modifier
                 .constrainAs(editorBox) {
                     top.linkTo(topToolBar.bottom)
-                    bottom.linkTo(bottomToolbar.top)
+                    bottom.linkTo(
+                        if (isEditorVisibleAndBgBlurred) bottomToolbar.top
+                        else parent.bottom
+                    )
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                     width = Dimension.ratio(aspectRatio.toString())
@@ -186,7 +191,7 @@ fun TextModeScreen(
             )
 
             Box(modifier = Modifier.fillMaxSize()) {
-                if (state.showBlurredBg.not() && state.textFieldState.isVisible.not()) {
+                if (isEditorVisibleAndBgBlurred) {
                     DrawAllTransformableViews(
                         centerAlignModifier = Modifier.align(Alignment.Center),
                         transformableViewsList = state.transformableViewStateList,
@@ -213,7 +218,7 @@ fun TextModeScreen(
         ) {
 
 
-            if (state.showBlurredBg.not() && state.textFieldState.isVisible.not()) {
+            if (isEditorVisibleAndBgBlurred) {
                 BorderForSelectedViews(
                     centerAlignModifier = Modifier.align(Alignment.Center),
                     transformableViewsList = state.transformableViewStateList,
@@ -245,7 +250,7 @@ fun TextModeScreen(
         }
 
 
-        if (state.showBlurredBg.not() && state.textFieldState.isVisible.not()) {
+        if (isEditorVisibleAndBgBlurred) {
             BottomToolBar(
                 modifier = Modifier.constrainAs(bottomToolbar) {
                     bottom.linkTo(parent.bottom)
