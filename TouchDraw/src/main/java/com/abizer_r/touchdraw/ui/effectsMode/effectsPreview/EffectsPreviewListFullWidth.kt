@@ -1,6 +1,11 @@
 package com.abizer_r.touchdraw.ui.effectsMode.effectsPreview
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -11,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -39,6 +45,7 @@ import com.abizer_r.components.theme.ToolBarBackgroundColor
 import com.abizer_r.components.util.ImmutableList
 import com.abizer_r.touchdraw.utils.editorScreen.EffectsModeUtils
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EffectsPreviewListFullWidth(
     modifier: Modifier = Modifier,
@@ -47,18 +54,21 @@ fun EffectsPreviewListFullWidth(
     onItemClicked: (position: Int, effectItem: EffectItem) -> Unit
 ) {
 
-    val scrollState = rememberScrollState()
-
-    Row(
+    LazyRow(
         modifier = modifier
             .fillMaxWidth()
-            .horizontalScroll(scrollState)
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        effectsList.items.forEachIndexed { index, effectItem ->
+        items(
+            count = effectsList.items.size,
+            key = { it },
+        ) {index ->
+            val effectItem = effectsList.items[index]
             EffectPreview(
-                modifier = Modifier.padding(horizontal = 4.dp),
+                modifier = Modifier
+                    .animateItemPlacement()
+                    .padding(horizontal = 4.dp),
                 effectItem = effectItem,
                 isSelected = index == selectedIndex,
                 selectedBorderColor = MaterialTheme.colorScheme.onBackground,

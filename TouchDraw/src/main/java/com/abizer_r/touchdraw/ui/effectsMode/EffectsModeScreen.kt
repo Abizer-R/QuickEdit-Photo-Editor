@@ -2,12 +2,16 @@ package com.abizer_r.touchdraw.ui.effectsMode
 
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -55,7 +60,10 @@ import jp.co.cyberagent.android.gpuimage.filter.GPUImageGrayscaleFilter
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageToneCurveFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -80,10 +88,13 @@ fun EffectsModeScreen(
     }
 
     LaunchedEffect(key1 = bitmap) {
-        viewModel.updateEffectList(
-            effectList = EffectsModeUtils.getEffectsPreviewList(context, bitmap)
-        )
-        viewModel.selectEffect(0)
+        withContext(Dispatchers.IO) {
+            val mEffectList = EffectsModeUtils.getEffectsPreviewList(context, bitmap)
+            viewModel.updateEffectList(
+                effectList = mEffectList
+            )
+            viewModel.selectEffect(0)
+        }
     }
 
     val screenshotState = rememberScreenshotState()
@@ -162,19 +173,43 @@ fun EffectsModeScreen(
 
         }
 
-        EffectsPreviewListFullWidth(
-            modifier = Modifier.constrainAs(effectsPreviewList) {
-                bottom.linkTo(parent.bottom)
-                width = Dimension.matchParent
-                height = Dimension.wrapContent
-            }
-                .background(ToolBarBackgroundColor)
-                .padding(vertical = 12.dp),
-            effectsList = ImmutableList(state.effectsList),
-            selectedIndex = state.selectedEffectIndex,
-            onItemClicked = onEffectItemClicked
-        )
+        if (state.effectsList.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .constrainAs(effectsPreviewList) {
+                        bottom.linkTo(parent.bottom)
+                        width = Dimension.matchParent
+                    }
+                    .background(ToolBarBackgroundColor)
+            ) {
 
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .padding(vertical = 12.dp)
+                        .size(48.dp)
+                        .align(Alignment.Center),
+
+                    color = MaterialTheme.colorScheme.onBackground,
+                    strokeWidth = 4.dp,
+                )
+            }
+
+        } else {
+            EffectsPreviewListFullWidth(
+                modifier = Modifier
+                    .constrainAs(effectsPreviewList) {
+                        bottom.linkTo(parent.bottom)
+                        width = Dimension.matchParent
+                        height = Dimension.wrapContent
+                    }
+                    .background(ToolBarBackgroundColor)
+                    .padding(vertical = 12.dp),
+                effectsList = ImmutableList(state.effectsList),
+                selectedIndex = state.selectedEffectIndex,
+                onItemClicked = onEffectItemClicked
+            )
+
+        }
 
     }
 }
