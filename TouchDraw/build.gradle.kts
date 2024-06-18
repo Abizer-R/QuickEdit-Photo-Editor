@@ -77,6 +77,7 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")   // This
 
     implementation("com.github.skydoves:cloudy:0.1.2")
+    implementation("jp.co.cyberagent.android:gpuimage:2.1.0")
 }
 
 kapt {

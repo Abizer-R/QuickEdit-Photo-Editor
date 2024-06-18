@@ -26,7 +26,8 @@ object EditorScreenUtils {
     private fun getDefaultBottomToolbarItemsList(): ArrayList<BottomToolbarItem> {
         return arrayListOf(
             BottomToolbarItem.DrawMode,
-            BottomToolbarItem.TextMode
+            BottomToolbarItem.TextMode,
+            BottomToolbarItem.EffectsMode
         )
     }
 }

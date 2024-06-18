@@ -6,6 +6,7 @@ sealed class BottomToolbarItem {
     // ---------- EditorScreen Items - START
     object DrawMode : BottomToolbarItem()
     object TextMode : BottomToolbarItem()
+    object EffectsMode : BottomToolbarItem()
     // ---------- EditorScreen Items - End
 
 
