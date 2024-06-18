@@ -96,8 +96,11 @@ fun TextModeScreen(
     }
 
     BackHandler {
-        keyboardController?.hide()
-        onBackPressed()
+        if (state.textFieldState.isVisible) {
+            viewModel.onEvent(HideTextField)
+        } else {
+            onBackPressed()
+        }
     }
 
     val defaultTextFont = MaterialTheme.typography.headlineMedium.fontSize
