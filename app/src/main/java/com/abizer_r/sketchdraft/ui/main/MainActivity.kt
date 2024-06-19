@@ -2,10 +2,14 @@ package com.abizer_r.sketchdraft.ui.main
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,29 +17,41 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.touchdraw.ui.SharedEditorViewModel
+import com.abizer_r.touchdraw.ui.common.ErrorView
+import com.abizer_r.touchdraw.ui.common.LoadingView
 import com.abizer_r.touchdraw.ui.drawMode.DrawModeScreen
 import com.abizer_r.touchdraw.ui.editorScreen.EditorScreen
 import com.abizer_r.touchdraw.ui.editorScreen.EditorScreenState
 import com.abizer_r.touchdraw.ui.effectsMode.EffectsModeScreen
 import com.abizer_r.touchdraw.ui.textMode.TextModeScreen
+import com.abizer_r.touchdraw.utils.other.bitmap.BitmapUtils
+import com.abizer_r.touchdraw.utils.other.bitmap.BitmapStatus
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.Stack
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -43,18 +59,76 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             SketchDraftTheme {
-                MainScreen()
+
+                val context = LocalContext.current
+
+                var selectedImageUri by remember {
+                    mutableStateOf<Uri?>(null)
+                }
+                var scaledBitmapStatus by remember {
+                    mutableStateOf<BitmapStatus>(BitmapStatus.None)
+                }
+                val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.PickVisualMedia()
+                ) { uri ->
+                    selectedImageUri = uri
+                }
+
+                LaunchedEffect(key1 = Unit) {
+                    singlePhotoPickerLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                }
+
+                LaunchedEffect(key1 = selectedImageUri) {
+                    selectedImageUri?.let { imgUri ->
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            BitmapUtils.getScaledBitmap(context, imgUri).onEach {
+                                scaledBitmapStatus = it
+                            }.collect()
+                        }
+                    }
+                }
+
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                ) {
+
+                    when (val bitmapStatus = scaledBitmapStatus) {
+                        BitmapStatus.None -> {}
+                        BitmapStatus.Processing -> {
+                            LoadingView(modifier = Modifier.fillMaxSize())
+                        }
+                        is BitmapStatus.Failed -> {
+                            val errorText = bitmapStatus.errorMsg ?: bitmapStatus.exception?.message
+                                ?: getString(com.abizer_r.components.R.string.something_went_wrong)
+                            ErrorView(
+                                modifier = Modifier.align(Alignment.Center),
+                                errorText = errorText
+                            )
+                        }
+                        is BitmapStatus.Success -> {
+                            MainScreen(mInitialBitmap = bitmapStatus.scaledBitmap)
+                        }
+                    }
+                }
+
             }
         }
     }
 }
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    mInitialBitmap: Bitmap?
+) {
     /**
      * This should be passed dynamically
      */
-    val initialBitmap = ImageBitmap.imageResource(
+    val initialBitmap = mInitialBitmap ?: ImageBitmap.imageResource(
         id = com.abizer_r.components.R.drawable.placeholder_image_3
     ).asAndroidBitmap()
 
@@ -199,6 +273,6 @@ fun MainScreenNavigation(
 fun MainScreenPreview() {
 
     SketchDraftTheme {
-        MainScreen()
+        MainScreen(null)
     }
 }

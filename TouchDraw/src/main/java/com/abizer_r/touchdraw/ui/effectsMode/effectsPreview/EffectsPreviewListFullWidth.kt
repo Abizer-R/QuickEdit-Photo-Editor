@@ -1,23 +1,16 @@
 package com.abizer_r.touchdraw.ui.effectsMode.effectsPreview
 
 import android.content.res.Configuration
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,7 +24,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,13 +35,12 @@ import com.abizer_r.components.theme.Black_alpha_30
 import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.components.theme.ToolBarBackgroundColor
 import com.abizer_r.components.util.ImmutableList
-import com.abizer_r.touchdraw.utils.editorScreen.EffectsModeUtils
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EffectsPreviewListFullWidth(
     modifier: Modifier = Modifier,
-    effectsList: ImmutableList<EffectItem>,
+    effectsList: ArrayList<EffectItem>,
     selectedIndex: Int,
     onItemClicked: (position: Int, effectItem: EffectItem) -> Unit
 ) {
@@ -61,10 +52,10 @@ fun EffectsPreviewListFullWidth(
         verticalAlignment = Alignment.CenterVertically
     ) {
         items(
-            count = effectsList.items.size,
+            count = effectsList.size,
             key = { it },
         ) {index ->
-            val effectItem = effectsList.items[index]
+            val effectItem = effectsList[index]
             EffectPreview(
                 modifier = Modifier
                     .animateItemPlacement()
@@ -130,10 +121,12 @@ fun EffectPreview(
 @Composable
 fun Selected_EffectPreviewItem() {
     SketchDraftTheme {
+        val bitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_1).asAndroidBitmap()
         EffectPreview(
             modifier = Modifier.padding(8.dp),
             effectItem = EffectItem(
-                previewBitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_1).asAndroidBitmap(),
+                ogBitmap = bitmap,
+                previewBitmap = bitmap,
                 label = "Dummy Effect"
             ),
             isSelected = true,
@@ -146,10 +139,12 @@ fun Selected_EffectPreviewItem() {
 @Composable
 fun Unselected_EffectPreviewItem() {
     SketchDraftTheme {
+        val bitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_1).asAndroidBitmap()
         EffectPreview(
             modifier = Modifier.padding(8.dp),
             effectItem = EffectItem(
-                previewBitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_1).asAndroidBitmap(),
+                ogBitmap = bitmap,
+                previewBitmap = bitmap,
                 label = "Dummy Effect"
             ),
             isSelected = false,
@@ -162,17 +157,21 @@ fun Unselected_EffectPreviewItem() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun Preview_EffectsPreviewList() {
+    val bitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_1).asAndroidBitmap()
     val mEffectsList = arrayListOf(
         EffectItem(
-            previewBitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_1).asAndroidBitmap(),
+            ogBitmap = bitmap,
+            previewBitmap = bitmap,
             label = "original"
         ),
         EffectItem(
-            previewBitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_1).asAndroidBitmap(),
+            ogBitmap = bitmap,
+            previewBitmap = bitmap,
             label = "greyscale"
         ),
         EffectItem(
-            previewBitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_1).asAndroidBitmap(),
+            ogBitmap = bitmap,
+            previewBitmap = bitmap,
             label = "poppy dogs"
         )
     )
@@ -181,7 +180,7 @@ fun Preview_EffectsPreviewList() {
             modifier = Modifier
                 .background(ToolBarBackgroundColor)
                 .padding(vertical = 12.dp),
-            effectsList = ImmutableList(mEffectsList),
+            effectsList = mEffectsList,
             selectedIndex = 0,
             onItemClicked = {_, _ ->}
         )

@@ -1,22 +1,20 @@
 package com.abizer_r.touchdraw.utils.editorScreen
 
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.Bitmap
-import android.util.Log
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
 import com.abizer_r.touchdraw.ui.effectsMode.effectsPreview.EffectItem
+import com.abizer_r.touchdraw.utils.AppUtils
 import jp.co.cyberagent.android.gpuimage.GPUImage
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageGrayscaleFilter
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageToneCurveFilter
+import kotlinx.coroutines.flow.flow
 
 object EffectsModeUtils {
 
     fun getEffectsPreviewList(
         context: Context, 
         bitmap: Bitmap, 
-    ): ArrayList<EffectItem> {
+    ) = flow<ArrayList<EffectItem>> {
         val effectList = arrayListOf<EffectItem>()
 
         val filterFile = arrayListOf<String>()
@@ -54,18 +52,35 @@ object EffectsModeUtils {
         val gpuImage = GPUImage(context)
         gpuImage.setImage(bitmap)
 
+//        emit(
+//            EffectItem(
+//                ogBitmap = bitmap,
+//                previewBitmap = getScaledPreviewBitmap(context, bitmap),
+//                label = "original"
+//            )
+//        )
         effectList.add(
             EffectItem(
-                previewBitmap = bitmap,
+                ogBitmap = bitmap,
+                previewBitmap = getScaledPreviewBitmap(context, bitmap),
                 label = "original"
             )
         )
 
         try {
             gpuImage.setFilter(GPUImageGrayscaleFilter())
+            val grayScaleBitmap = gpuImage.bitmapWithFilterApplied
+//            emit(
+//                EffectItem(
+//                    ogBitmap = grayScaleBitmap,
+//                    previewBitmap = getScaledPreviewBitmap(context, grayScaleBitmap),
+//                    label = "grayscale"
+//                )
+//            )
             effectList.add(
                 EffectItem(
-                    previewBitmap = gpuImage.bitmapWithFilterApplied,
+                    ogBitmap = grayScaleBitmap,
+                    previewBitmap = getScaledPreviewBitmap(context, grayScaleBitmap),
                     label = "grayscale"
                 )
             )
@@ -81,18 +96,43 @@ object EffectsModeUtils {
                 inputFilter.close()
                 gpuImage.setFilter(gpuFilter)
 
+                val filteredBitmap = gpuImage.bitmapWithFilterApplied
+//                emit(
+//                    EffectItem(
+//                        ogBitmap = filteredBitmap,
+//                        previewBitmap = getScaledPreviewBitmap(context, filteredBitmap),
+//                        label = fileName.drop(4).dropLast(4).replace("_", " ")
+//                    )
+//                )
                 effectList.add(
                     EffectItem(
-                        previewBitmap = gpuImage.bitmapWithFilterApplied,
+                        ogBitmap = filteredBitmap,
+                        previewBitmap = getScaledPreviewBitmap(context, filteredBitmap),
                         label = fileName.drop(4).dropLast(4).replace("_", " ")
                     )
                 )
 
+                if (effectList.size >= 10) {
+                    emit(effectList)
+                    effectList.clear()
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
 
-        return effectList
+        if (effectList.isNotEmpty()) {
+            emit(effectList)
+        }
+//        return effectList
+    }
+
+    fun getScaledPreviewBitmap(context: Context, originalBitmap: Bitmap): Bitmap {
+
+        val screenWidth = AppUtils.getScreenWidth(context)
+        val aspectRatio = originalBitmap.width.toFloat() / originalBitmap.height.toFloat()
+        val reqWidth = screenWidth / 3
+        val reqHeight = (reqWidth / aspectRatio).toInt()
+        return Bitmap.createScaledBitmap(originalBitmap, reqWidth, reqHeight, false)
     }
 }
