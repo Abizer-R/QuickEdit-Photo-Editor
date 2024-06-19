@@ -89,11 +89,19 @@ fun EffectsModeScreen(
 
     LaunchedEffect(key1 = bitmap) {
         withContext(Dispatchers.IO) {
-            val mEffectList = EffectsModeUtils.getEffectsPreviewList(context, bitmap)
-            viewModel.updateEffectList(
-                effectList = mEffectList
-            )
-            viewModel.selectEffect(0)
+
+            EffectsModeUtils.getEffectsPreviewList(context, bitmap).onEach {
+                viewModel.addToEffectList(
+                    effectItems = it,
+                    selectInitialBitmap = state.effectsList.isEmpty(),
+                )
+            }.collect()
+
+//            val mEffectList = EffectsModeUtils.getEffectsPreviewList(context, bitmap)
+//            viewModel.updateEffectList(
+//                effectList = mEffectList
+//            )
+//            viewModel.selectEffect(0)
         }
     }
 
@@ -195,6 +203,7 @@ fun EffectsModeScreen(
             }
 
         } else {
+            Log.e("TEST_LI", "EffectsModeScreen: size = ${state.effectsList.size}", )
             EffectsPreviewListFullWidth(
                 modifier = Modifier
                     .constrainAs(effectsPreviewList) {
@@ -204,7 +213,7 @@ fun EffectsModeScreen(
                     }
                     .background(ToolBarBackgroundColor)
                     .padding(vertical = 12.dp),
-                effectsList = ImmutableList(state.effectsList),
+                effectsList = state.effectsList,
                 selectedIndex = state.selectedEffectIndex,
                 onItemClicked = onEffectItemClicked
             )

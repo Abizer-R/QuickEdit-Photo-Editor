@@ -24,6 +24,18 @@ class EffectsModeViewModel @Inject constructor(
         _state.update { it.copy(effectsList = effectList) }
     }
 
+    fun addToEffectList(
+        effectItems: ArrayList<EffectItem>,
+        selectInitialBitmap: Boolean = false,
+    ) {
+        val currList = ArrayList(state.value.effectsList)
+        currList.addAll(effectItems)
+        _state.update { it.copy(effectsList = currList) }
+        if (selectInitialBitmap) {
+            selectEffect(selectedIndex = 0)
+        }
+    }
+
     fun selectEffect(selectedIndex: Int) {
         if (selectedIndex < 0 || selectedIndex >= state.value.effectsList.size) {
             Log.e("EffectsModeViewModel", "selectEffect: index out of bound, selectedIndex = $selectedIndex", )

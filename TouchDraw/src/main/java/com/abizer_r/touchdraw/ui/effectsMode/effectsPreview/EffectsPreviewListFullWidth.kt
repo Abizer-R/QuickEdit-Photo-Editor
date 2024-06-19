@@ -40,7 +40,7 @@ import com.abizer_r.components.util.ImmutableList
 @Composable
 fun EffectsPreviewListFullWidth(
     modifier: Modifier = Modifier,
-    effectsList: ImmutableList<EffectItem>,
+    effectsList: ArrayList<EffectItem>,
     selectedIndex: Int,
     onItemClicked: (position: Int, effectItem: EffectItem) -> Unit
 ) {
@@ -52,10 +52,10 @@ fun EffectsPreviewListFullWidth(
         verticalAlignment = Alignment.CenterVertically
     ) {
         items(
-            count = effectsList.items.size,
+            count = effectsList.size,
             key = { it },
         ) {index ->
-            val effectItem = effectsList.items[index]
+            val effectItem = effectsList[index]
             EffectPreview(
                 modifier = Modifier
                     .animateItemPlacement()
@@ -180,7 +180,7 @@ fun Preview_EffectsPreviewList() {
             modifier = Modifier
                 .background(ToolBarBackgroundColor)
                 .padding(vertical = 12.dp),
-            effectsList = ImmutableList(mEffectsList),
+            effectsList = mEffectsList,
             selectedIndex = 0,
             onItemClicked = {_, _ ->}
         )

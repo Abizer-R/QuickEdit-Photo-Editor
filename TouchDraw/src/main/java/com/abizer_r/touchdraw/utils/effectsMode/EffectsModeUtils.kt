@@ -7,13 +7,14 @@ import com.abizer_r.touchdraw.utils.AppUtils
 import jp.co.cyberagent.android.gpuimage.GPUImage
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageGrayscaleFilter
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageToneCurveFilter
+import kotlinx.coroutines.flow.flow
 
 object EffectsModeUtils {
 
     fun getEffectsPreviewList(
         context: Context, 
         bitmap: Bitmap, 
-    ): ArrayList<EffectItem> {
+    ) = flow<ArrayList<EffectItem>> {
         val effectList = arrayListOf<EffectItem>()
 
         val filterFile = arrayListOf<String>()
@@ -51,6 +52,13 @@ object EffectsModeUtils {
         val gpuImage = GPUImage(context)
         gpuImage.setImage(bitmap)
 
+//        emit(
+//            EffectItem(
+//                ogBitmap = bitmap,
+//                previewBitmap = getScaledPreviewBitmap(context, bitmap),
+//                label = "original"
+//            )
+//        )
         effectList.add(
             EffectItem(
                 ogBitmap = bitmap,
@@ -62,6 +70,13 @@ object EffectsModeUtils {
         try {
             gpuImage.setFilter(GPUImageGrayscaleFilter())
             val grayScaleBitmap = gpuImage.bitmapWithFilterApplied
+//            emit(
+//                EffectItem(
+//                    ogBitmap = grayScaleBitmap,
+//                    previewBitmap = getScaledPreviewBitmap(context, grayScaleBitmap),
+//                    label = "grayscale"
+//                )
+//            )
             effectList.add(
                 EffectItem(
                     ogBitmap = grayScaleBitmap,
@@ -82,6 +97,13 @@ object EffectsModeUtils {
                 gpuImage.setFilter(gpuFilter)
 
                 val filteredBitmap = gpuImage.bitmapWithFilterApplied
+//                emit(
+//                    EffectItem(
+//                        ogBitmap = filteredBitmap,
+//                        previewBitmap = getScaledPreviewBitmap(context, filteredBitmap),
+//                        label = fileName.drop(4).dropLast(4).replace("_", " ")
+//                    )
+//                )
                 effectList.add(
                     EffectItem(
                         ogBitmap = filteredBitmap,
@@ -90,12 +112,19 @@ object EffectsModeUtils {
                     )
                 )
 
+                if (effectList.size >= 10) {
+                    emit(effectList)
+                    effectList.clear()
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
 
-        return effectList
+        if (effectList.isNotEmpty()) {
+            emit(effectList)
+        }
+//        return effectList
     }
 
     fun getScaledPreviewBitmap(context: Context, originalBitmap: Bitmap): Bitmap {
