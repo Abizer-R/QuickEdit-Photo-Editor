@@ -54,6 +54,7 @@ class SharedEditorViewModel @Inject constructor(
         latestTimeForAddingBitmapToStack = currTime
 
         bitmapStack.push(bitmap)
+        bitmapRedoStack.clear()
         if (triggerRecomposition) {
             // trigger recomposition while adding initialBitmap in MainScreen
             _recompositionTrigger.update { recompositionTrigger.value + 1 }

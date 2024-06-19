@@ -31,7 +31,7 @@ class EffectsModeViewModel @Inject constructor(
         }
         _state.update { it.copy(
             selectedEffectIndex = selectedIndex,
-            filteredBitmap = state.value.effectsList[selectedIndex].previewBitmap
+            filteredBitmap = state.value.effectsList[selectedIndex].ogBitmap
         ) }
     }
 }
