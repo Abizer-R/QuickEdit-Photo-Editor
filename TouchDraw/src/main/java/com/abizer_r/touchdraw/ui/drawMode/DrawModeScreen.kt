@@ -44,6 +44,7 @@ import com.abizer_r.touchdraw.utils.drawMode.DrawModeUtils
 import com.abizer_r.touchdraw.utils.drawMode.getOpacityOrNull
 import com.abizer_r.touchdraw.utils.drawMode.getShapeTypeOrNull
 import com.abizer_r.touchdraw.utils.drawMode.getWidthOrNull
+import com.abizer_r.touchdraw.utils.other.bitmap.ImmutableBitmap
 import com.smarttoolfactory.screenshot.ImageResult
 import com.smarttoolfactory.screenshot.ScreenshotBox
 import com.smarttoolfactory.screenshot.rememberScreenshotState
@@ -57,7 +58,7 @@ import java.util.UUID
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun DrawModeScreen(
-    bitmap: Bitmap,
+    immutableBitmap: ImmutableBitmap,
     onDoneClicked: (bitmap: Bitmap) -> Unit,
     onBackPressed: () -> Unit
 ) {
@@ -147,6 +148,7 @@ fun DrawModeScreen(
             onDoneClicked = onDoneClickedLambda
         )
 
+        val bitmap = immutableBitmap.bitmap
         val aspectRatio = bitmap?.let {
             bitmap.width.toFloat() / bitmap.height.toFloat()
         }

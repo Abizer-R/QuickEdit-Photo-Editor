@@ -51,6 +51,7 @@ import com.abizer_r.touchdraw.ui.effectsMode.effectsPreview.EffectsPreviewListFu
 import com.abizer_r.touchdraw.ui.textMode.TextModeEvent
 import com.abizer_r.touchdraw.ui.textMode.TextModeViewModel
 import com.abizer_r.touchdraw.utils.editorScreen.EffectsModeUtils
+import com.abizer_r.touchdraw.utils.other.bitmap.ImmutableBitmap
 import com.abizer_r.touchdraw.utils.textMode.colorList.ColorListFullWidth
 import com.smarttoolfactory.screenshot.ImageResult
 import com.smarttoolfactory.screenshot.ScreenshotBox
@@ -69,7 +70,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun EffectsModeScreen(
     modifier: Modifier = Modifier,
-    bitmap: Bitmap,
+    immutableBitmap: ImmutableBitmap,
     onDoneClicked: (bitmap: Bitmap) -> Unit,
     onBackPressed: () -> Unit
 ) {
@@ -81,6 +82,7 @@ fun EffectsModeScreen(
         lifecycleOwner = lifeCycleOwner
     )
 
+    val bitmap = immutableBitmap.bitmap
     val currentBitmap = state.filteredBitmap ?: bitmap
 
     BackHandler {
@@ -228,8 +230,9 @@ fun EffectsModeScreen(
 fun Preview_EffectsModeScreen() {
     SketchDraftTheme {
         EffectsModeScreen(
-            bitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_2)
-                .asAndroidBitmap(),
+            immutableBitmap = ImmutableBitmap(
+                ImageBitmap.imageResource(id = R.drawable.placeholder_image_2).asAndroidBitmap()
+            ),
             onDoneClicked = {},
             onBackPressed = {}
         )

@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -41,6 +42,7 @@ import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarE
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TextModeTopToolbar
 import com.abizer_r.touchdraw.ui.textMode.textEditorLayout.TextEditorLayout
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
+import com.abizer_r.touchdraw.utils.other.bitmap.ImmutableBitmap
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils.BorderForSelectedViews
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils.DrawAllTransformableViews
@@ -57,7 +59,7 @@ import java.util.UUID
 @Composable
 fun TextModeScreen(
     modifier: Modifier = Modifier,
-    bitmap: ImageBitmap,
+    immutableBitmap: ImmutableBitmap,
     onDoneClicked: (bitmap: Bitmap) -> Unit,
     onBackPressed: () -> Unit
 ) {
@@ -173,6 +175,7 @@ fun TextModeScreen(
             onCloseClicked = onCloseClickedLambda,
             onDoneClicked = onDoneClickedLambda
         )
+        val bitmap = immutableBitmap.bitmap
         val aspectRatio = bitmap.let {
             bitmap.width.toFloat() / bitmap.height.toFloat()
         }
@@ -195,7 +198,7 @@ fun TextModeScreen(
 
             BlurBitmapBackground(
                 modifier = Modifier.fillMaxSize(),
-                imageBitmap = bitmap,
+                imageBitmap = bitmap.asImageBitmap(),
                 shouldBlur = state.showBlurredBg,
                 blurRadius = 15,
                 onBgClicked = onBgClickedLambda
