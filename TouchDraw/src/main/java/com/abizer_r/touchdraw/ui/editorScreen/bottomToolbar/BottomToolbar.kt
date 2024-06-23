@@ -43,9 +43,9 @@ import androidx.compose.ui.unit.dp
 import com.abizer_r.components.R
 import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.components.theme.ToolBarBackgroundColor
+import com.abizer_r.components.util.ImmutableList
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
 import com.abizer_r.touchdraw.utils.drawMode.DrawModeUtils
 import com.abizer_r.touchdraw.utils.editorScreen.EditorScreenUtils
 import com.abizer_r.touchdraw.utils.editorScreen.EffectsModeUtils
@@ -54,7 +54,10 @@ import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
 @Composable
 fun BottomToolBar(
     modifier: Modifier,
-    bottomToolbarState: BottomToolbarState,
+    toolbarItems: ImmutableList<BottomToolbarItem>,
+    selectedItem: BottomToolbarItem = BottomToolbarItem.NONE,
+    showColorPickerIcon: Boolean = true,
+    selectedColor: Color = Color.White,
     onEvent: (BottomToolbarEvent) -> Unit
 ) {
 
@@ -64,11 +67,11 @@ fun BottomToolBar(
             .padding(vertical = 4.dp)
             .background(ToolBarBackgroundColor)
     ) {
-        itemsIndexed(bottomToolbarState.toolbarItems) { index, mToolbarItem ->
+        itemsIndexed(toolbarItems.items) { index, mToolbarItem ->
             val itemModifier = Modifier
             if (index == 0) {
                 itemModifier.padding(start = 8.dp)
-            } else if (index == bottomToolbarState.toolbarItems.size - 1) {
+            } else if (index == toolbarItems.items.size - 1) {
                 itemModifier.padding(end = 8.dp)
             } else {
                 itemModifier.padding(horizontal = 16.dp)
@@ -78,9 +81,9 @@ fun BottomToolBar(
                     horizontal = 16.dp
                 ),
                 toolbarItem = mToolbarItem,
-                selectedColor = bottomToolbarState.selectedColor,
-                showColorPickerIcon = bottomToolbarState.showColorPickerIcon,
-                isSelected = mToolbarItem == bottomToolbarState.selectedItem,
+                selectedColor = selectedColor,
+                showColorPickerIcon = showColorPickerIcon,
+                isSelected = mToolbarItem == selectedItem,
                 onEvent = onEvent
             )
         }
@@ -274,9 +277,10 @@ fun ColorToolbarItem(
 @Composable
 fun EditorScreen_BottomToolbar() {
     SketchDraftTheme {
+        val itemsList = EditorScreenUtils.getDefaultBottomToolbarItemsList()
         BottomToolBar(
             modifier = Modifier.fillMaxWidth(),
-            bottomToolbarState = EditorScreenUtils.getDefaultBottomToolbarState(),
+            toolbarItems = ImmutableList(itemsList),
             onEvent = {}
         )
     }
@@ -286,9 +290,13 @@ fun EditorScreen_BottomToolbar() {
 @Composable
 fun DrawMode_BottomToolbar() {
     SketchDraftTheme {
+        val itemsList = DrawModeUtils.getDefaultBottomToolbarItemsList()
         BottomToolBar(
             modifier = Modifier.fillMaxWidth(),
-            bottomToolbarState = DrawModeUtils.getDefaultBottomToolbarState(),
+            toolbarItems = ImmutableList(itemsList),
+            showColorPickerIcon = true,
+            selectedColor = Color.White,
+            selectedItem = itemsList[1],
             onEvent = {}
         )
     }
@@ -298,9 +306,12 @@ fun DrawMode_BottomToolbar() {
 @Composable
 fun TextMode_BottomToolbar() {
     SketchDraftTheme {
+        val itemsList = TextModeUtils.getDefaultBottomToolbarItemsList()
         BottomToolBar(
             modifier = Modifier.fillMaxWidth(),
-            bottomToolbarState = TextModeUtils.getDefaultBottomToolbarState(),
+            toolbarItems = ImmutableList(itemsList),
+            showColorPickerIcon = true,
+            selectedColor = Color.White,
             onEvent = {}
         )
     }

@@ -32,13 +32,16 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.abizer_r.components.util.ImmutableList
 import com.abizer_r.touchdraw.utils.textMode.blurBackground.BlurBitmapBackground
 import com.abizer_r.components.util.defaultErrorToast
 import com.abizer_r.touchdraw.ui.textMode.TextModeEvent.*
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TextModeTopToolbar
 import com.abizer_r.touchdraw.ui.textMode.textEditorLayout.TextEditorLayout
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
+import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils.BorderForSelectedViews
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils.DrawAllTransformableViews
 import com.skydoves.cloudy.Cloudy
@@ -65,9 +68,10 @@ fun TextModeScreen(
     val state by viewModel.state.collectAsStateWithLifecycle(
         lifecycleOwner = lifeCycleOwner
     )
-    val bottomToolbarState by viewModel.bottomToolbarState.collectAsStateWithLifecycle(
-        lifecycleOwner = lifeCycleOwner
-    )
+
+    val bottomToolbarItems = remember {
+        ImmutableList(TextModeUtils.getDefaultBottomToolbarItemsList())
+    }
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -143,6 +147,10 @@ fun TextModeScreen(
 
     val onBgClickedLambda = remember<() -> Unit> {{
         viewModel.updateViewSelection(null)
+    }}
+
+    val onBottomToolbarEventLambda = remember<(BottomToolbarEvent) -> Unit> {{
+        viewModel.onBottomToolbarEvent(it)
     }}
 
 
@@ -260,10 +268,8 @@ fun TextModeScreen(
                     width = Dimension.matchParent
                     height = Dimension.wrapContent
                 },
-                bottomToolbarState = bottomToolbarState,
-                onEvent = {
-                    viewModel.onBottomToolbarEvent(it)
-                }
+                toolbarItems = bottomToolbarItems,
+                onEvent = onBottomToolbarEventLambda
             )
 
         }

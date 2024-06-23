@@ -1,7 +1,9 @@
 package com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state
 
+import androidx.compose.runtime.Immutable
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
 
+@Immutable
 sealed class BottomToolbarItem {
     // ---------- EditorScreen Items - START
     object DrawMode : BottomToolbarItem()

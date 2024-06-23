@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -27,6 +28,7 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.abizer_r.components.util.ImmutableList
 import com.abizer_r.components.util.defaultErrorToast
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.DrawingCanvas
 import com.abizer_r.touchdraw.ui.drawMode.stateHandling.DrawModeEvent
@@ -38,6 +40,7 @@ import com.abizer_r.touchdraw.ui.textMode.TextModeEvent
 import com.abizer_r.touchdraw.ui.textMode.getSelectedColor
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.touchdraw.utils.drawMode.CustomLayerTypeComposable
+import com.abizer_r.touchdraw.utils.drawMode.DrawModeUtils
 import com.abizer_r.touchdraw.utils.drawMode.getOpacityOrNull
 import com.abizer_r.touchdraw.utils.drawMode.getShapeTypeOrNull
 import com.abizer_r.touchdraw.utils.drawMode.getWidthOrNull
@@ -66,12 +69,18 @@ fun DrawModeScreen(
     val state by viewModel.state.collectAsStateWithLifecycle(
         lifecycleOwner = lifeCycleOwner
     )
-    val bottomToolbarState by viewModel.bottomToolbarState.collectAsStateWithLifecycle(
-        lifecycleOwner = lifeCycleOwner
-    )
 
     val colorOnBackground = MaterialTheme.colorScheme.onBackground
     val backgroundColor = MaterialTheme.colorScheme.background
+
+    val bottomToolbarItems = remember {
+        ImmutableList(DrawModeUtils.getDefaultBottomToolbarItemsList())
+    }
+    LaunchedEffect(key1 = Unit) {
+        viewModel.onBottomToolbarEvent(
+            BottomToolbarEvent.OnItemClicked(bottomToolbarItems.items[1])
+        )
+    }
 
     val screenshotState = rememberScreenshotState()
 
@@ -107,6 +116,16 @@ fun DrawModeScreen(
         }
     }}
 
+    val onUndoLambda = remember<() -> Unit> {{
+        viewModel.onEvent(DrawModeEvent.OnUndo)
+    }}
+    val onRedoLambda = remember<() -> Unit> {{
+        viewModel.onEvent(DrawModeEvent.OnRedo)
+    }}
+    val onBottomToolbarEventLambda = remember<(BottomToolbarEvent) -> Unit> {{
+        viewModel.onBottomToolbarEvent(it)
+    }}
+
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
@@ -122,12 +141,8 @@ fun DrawModeScreen(
             },
             undoEnabled = state.pathDetailStack.isNotEmpty(),
             redoEnabled = state.redoStack.isNotEmpty(),
-            onUndo = {
-                viewModel.onEvent(DrawModeEvent.OnUndo)
-            },
-            onRedo = {
-                viewModel.onEvent(DrawModeEvent.OnRedo)
-            },
+            onUndo = onUndoLambda,
+            onRedo = onRedoLambda,
             onCloseClicked = onCloseClickedLambda,
             onDoneClicked = onDoneClickedLambda
         )
@@ -164,8 +179,8 @@ fun DrawModeScreen(
                 DrawingCanvas(
                     modifier = Modifier.fillMaxSize(),
                     pathDetailStack = state.pathDetailStack,
-                    selectedColor = bottomToolbarState.selectedColor,
-                    currentTool = bottomToolbarState.selectedItem,
+                    selectedColor = state.selectedColor,
+                    currentTool = state.selectedTool,
                     onDrawingEvent = {
                         viewModel.onEvent(it)
                     }
@@ -180,8 +195,11 @@ fun DrawModeScreen(
                 width = Dimension.matchParent
                 height = Dimension.wrapContent
             },
-            bottomToolbarState = bottomToolbarState,
-            onEvent = viewModel::onBottomToolbarEvent
+            toolbarItems = bottomToolbarItems,
+            showColorPickerIcon = viewModel.showColorPickerIconInToolbar,
+            selectedColor = state.selectedColor,
+            selectedItem = state.selectedTool,
+            onEvent = onBottomToolbarEventLambda
         )
 
         if (state.showBottomToolbarExtension) {
@@ -192,19 +210,19 @@ fun DrawModeScreen(
                         width = Dimension.matchParent
                     }
                     .clickable { }, /* added clickable{} to avoid triggering touchEvent in DrawingCanvas when clicking anywhere on toolbarExtension */
-                width = bottomToolbarState.selectedItem.getWidthOrNull(),
+                width = state.selectedTool.getWidthOrNull(),
                 onWidthChange = { mWidth ->
                     viewModel.onBottomToolbarEvent(
                         BottomToolbarEvent.UpdateWidth(mWidth)
                     )
                 },
-                opacity = bottomToolbarState.selectedItem.getOpacityOrNull(),
+                opacity = state.selectedTool.getOpacityOrNull(),
                 onOpacityChange = { mOpacity ->
                     viewModel.onBottomToolbarEvent(
                         BottomToolbarEvent.UpdateOpacity(mOpacity)
                     )
                 },
-                shapeType = bottomToolbarState.selectedItem.getShapeTypeOrNull(),
+                shapeType = state.selectedTool.getShapeTypeOrNull(),
                 onShapeTypeChange = { mShapeType ->
                     viewModel.onBottomToolbarEvent(
                         BottomToolbarEvent.UpdateShapeType(mShapeType)

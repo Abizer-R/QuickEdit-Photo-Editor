@@ -17,25 +17,12 @@ import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.OvalS
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.RectangleShape
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
 import kotlin.math.cos
 import kotlin.math.sin
 
 object DrawModeUtils {
 
-    fun getDefaultBottomToolbarState(
-        defaultColorSelected: Color = Color.White
-    ): BottomToolbarState {
-        val toolbarListItems = getDefaultBottomToolbarItemsList()
-        return BottomToolbarState(
-            toolbarItems = toolbarListItems,
-            selectedItem = toolbarListItems[1],
-            selectedColor = defaultColorSelected,
-            showColorPickerIcon = true
-        )
-    }
-
-    private fun getDefaultBottomToolbarItemsList(): ArrayList<BottomToolbarItem> {
+    fun getDefaultBottomToolbarItemsList(): ArrayList<BottomToolbarItem> {
         return arrayListOf(
             BottomToolbarItem.ColorItem,
             BottomToolbarItem.BrushTool(
