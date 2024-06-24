@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
@@ -26,9 +25,6 @@ class TextModeViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(TextModeState())
     val state: StateFlow<TextModeState> = _state
-
-    private val _bottomToolbarState = MutableStateFlow(TextModeUtils.getDefaultBottomToolbarState())
-    val bottomToolbarState: StateFlow<BottomToolbarState> = _bottomToolbarState
 
     init {
 //        debugTrackViewListSize()

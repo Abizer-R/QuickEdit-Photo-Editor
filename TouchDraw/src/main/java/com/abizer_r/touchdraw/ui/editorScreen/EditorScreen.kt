@@ -26,6 +26,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.abizer_r.components.R
 import com.abizer_r.components.theme.SketchDraftTheme
+import com.abizer_r.components.util.ImmutableList
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
@@ -102,6 +103,11 @@ private fun EditorScreenLayout(
     onRedo: () -> Unit,
     onBottomToolbarEvent: (BottomToolbarEvent) -> Unit
 ) {
+
+    val bottomToolbarItems = remember {
+        ImmutableList(EditorScreenUtils.getDefaultBottomToolbarItemsList())
+    }
+
     ConstraintLayout(
         modifier = modifier
             .fillMaxSize()
@@ -156,7 +162,7 @@ private fun EditorScreenLayout(
                 width = Dimension.matchParent
                 height = Dimension.wrapContent
             },
-            bottomToolbarState = EditorScreenUtils.getDefaultBottomToolbarState(),
+            toolbarItems = bottomToolbarItems,
             onEvent = onBottomToolbarEvent
         )
 

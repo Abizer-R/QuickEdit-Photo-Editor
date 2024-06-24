@@ -7,7 +7,6 @@ import com.abizer_r.touchdraw.ui.drawMode.stateHandling.DrawModeEvent
 import com.abizer_r.touchdraw.ui.drawMode.stateHandling.DrawModeState
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
 import com.abizer_r.touchdraw.utils.drawMode.DrawModeUtils
 import com.abizer_r.touchdraw.utils.drawMode.setOpacityIfPossible
 import com.abizer_r.touchdraw.utils.drawMode.setShapeTypeIfPossible
@@ -26,10 +25,9 @@ class DrawModeViewModel @Inject constructor(
     private val _state = MutableStateFlow(DrawModeState())
     val state: StateFlow<DrawModeState> = _state
 
-    private val _bottomToolbarState = MutableStateFlow(DrawModeUtils.getDefaultBottomToolbarState())
-    val bottomToolbarState: StateFlow<BottomToolbarState> = _bottomToolbarState
-
     var shouldGoToNextScreen = false
+    // shows the icon initially, then show selected color
+    var showColorPickerIconInToolbar = true
 
     fun handleStateBeforeCaptureScreenshot() {
         shouldGoToNextScreen = true
@@ -42,14 +40,12 @@ class DrawModeViewModel @Inject constructor(
         when (event) {
             is DrawModeEvent.ToggleColorPicker -> {
                 _state.update {
-                    it.copy(showColorPicker = it.showColorPicker.not())
-                }
-                _bottomToolbarState.update {
                     it.copy(
-                        selectedColor = event.selectedColor ?: it.selectedColor,
-                        showColorPickerIcon = false
+                        showColorPicker = it.showColorPicker.not(),
+                        selectedColor = event.selectedColor ?: it.selectedColor
                     )
                 }
+                showColorPickerIconInToolbar = false
             }
 
             DrawModeEvent.OnUndo -> {
@@ -87,30 +83,24 @@ class DrawModeViewModel @Inject constructor(
             }
 
             is BottomToolbarEvent.UpdateOpacity -> {
-                _bottomToolbarState.update {
-                    it.copy(
-                        selectedItem = it.selectedItem.setOpacityIfPossible(event.newOpacity),
-                        recompositionTriggerValue = it.recompositionTriggerValue + 1
-                    )
-                }
+                _state.update { it.copy(
+                    selectedTool = it.selectedTool.setOpacityIfPossible(event.newOpacity),
+                    recompositionTrigger = it.recompositionTrigger + 1
+                ) }
             }
 
             is BottomToolbarEvent.UpdateWidth -> {
-                _bottomToolbarState.update {
-                    it.copy(
-                        selectedItem = it.selectedItem.setWidthIfPossible(event.newWidth),
-                        recompositionTriggerValue = it.recompositionTriggerValue + 1
-                    )
-                }
+                _state.update { it.copy(
+                    selectedTool = it.selectedTool.setWidthIfPossible(event.newWidth),
+                    recompositionTrigger = it.recompositionTrigger + 1
+                ) }
             }
 
             is BottomToolbarEvent.UpdateShapeType -> {
-                _bottomToolbarState.update {
-                    it.copy(
-                        selectedItem = it.selectedItem.setShapeTypeIfPossible(event.newShapeType),
-                        recompositionTriggerValue = it.recompositionTriggerValue + 1
-                    )
-                }
+                _state.update { it.copy(
+                    selectedTool = it.selectedTool.setShapeTypeIfPossible(event.newShapeType),
+                    recompositionTrigger = it.recompositionTrigger + 1
+                ) }
             }
 
             else -> {}
@@ -126,7 +116,7 @@ class DrawModeViewModel @Inject constructor(
             }
 
             // Clicked on already selected item
-            bottomToolbarState.value.selectedItem -> {
+            state.value.selectedTool -> {
                 _state.update {
                     it.copy(showBottomToolbarExtension = it.showBottomToolbarExtension.not())
                 }
@@ -134,11 +124,8 @@ class DrawModeViewModel @Inject constructor(
 
             // clicked on another item
             else -> {
-//                _state.value = mState.copy(
-//                    showBottomToolbarExtension = false
-//                )
-                _bottomToolbarState.update {
-                    it.copy(selectedItem = selectedItem)
+                _state.update {
+                    it.copy(selectedTool = selectedItem)
                 }
             }
         }

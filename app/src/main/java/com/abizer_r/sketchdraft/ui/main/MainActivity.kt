@@ -47,6 +47,7 @@ import com.abizer_r.touchdraw.ui.effectsMode.EffectsModeScreen
 import com.abizer_r.touchdraw.ui.textMode.TextModeScreen
 import com.abizer_r.touchdraw.utils.other.bitmap.BitmapUtils
 import com.abizer_r.touchdraw.utils.other.bitmap.BitmapStatus
+import com.abizer_r.touchdraw.utils.other.bitmap.ImmutableBitmap
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
@@ -186,83 +187,103 @@ fun MainScreenNavigation(
             val initialEditorState = EditorScreenState(
                 sharedEditorViewModel.bitmapStack, sharedEditorViewModel.bitmapRedoStack
             )
+
+            val goToDrawModeScreenLambda = remember<(EditorScreenState) -> Unit> {{ finalEditorState ->
+                sharedEditorViewModel.updateStacksFromEditorState(finalEditorState)
+                navController.navigate("drawMode")
+            }}
+            val goToTextModeScreenLambda = remember<(EditorScreenState) -> Unit> {{ finalEditorState ->
+                sharedEditorViewModel.updateStacksFromEditorState(finalEditorState)
+                navController.navigate("textMode")
+            }}
+            val goToEffectsModeScreenLambda = remember<(EditorScreenState) -> Unit> {{ finalEditorState ->
+                sharedEditorViewModel.updateStacksFromEditorState(finalEditorState)
+                navController.navigate("effectsMode")
+            }}
+
             EditorScreen(
                 initialEditorScreenState = initialEditorState,
-                goToDrawModeScreen = { finalEditorState ->
-                    sharedEditorViewModel.updateStacksFromEditorState(finalEditorState)
-                    navController.navigate("drawMode")
-                },
-                goToTextModeScreen = { finalEditorState ->
-                    sharedEditorViewModel.updateStacksFromEditorState(finalEditorState)
-                    navController.navigate("textMode")
-                },
-                goToEffectsModeScreen = { finalEditorState ->
-                    sharedEditorViewModel.updateStacksFromEditorState(finalEditorState)
-                    navController.navigate("effectsMode")
-                },
+                goToDrawModeScreen = goToDrawModeScreenLambda,
+                goToTextModeScreen = goToTextModeScreenLambda,
+                goToEffectsModeScreen = goToEffectsModeScreenLambda,
             )
 
         }
 
         composable(route = "drawMode") { entry ->
+
+            val onBackPressedLambda = remember<() -> Unit> {{
+                navController.navigateUp()
+            }}
+
+            val onDoneClickedLambda = remember<(Bitmap) -> Unit> {{
+                Log.d("TEST_RECOMP", "DrawModeScreen: addBitmapToStack, bitmap = $it")
+                sharedEditorViewModel.addBitmapToStack(
+                    bitmap = it.copy(Bitmap.Config.ARGB_8888, false),
+                )
+                navController.navigate(
+                    "editorScreen",
+                    navOptions = NavOptions.Builder()
+                        .setPopUpTo(route = "editorScreen", inclusive = true)
+                        .build()
+                )
+            }}
+
             DrawModeScreen(
-                bitmap = sharedEditorViewModel.getCurrentBitmap(),
-                onBackPressed = {
-                    navController.navigateUp()
-                },
-                onDoneClicked = {
-                    Log.d("TEST_RECOMP", "DrawModeScreen: addBitmapToStack, bitmap = $it")
-                    sharedEditorViewModel.addBitmapToStack(
-                        bitmap = it.copy(Bitmap.Config.ARGB_8888, false),
-                    )
-                    navController.navigate(
-                        "editorScreen",
-                        navOptions = NavOptions.Builder()
-                            .setPopUpTo(route = "editorScreen", inclusive = true)
-                            .build()
-                    )
-                }
+                immutableBitmap = ImmutableBitmap((sharedEditorViewModel.getCurrentBitmap())),
+                onBackPressed = onBackPressedLambda,
+                onDoneClicked = onDoneClickedLambda,
             )
         }
 
         composable(route = "textMode") { entry ->
+
+            val onBackPressedLambda = remember<() -> Unit> {{
+                navController.navigateUp()
+            }}
+
+            val onDoneClickedLambda = remember<(Bitmap) -> Unit> {{
+                Log.d("TEST_RECOMP", "TextModeScreen: addBitmapToStack, bitmap = $it", )
+                sharedEditorViewModel.addBitmapToStack(
+                    bitmap = it.copy(Bitmap.Config.ARGB_8888, false),
+                )
+                navController.navigate(
+                    "editorScreen",
+                    navOptions = NavOptions.Builder()
+                        .setPopUpTo(route = "editorScreen", inclusive = true)
+                        .build()
+                )
+            }}
+
             TextModeScreen(
-                bitmap = sharedEditorViewModel.getCurrentBitmap().asImageBitmap(),
-                onBackPressed = {
-                    navController.navigateUp()
-                },
-                onDoneClicked = {
-                    Log.d("TEST_RECOMP", "TextModeScreen: addBitmapToStack, bitmap = $it", )
-                    sharedEditorViewModel.addBitmapToStack(
-                        bitmap = it.copy(Bitmap.Config.ARGB_8888, false),
-                    )
-                    navController.navigate(
-                        "editorScreen",
-                        navOptions = NavOptions.Builder()
-                            .setPopUpTo(route = "editorScreen", inclusive = true)
-                            .build()
-                    )
-                }
+                immutableBitmap = ImmutableBitmap(sharedEditorViewModel.getCurrentBitmap()),
+                onBackPressed = onBackPressedLambda,
+                onDoneClicked = onDoneClickedLambda,
             )
         }
 
         composable(route = "effectsMode") { entry ->
+
+            val onBackPressedLambda = remember<() -> Unit> {{
+                navController.navigateUp()
+            }}
+
+            val onDoneClickedLambda = remember<(Bitmap) -> Unit> {{
+                sharedEditorViewModel.addBitmapToStack(
+                    bitmap = it.copy(Bitmap.Config.ARGB_8888, false),
+                )
+                navController.navigate(
+                    "editorScreen",
+                    navOptions = NavOptions.Builder()
+                        .setPopUpTo(route = "editorScreen", inclusive = true)
+                        .build()
+                )
+            }}
+
             EffectsModeScreen(
-                bitmap = sharedEditorViewModel.getCurrentBitmap(),
-                onBackPressed = {
-                    navController.navigateUp()
-                },
-                onDoneClicked = {
-                    sharedEditorViewModel.addBitmapToStack(
-                        bitmap = it.copy(Bitmap.Config.ARGB_8888, false),
-                    )
-                    navController.navigate(
-                        "editorScreen",
-                        navOptions = NavOptions.Builder()
-                            .setPopUpTo(route = "editorScreen", inclusive = true)
-                            .build()
-                    )
-                }
+                immutableBitmap = ImmutableBitmap(sharedEditorViewModel.getCurrentBitmap()),
+                onBackPressed = onBackPressedLambda,
+                onDoneClicked = onDoneClickedLambda,
             )
         }
     }

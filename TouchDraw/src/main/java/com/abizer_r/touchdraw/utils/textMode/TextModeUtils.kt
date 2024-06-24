@@ -6,9 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarState
 import com.abizer_r.touchdraw.ui.transformableViews.TransformableTextBox
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxState
@@ -76,14 +74,7 @@ object TextModeUtils {
             }
     }
 
-    fun getDefaultBottomToolbarState(): BottomToolbarState {
-        val toolbarListItems = getDefaultBottomToolbarItemsList()
-        return BottomToolbarState(
-            toolbarItems = toolbarListItems
-        )
-    }
-
-    private fun getDefaultBottomToolbarItemsList(): ArrayList<BottomToolbarItem> {
+    fun getDefaultBottomToolbarItemsList(): ArrayList<BottomToolbarItem> {
         return arrayListOf(
             BottomToolbarItem.AddItem
         )
