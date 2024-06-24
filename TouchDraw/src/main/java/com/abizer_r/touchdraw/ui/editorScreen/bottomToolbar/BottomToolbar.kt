@@ -64,8 +64,8 @@ fun BottomToolBar(
     LazyRow(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
             .background(ToolBarBackgroundColor)
+            .padding(vertical = 4.dp)
     ) {
         itemsIndexed(toolbarItems.items) { index, mToolbarItem ->
             val itemModifier = Modifier

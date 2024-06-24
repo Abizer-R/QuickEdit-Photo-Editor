@@ -5,10 +5,15 @@ import android.graphics.Bitmap
 import android.util.Log
 import android.view.View
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -46,6 +51,7 @@ import com.abizer_r.touchdraw.utils.drawMode.DrawModeUtils
 import com.abizer_r.touchdraw.utils.drawMode.getOpacityOrNull
 import com.abizer_r.touchdraw.utils.drawMode.getShapeTypeOrNull
 import com.abizer_r.touchdraw.utils.drawMode.getWidthOrNull
+import com.abizer_r.touchdraw.utils.other.anim.AnimUtils
 import com.abizer_r.touchdraw.utils.other.bitmap.ImmutableBitmap
 import com.smarttoolfactory.screenshot.ImageResult
 import com.smarttoolfactory.screenshot.ScreenshotBox
@@ -104,7 +110,11 @@ fun DrawModeScreen(
     }
 
     BackHandler {
-        onBackPressed()
+        if (state.showBottomToolbarExtension) {
+            viewModel.onEvent(DrawModeEvent.UpdateToolbarExtensionVisibility(false))
+        } else {
+            onBackPressed()
+        }
     }
 
     val onCloseClickedLambda = remember<() -> Unit> {{
@@ -154,9 +164,11 @@ fun DrawModeScreen(
         val aspectRatio = bitmap?.let {
             bitmap.width.toFloat() / bitmap.height.toFloat()
         }
-        val screenShotBoxWidth = if (aspectRatio != null) {
-            Dimension.ratio(aspectRatio.toString())
-        } else Dimension.fillToConstraints
+        val screenShotBoxWidth = remember(key1 = bitmap) {
+            if (aspectRatio != null) {
+                Dimension.ratio(aspectRatio.toString())
+            } else Dimension.fillToConstraints
+        }
         ScreenshotBox(
             modifier = Modifier.constrainAs(drawingView) {
                 start.linkTo(parent.start)
@@ -222,14 +234,22 @@ fun DrawModeScreen(
                 BottomToolbarEvent.UpdateShapeType(mShapeType)
             )
         }}
-        if (state.showBottomToolbarExtension) {
+
+        AnimatedVisibility(
+            visible = state.showBottomToolbarExtension,
+            modifier = Modifier
+                .constrainAs(bottomToolbarExtension) {
+                    bottom.linkTo(bottomToolbar.top)
+                    width = Dimension.matchParent
+                }
+                .clickable(onClick = emptyLambda), /* added clickable{} to avoid triggering touchEvent in DrawingCanvas when clicking anywhere on toolbarExtension */
+            enter = AnimUtils.toolbarExpandAnim(),
+            exit = AnimUtils.toolbarCollapseAnim()
+
+        ) {
             ToolbarExtensionView(
-                modifier = Modifier
-                    .constrainAs(bottomToolbarExtension) {
-                        bottom.linkTo(bottomToolbar.top)
-                        width = Dimension.matchParent
-                    }
-                    .clickable(onClick = emptyLambda), /* added clickable{} to avoid triggering touchEvent in DrawingCanvas when clicking anywhere on toolbarExtension */
+                modifier = Modifier.fillMaxWidth(),
+                showSeparationAtBottom = true,
                 width = state.selectedTool.getWidthOrNull(),
                 opacity = state.selectedTool.getOpacityOrNull(),
                 shapeType = state.selectedTool.getShapeTypeOrNull(),

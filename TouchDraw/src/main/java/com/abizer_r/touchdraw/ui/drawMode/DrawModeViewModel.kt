@@ -3,6 +3,7 @@ package com.abizer_r.touchdraw.ui.drawMode
 import android.icu.util.Calendar
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.abizer_r.touchdraw.ui.drawMode.stateHandling.DrawModeEvent
 import com.abizer_r.touchdraw.ui.drawMode.stateHandling.DrawModeState
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
@@ -11,10 +12,13 @@ import com.abizer_r.touchdraw.utils.drawMode.DrawModeUtils
 import com.abizer_r.touchdraw.utils.drawMode.setOpacityIfPossible
 import com.abizer_r.touchdraw.utils.drawMode.setShapeTypeIfPossible
 import com.abizer_r.touchdraw.utils.drawMode.setWidthIfPossible
+import com.abizer_r.touchdraw.utils.other.anim.AnimUtils.TOOLBAR_ANIM_DURATION
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,6 +42,9 @@ class DrawModeViewModel @Inject constructor(
 
     fun onEvent(event: DrawModeEvent) {
         when (event) {
+            is DrawModeEvent.UpdateToolbarExtensionVisibility -> {
+                _state.update { it.copy(showBottomToolbarExtension = event.isVisible) }
+            }
             is DrawModeEvent.ToggleColorPicker -> {
                 _state.update {
                     it.copy(
@@ -124,8 +131,15 @@ class DrawModeViewModel @Inject constructor(
 
             // clicked on another item
             else -> {
-                _state.update {
-                    it.copy(selectedTool = selectedItem)
+                viewModelScope.launch {
+                    if (state.value.showBottomToolbarExtension) {
+                        // Collapse toolbarExtension and change current item after DELAY
+                        _state.update { it.copy(showBottomToolbarExtension = false) }
+                        delay(TOOLBAR_ANIM_DURATION.toLong())
+                    }
+                    _state.update { it.copy(selectedTool = selectedItem) }
+                    // open toolbarExtension for new item
+                    _state.update { it.copy(showBottomToolbarExtension = true) }
                 }
             }
         }
