@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -31,6 +32,7 @@ import androidx.lifecycle.lifecycleScope
 import com.abizer_r.components.util.ImmutableList
 import com.abizer_r.components.util.defaultErrorToast
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.DrawingCanvas
+import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
 import com.abizer_r.touchdraw.ui.drawMode.stateHandling.DrawModeEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
@@ -183,9 +185,7 @@ fun DrawModeScreen(
                     pathDetailStack = state.pathDetailStack,
                     selectedColor = state.selectedColor,
                     currentTool = state.selectedTool,
-                    onDrawingEvent = {
-                        viewModel.onEvent(it)
-                    }
+                    onDrawingEvent = viewModel::onEvent
                 )
             }
         }
@@ -204,6 +204,24 @@ fun DrawModeScreen(
             onEvent = onBottomToolbarEventLambda
         )
 
+
+        val emptyLambda = remember<() -> Unit> {{
+        }}
+        val onWidthChangeLambda = remember<(Float) -> Unit> {{ mWidth ->
+            viewModel.onBottomToolbarEvent(
+                BottomToolbarEvent.UpdateWidth(mWidth)
+            )
+        }}
+        val onOpacityChangeLambda = remember<(Float) -> Unit> {{ mOpacity ->
+            viewModel.onBottomToolbarEvent(
+                BottomToolbarEvent.UpdateOpacity(mOpacity)
+            )
+        }}
+        val onShapeTypeChangeLambda = remember<(ShapeType) -> Unit> {{ mShapeType ->
+            viewModel.onBottomToolbarEvent(
+                BottomToolbarEvent.UpdateShapeType(mShapeType)
+            )
+        }}
         if (state.showBottomToolbarExtension) {
             ToolbarExtensionView(
                 modifier = Modifier
@@ -211,39 +229,29 @@ fun DrawModeScreen(
                         bottom.linkTo(bottomToolbar.top)
                         width = Dimension.matchParent
                     }
-                    .clickable { }, /* added clickable{} to avoid triggering touchEvent in DrawingCanvas when clicking anywhere on toolbarExtension */
+                    .clickable(onClick = emptyLambda), /* added clickable{} to avoid triggering touchEvent in DrawingCanvas when clicking anywhere on toolbarExtension */
                 width = state.selectedTool.getWidthOrNull(),
-                onWidthChange = { mWidth ->
-                    viewModel.onBottomToolbarEvent(
-                        BottomToolbarEvent.UpdateWidth(mWidth)
-                    )
-                },
                 opacity = state.selectedTool.getOpacityOrNull(),
-                onOpacityChange = { mOpacity ->
-                    viewModel.onBottomToolbarEvent(
-                        BottomToolbarEvent.UpdateOpacity(mOpacity)
-                    )
-                },
                 shapeType = state.selectedTool.getShapeTypeOrNull(),
-                onShapeTypeChange = { mShapeType ->
-                    viewModel.onBottomToolbarEvent(
-                        BottomToolbarEvent.UpdateShapeType(mShapeType)
-                    )
-                }
+                onWidthChange = onWidthChangeLambda,
+                onOpacityChange = onOpacityChangeLambda,
+                onShapeTypeChange = onShapeTypeChangeLambda
             )
         }
 
 
+        val onDismissRequestLambda = remember<() -> Unit> {{
+            viewModel.onEvent(DrawModeEvent.ToggleColorPicker(null))
+        }}
+        val onPickedColorLambda = remember<(Color) -> Unit> {{ selectedColor ->
+            viewModel.onEvent(DrawModeEvent.ToggleColorPicker(selectedColor))
+        }}
         ColorPickerDialog(
             show = state.showColorPicker,
             type = ColorPickerType.Circle(showAlphaBar = false),
             properties = DialogProperties(),
-            onDismissRequest = {
-                viewModel.onEvent(DrawModeEvent.ToggleColorPicker(null))
-            },
-            onPickedColor = { selectedColor ->
-                viewModel.onEvent(DrawModeEvent.ToggleColorPicker(selectedColor))
-            }
+            onDismissRequest = onDismissRequestLambda,
+            onPickedColor = onPickedColorLambda
         )
 
     }

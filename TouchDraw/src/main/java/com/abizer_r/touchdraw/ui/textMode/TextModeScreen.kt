@@ -209,9 +209,7 @@ fun TextModeScreen(
                     DrawAllTransformableViews(
                         centerAlignModifier = Modifier.align(Alignment.Center),
                         transformableViewsList = state.transformableViewStateList,
-                        onTransformableBoxEvent = {
-                            viewModel.onTransformableBoxEvent(it)
-                        }
+                        onTransformableBoxEvent = viewModel::onTransformableBoxEvent
                     )
                 }
             }
@@ -236,9 +234,7 @@ fun TextModeScreen(
                 BorderForSelectedViews(
                     centerAlignModifier = Modifier.align(Alignment.Center),
                     transformableViewsList = state.transformableViewStateList,
-                    onTransformableBoxEvent = {
-                        viewModel.onTransformableBoxEvent(it)
-                    }
+                    onTransformableBoxEvent = viewModel::onTransformableBoxEvent
                 )
             }
 
@@ -256,9 +252,7 @@ fun TextModeScreen(
                         height = Dimension.fillToConstraints
                     },
                 textFieldState = state.textFieldState,
-                onTextModeEvent = {
-                    viewModel.onEvent(it)
-                }
+                onTextModeEvent = viewModel::onEvent
             )
 
         }
