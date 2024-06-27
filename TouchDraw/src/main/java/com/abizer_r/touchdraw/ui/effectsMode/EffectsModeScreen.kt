@@ -1,10 +1,20 @@
+@file:OptIn(ExperimentalSharedTransitionApi::class)
+
 package com.abizer_r.touchdraw.ui.effectsMode
 
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -52,6 +62,7 @@ import com.abizer_r.touchdraw.ui.effectsMode.effectsPreview.EffectItem
 import com.abizer_r.touchdraw.ui.effectsMode.effectsPreview.EffectsPreviewListFullWidth
 import com.abizer_r.touchdraw.ui.textMode.TextModeEvent
 import com.abizer_r.touchdraw.ui.textMode.TextModeViewModel
+import com.abizer_r.touchdraw.utils.SharedTransitionPreviewExtension
 import com.abizer_r.touchdraw.utils.editorScreen.EffectsModeUtils
 import com.abizer_r.touchdraw.utils.other.bitmap.ImmutableBitmap
 import com.abizer_r.touchdraw.utils.textMode.colorList.ColorListFullWidth
@@ -70,8 +81,9 @@ import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun EffectsModeScreen(
+fun SharedTransitionScope.EffectsModeScreen(
     modifier: Modifier = Modifier,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     immutableBitmap: ImmutableBitmap,
     onDoneClicked: (bitmap: Bitmap) -> Unit,
     onBackPressed: () -> Unit
@@ -174,7 +186,13 @@ fun EffectsModeScreen(
                     height = Dimension.fillToConstraints
                 }
                 .clipToBounds()
-                .animateContentSize(),
+                .animateContentSize()
+                .sharedBounds(
+                    sharedContentState = rememberSharedContentState(key = "centerImageBound"),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    enter = EnterTransition.None,
+                    exit = ExitTransition.None
+                ),
             screenshotState = screenshotState
         ) {
 
@@ -228,12 +246,16 @@ fun EffectsModeScreen(
 @Composable
 fun Preview_EffectsModeScreen() {
     SketchDraftTheme {
-        EffectsModeScreen(
-            immutableBitmap = ImmutableBitmap(
-                ImageBitmap.imageResource(id = R.drawable.placeholder_image_2).asAndroidBitmap()
-            ),
-            onDoneClicked = {},
-            onBackPressed = {}
-        )
+        SharedTransitionPreviewExtension {
+            EffectsModeScreen(
+                immutableBitmap = ImmutableBitmap(
+                    ImageBitmap.imageResource(id = R.drawable.placeholder_image_2).asAndroidBitmap()
+                ),
+                animatedVisibilityScope = it,
+                onDoneClicked = {},
+                onBackPressed = {}
+            )
+
+        }
     }
 }

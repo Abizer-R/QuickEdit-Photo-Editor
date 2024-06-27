@@ -81,6 +81,7 @@ dependencies {
     kapt(libs.hilt.compiler)
 
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.compose.animation)
     // Below dependency allows us to create viewModels scoped to a particular composable screen inside a NavHost (ie in navigation)
     implementation(libs.androidx.hilt.navigation.compose)
 }
