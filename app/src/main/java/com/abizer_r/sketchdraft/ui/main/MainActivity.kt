@@ -10,6 +10,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,9 +24,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.imageResource
@@ -61,6 +65,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             SketchDraftTheme {
 
+                window.decorView.rootView.setBackgroundColor(Color.Transparent.toArgb());
                 val context = LocalContext.current
 
                 var selectedImageUri by remember {
@@ -180,7 +185,9 @@ fun MainScreenNavigation(
     val navController = rememberNavController()
     NavHost(
         navController = navController,
-        startDestination = "editorScreen"
+        startDestination = "editorScreen",
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None }
     ) {
 
         composable(route = "editorScreen") {

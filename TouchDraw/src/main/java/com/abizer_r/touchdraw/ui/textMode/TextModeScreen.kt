@@ -1,12 +1,15 @@
 package com.abizer_r.touchdraw.ui.textMode
 
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -19,10 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -37,16 +37,17 @@ import com.abizer_r.components.util.ImmutableList
 import com.abizer_r.touchdraw.utils.textMode.blurBackground.BlurBitmapBackground
 import com.abizer_r.components.util.defaultErrorToast
 import com.abizer_r.touchdraw.ui.textMode.TextModeEvent.*
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBarStatic
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.DEFAULT_TOOLBAR_HEIGHT
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TextModeTopToolbar
 import com.abizer_r.touchdraw.ui.textMode.textEditorLayout.TextEditorLayout
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
+import com.abizer_r.touchdraw.utils.other.anim.AnimUtils
 import com.abizer_r.touchdraw.utils.other.bitmap.ImmutableBitmap
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils.BorderForSelectedViews
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils.DrawAllTransformableViews
-import com.skydoves.cloudy.Cloudy
 import com.smarttoolfactory.screenshot.ImageResult
 import com.smarttoolfactory.screenshot.ScreenshotBox
 import com.smarttoolfactory.screenshot.rememberScreenshotState
@@ -116,6 +117,9 @@ fun TextModeScreen(
                 textFont = defaultTextFont
             )
         )
+        viewModel.onEvent(
+            ShowTextField(state.textFieldState)
+        )
     }
 
     val onCloseClickedLambda = remember<() -> Unit> {{
@@ -160,11 +164,10 @@ fun TextModeScreen(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .imePadding()
     ) {
         val (topToolBar, bottomToolbar, editorBox, editorBoxBgStretched, textInputView) = createRefs()
 
-        val isEditorVisibleAndBgBlurred = state.showBlurredBg.not() && state.textFieldState.isVisible.not()
+        val showBottomToolbar = state.collapseToolbar.not()
 
         TextModeTopToolbar(
             modifier = Modifier.constrainAs(topToolBar) {
@@ -182,17 +185,22 @@ fun TextModeScreen(
         ScreenshotBox(
             modifier = Modifier
                 .constrainAs(editorBox) {
-                    top.linkTo(topToolBar.bottom)
-                    bottom.linkTo(
-                        if (isEditorVisibleAndBgBlurred) bottomToolbar.top
-                        else parent.bottom
-                    )
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.ratio(aspectRatio.toString())
-                    height = Dimension.fillToConstraints
+                    if (showBottomToolbar) {
+                        top.linkTo(topToolBar.bottom)
+                        bottom.linkTo(bottomToolbar.top)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        width = Dimension.ratio(aspectRatio.toString())
+                        height = Dimension.fillToConstraints
+                    } else {
+                        top.linkTo(topToolBar.bottom)
+                        bottom.linkTo(parent.bottom)
+                        width = Dimension.matchParent
+                        height = Dimension.fillToConstraints
+                    }
                 }
-                .clipToBounds(),
+                .clipToBounds()
+                .animateContentSize(),
             screenshotState = screenshotState
         ) {
 
@@ -200,12 +208,13 @@ fun TextModeScreen(
                 modifier = Modifier.fillMaxSize(),
                 imageBitmap = bitmap.asImageBitmap(),
                 shouldBlur = state.showBlurredBg,
+                contentScale = if (showBottomToolbar) ContentScale.Fit else ContentScale.Crop,
                 blurRadius = 15,
                 onBgClicked = onBgClickedLambda
             )
 
             Box(modifier = Modifier.fillMaxSize()) {
-                if (isEditorVisibleAndBgBlurred) {
+                if (showBottomToolbar) {
                     DrawAllTransformableViews(
                         centerAlignModifier = Modifier.align(Alignment.Center),
                         transformableViewsList = state.transformableViewStateList,
@@ -230,7 +239,7 @@ fun TextModeScreen(
         ) {
 
 
-            if (isEditorVisibleAndBgBlurred) {
+            if (showBottomToolbar) {
                 BorderForSelectedViews(
                     centerAlignModifier = Modifier.align(Alignment.Center),
                     transformableViewsList = state.transformableViewStateList,
@@ -240,35 +249,42 @@ fun TextModeScreen(
 
         }
 
-        if (state.textFieldState.isVisible) {
+        AnimatedVisibility(
+            visible = state.textFieldState.isVisible,
+            modifier = Modifier.constrainAs(textInputView) {
+                top.linkTo(topToolBar.bottom)
+                bottom.linkTo(parent.bottom)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                width = Dimension.fillToConstraints
+                height = Dimension.fillToConstraints
+            },
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
             TextEditorLayout(
-                modifier = Modifier
-                    .constrainAs(textInputView) {
-                        top.linkTo(topToolBar.bottom)
-                        bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                        width = Dimension.fillToConstraints
-                        height = Dimension.fillToConstraints
-                    },
+                modifier = Modifier,
                 textFieldState = state.textFieldState,
                 onTextModeEvent = viewModel::onEvent
             )
-
         }
 
 
-        if (isEditorVisibleAndBgBlurred) {
-            BottomToolBar(
-                modifier = Modifier.constrainAs(bottomToolbar) {
-                    bottom.linkTo(parent.bottom)
-                    width = Dimension.matchParent
-                    height = Dimension.wrapContent
-                },
+        AnimatedVisibility(
+            visible = showBottomToolbar,
+            modifier = Modifier.constrainAs(bottomToolbar) {
+                bottom.linkTo(parent.bottom)
+                width = Dimension.matchParent
+                height = Dimension.wrapContent
+            },
+            enter = AnimUtils.toolbarExpandAnim(),
+            exit = AnimUtils.toolbarCollapseAnim()
+        ) {
+            BottomToolBarStatic(
+                modifier = Modifier.fillMaxWidth(),
                 toolbarItems = bottomToolbarItems,
                 onEvent = onBottomToolbarEventLambda
             )
-
         }
     }
 }

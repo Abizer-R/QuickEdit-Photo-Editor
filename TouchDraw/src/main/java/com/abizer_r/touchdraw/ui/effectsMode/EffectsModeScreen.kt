@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -45,6 +46,7 @@ import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.components.theme.ToolBarBackgroundColor
 import com.abizer_r.components.util.ImmutableList
 import com.abizer_r.components.util.defaultErrorToast
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.DEFAULT_TOOLBAR_HEIGHT
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TextModeTopToolbar
 import com.abizer_r.touchdraw.ui.effectsMode.effectsPreview.EffectItem
 import com.abizer_r.touchdraw.ui.effectsMode.effectsPreview.EffectsPreviewListFullWidth
@@ -171,7 +173,8 @@ fun EffectsModeScreen(
                     width = Dimension.ratio(aspectRatio.toString())
                     height = Dimension.fillToConstraints
                 }
-                .clipToBounds(),
+                .clipToBounds()
+                .animateContentSize(),
             screenshotState = screenshotState
         ) {
 
@@ -183,42 +186,38 @@ fun EffectsModeScreen(
 
         }
 
-        if (state.effectsList.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .constrainAs(effectsPreviewList) {
-                        bottom.linkTo(parent.bottom)
-                        width = Dimension.matchParent
-                    }
-                    .background(ToolBarBackgroundColor)
-            ) {
 
+        Box(
+            modifier = Modifier
+                .constrainAs(effectsPreviewList) {
+                    bottom.linkTo(parent.bottom)
+                    width = Dimension.matchParent
+                    height = if (state.effectsList.isEmpty()) {
+                        Dimension.value(DEFAULT_TOOLBAR_HEIGHT)
+                    } else Dimension.wrapContent
+                }
+                .background(ToolBarBackgroundColor)
+                .animateContentSize()
+        ) {
+
+            if (state.effectsList.isEmpty()) {
                 CircularProgressIndicator(
                     modifier = Modifier
-                        .padding(vertical = 12.dp)
-                        .size(48.dp)
+                        .size(36.dp)
                         .align(Alignment.Center),
-
                     color = MaterialTheme.colorScheme.onBackground,
-                    strokeWidth = 4.dp,
+                    strokeWidth = 3.dp,
+                )
+            } else {
+                EffectsPreviewListFullWidth(
+                    modifier = Modifier
+                        .background(ToolBarBackgroundColor)
+                        .padding(vertical = 12.dp),
+                    effectsList = state.effectsList,
+                    selectedIndex = state.selectedEffectIndex,
+                    onItemClicked = onEffectItemClicked
                 )
             }
-
-        } else {
-            Log.e("TEST_LI", "EffectsModeScreen: size = ${state.effectsList.size}", )
-            EffectsPreviewListFullWidth(
-                modifier = Modifier
-                    .constrainAs(effectsPreviewList) {
-                        bottom.linkTo(parent.bottom)
-                        width = Dimension.matchParent
-                        height = Dimension.wrapContent
-                    }
-                    .background(ToolBarBackgroundColor)
-                    .padding(vertical = 12.dp),
-                effectsList = state.effectsList,
-                selectedIndex = state.selectedEffectIndex,
-                onItemClicked = onEffectItemClicked
-            )
 
         }
 

@@ -8,7 +8,6 @@ import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarE
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableBoxEvents
-import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -51,6 +50,8 @@ class TextModeViewModel @Inject constructor(
 
             is TextModeEvent.ShowTextField -> viewModelScope.launch {
                 Log.e("TEST_BLUR", "PlaceHolder Text: ", )
+                _state.update { it.copy(collapseToolbar = true) }
+                delay(100)  /* delay to prepare views before blurring the image */
                 _state.update { it.copy(showBlurredBg = true) }
                 delay(200)  /* delay to let Cloudy library make actual bitmap blurry, before textEditor is shown */
                 _state.update { it.copy(
@@ -86,7 +87,7 @@ class TextModeViewModel @Inject constructor(
             }
 
             is TextModeEvent.HideTextField -> viewModelScope.launch {
-                _state.update { it.copy(showBlurredBg = false) }
+                _state.update { it.copy(collapseToolbar = false, showBlurredBg = false) }
                 _state.update { it.copy(
                     textFieldState = it.textFieldState.copy(
                         isVisible = false,

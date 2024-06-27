@@ -27,12 +27,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.abizer_r.components.R
 import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.components.util.ImmutableList
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBarStatic
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TopToolBar
 import com.abizer_r.touchdraw.utils.editorScreen.EditorScreenUtils
-import com.abizer_r.touchdraw.utils.editorScreen.EffectsModeUtils
 
 @Composable
 fun EditorScreen(
@@ -156,7 +155,7 @@ private fun EditorScreenLayout(
         }
 
 
-        BottomToolBar(
+        BottomToolBarStatic(
             modifier = Modifier.constrainAs(bottomToolbar) {
                 bottom.linkTo(parent.bottom)
                 width = Dimension.matchParent

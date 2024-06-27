@@ -2,19 +2,14 @@ package com.abizer_r.touchdraw.ui.drawMode
 
 import ToolbarExtensionView
 import android.graphics.Bitmap
-import android.util.Log
 import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,7 +22,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -39,13 +33,9 @@ import com.abizer_r.components.util.defaultErrorToast
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.DrawingCanvas
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
 import com.abizer_r.touchdraw.ui.drawMode.stateHandling.DrawModeEvent
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBarStatic
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TopToolBar
-import com.abizer_r.touchdraw.ui.textMode.TextModeEvent
-import com.abizer_r.touchdraw.ui.textMode.getSelectedColor
-import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.touchdraw.utils.drawMode.CustomLayerTypeComposable
 import com.abizer_r.touchdraw.utils.drawMode.DrawModeUtils
 import com.abizer_r.touchdraw.utils.drawMode.getOpacityOrNull
@@ -61,7 +51,6 @@ import io.mhssn.colorpicker.ColorPickerType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -203,7 +192,7 @@ fun DrawModeScreen(
         }
 
 
-        BottomToolBar(
+        BottomToolBarStatic(
             modifier = Modifier.constrainAs(bottomToolbar) {
                 bottom.linkTo(parent.bottom)
                 width = Dimension.matchParent
