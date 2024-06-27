@@ -2,6 +2,12 @@ package com.abizer_r.touchdraw.ui.editorScreen
 
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -27,16 +33,20 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.abizer_r.components.R
 import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.components.util.ImmutableList
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBarStatic
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TopToolBar
+import com.abizer_r.touchdraw.ui.effectsMode.EffectsModeScreen
+import com.abizer_r.touchdraw.utils.SharedTransitionPreviewExtension
 import com.abizer_r.touchdraw.utils.editorScreen.EditorScreenUtils
-import com.abizer_r.touchdraw.utils.editorScreen.EffectsModeUtils
+import com.abizer_r.touchdraw.utils.other.bitmap.ImmutableBitmap
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun EditorScreen(
+fun SharedTransitionScope.EditorScreen(
     modifier: Modifier = Modifier,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     initialEditorScreenState: EditorScreenState,
     goToDrawModeScreen: (finalEditorState: EditorScreenState) -> Unit,
     goToTextModeScreen: (finalEditorState: EditorScreenState) -> Unit,
@@ -82,6 +92,7 @@ fun EditorScreen(
 
         EditorScreenLayout(
             modifier = modifier,
+            animatedVisibilityScope = animatedVisibilityScope,
             currentBitmap = currentBitmap,
             undoEnabled = viewModel.undoEnabled(),
             redoEnabled = viewModel.redoEnabled(),
@@ -93,9 +104,11 @@ fun EditorScreen(
 
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun EditorScreenLayout(
+private fun SharedTransitionScope.EditorScreenLayout(
     modifier: Modifier,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     currentBitmap: Bitmap,
     undoEnabled: Boolean,
     redoEnabled: Boolean,
@@ -135,14 +148,24 @@ private fun EditorScreenLayout(
             Dimension.ratio(aspectRatio.toString())
         } else Dimension.fillToConstraints
         Box(
-            modifier = Modifier.constrainAs(bgImage) {
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-                top.linkTo(topToolbar.bottom)
-                bottom.linkTo(bottomToolbar.top)
-                width = screenShotBoxWidth
-                height = Dimension.fillToConstraints
-            }
+            modifier = Modifier
+                .constrainAs(bgImage) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(topToolbar.bottom)
+                    bottom.linkTo(bottomToolbar.top)
+                    width = screenShotBoxWidth
+                    height = Dimension.fillToConstraints
+                }
+                .sharedBounds(
+                    sharedContentState = rememberSharedContentState(key = "centerImageBound"),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    enter = EnterTransition.None,
+                    exit = ExitTransition.None,
+                    boundsTransform = { _, _ ->
+                        tween(durationMillis = 400)
+                    }
+                )
         ) {
 
             Image(
@@ -156,7 +179,7 @@ private fun EditorScreenLayout(
         }
 
 
-        BottomToolBar(
+        BottomToolBarStatic(
             modifier = Modifier.constrainAs(bottomToolbar) {
                 bottom.linkTo(parent.bottom)
                 width = Dimension.matchParent
@@ -172,18 +195,24 @@ private fun EditorScreenLayout(
 
 
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PreviewEditorScreen() {
     SketchDraftTheme {
-        EditorScreenLayout(
-            modifier = Modifier,
-            currentBitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_2).asAndroidBitmap(),
-            undoEnabled = false,
-            redoEnabled = false,
-            onUndo = {},
-            onRedo = {},
-            onBottomToolbarEvent = {}
-        )
+        SharedTransitionPreviewExtension {
+            EditorScreenLayout(
+                modifier = Modifier,
+                animatedVisibilityScope = it,
+                currentBitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_2).asAndroidBitmap(),
+                undoEnabled = false,
+                redoEnabled = false,
+                onUndo = {},
+                onRedo = {},
+                onBottomToolbarEvent = {}
+            )
+
+        }
+
     }
 }

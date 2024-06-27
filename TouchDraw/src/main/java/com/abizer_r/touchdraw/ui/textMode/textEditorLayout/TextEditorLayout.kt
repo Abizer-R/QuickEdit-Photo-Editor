@@ -2,6 +2,9 @@ package com.abizer_r.touchdraw.ui.textMode.textEditorLayout
 
 import android.content.res.Configuration
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -9,6 +12,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -61,6 +67,11 @@ fun TextEditorLayout(
 
     val focusRequesterForTextField = remember { FocusRequester() }
 
+    val showPlaceHolder by remember(key1 = textFieldState.text.isBlank()) {
+        Log.e("TEST_text_mode", "TextEditorLayout: showPlaceHolder = ${textFieldState.text.isBlank()}", )
+        mutableStateOf(textFieldState.text.isBlank())
+    }
+
     val onColorItemClicked = remember<(Int, Color) -> Unit> {{ index, color ->
         onTextModeEvent(TextModeEvent.SelectTextColor(index, color))
     }}
@@ -106,18 +117,20 @@ fun TextEditorLayout(
         )
 
         // PlaceHolder Text
-        if (textFieldState.text.isEmpty()) {
-            Log.e("TEST_BLUR", "PlaceHolder Text: ", )
+        AnimatedVisibility(
+            visible = showPlaceHolder,
+            modifier = Modifier.constrainAs(placeHolderText) {
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                width = Dimension.matchParent
+                height = Dimension.wrapContent
+            },
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
             Text(
-                modifier = Modifier
-                    .constrainAs(placeHolderText) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                        width = Dimension.matchParent
-                        height = Dimension.wrapContent
-                    },
                 text = stringResource(id = R.string.enter_your_text),
                 textAlign = textFieldState.textAlign,
                 color = textFieldState.getSelectedColor(),

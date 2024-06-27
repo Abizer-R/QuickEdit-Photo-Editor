@@ -2,14 +2,14 @@ package com.abizer_r.touchdraw.ui.drawMode
 
 import ToolbarExtensionView
 import android.graphics.Bitmap
-import android.util.Log
 import android.view.View
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,7 +22,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -34,18 +33,15 @@ import com.abizer_r.components.util.defaultErrorToast
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.DrawingCanvas
 import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
 import com.abizer_r.touchdraw.ui.drawMode.stateHandling.DrawModeEvent
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBar
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.BottomToolBarStatic
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
-import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TopToolBar
-import com.abizer_r.touchdraw.ui.textMode.TextModeEvent
-import com.abizer_r.touchdraw.ui.textMode.getSelectedColor
-import com.abizer_r.touchdraw.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.touchdraw.utils.drawMode.CustomLayerTypeComposable
 import com.abizer_r.touchdraw.utils.drawMode.DrawModeUtils
 import com.abizer_r.touchdraw.utils.drawMode.getOpacityOrNull
 import com.abizer_r.touchdraw.utils.drawMode.getShapeTypeOrNull
 import com.abizer_r.touchdraw.utils.drawMode.getWidthOrNull
+import com.abizer_r.touchdraw.utils.other.anim.AnimUtils
 import com.abizer_r.touchdraw.utils.other.bitmap.ImmutableBitmap
 import com.smarttoolfactory.screenshot.ImageResult
 import com.smarttoolfactory.screenshot.ScreenshotBox
@@ -55,7 +51,6 @@ import io.mhssn.colorpicker.ColorPickerType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -104,7 +99,11 @@ fun DrawModeScreen(
     }
 
     BackHandler {
-        onBackPressed()
+        if (state.showBottomToolbarExtension) {
+            viewModel.onEvent(DrawModeEvent.UpdateToolbarExtensionVisibility(false))
+        } else {
+            onBackPressed()
+        }
     }
 
     val onCloseClickedLambda = remember<() -> Unit> {{
@@ -154,9 +153,11 @@ fun DrawModeScreen(
         val aspectRatio = bitmap?.let {
             bitmap.width.toFloat() / bitmap.height.toFloat()
         }
-        val screenShotBoxWidth = if (aspectRatio != null) {
-            Dimension.ratio(aspectRatio.toString())
-        } else Dimension.fillToConstraints
+        val screenShotBoxWidth = remember(key1 = bitmap) {
+            if (aspectRatio != null) {
+                Dimension.ratio(aspectRatio.toString())
+            } else Dimension.fillToConstraints
+        }
         ScreenshotBox(
             modifier = Modifier.constrainAs(drawingView) {
                 start.linkTo(parent.start)
@@ -191,7 +192,7 @@ fun DrawModeScreen(
         }
 
 
-        BottomToolBar(
+        BottomToolBarStatic(
             modifier = Modifier.constrainAs(bottomToolbar) {
                 bottom.linkTo(parent.bottom)
                 width = Dimension.matchParent
@@ -222,14 +223,22 @@ fun DrawModeScreen(
                 BottomToolbarEvent.UpdateShapeType(mShapeType)
             )
         }}
-        if (state.showBottomToolbarExtension) {
+
+        AnimatedVisibility(
+            visible = state.showBottomToolbarExtension,
+            modifier = Modifier
+                .constrainAs(bottomToolbarExtension) {
+                    bottom.linkTo(bottomToolbar.top)
+                    width = Dimension.matchParent
+                }
+                .clickable(onClick = emptyLambda), /* added clickable{} to avoid triggering touchEvent in DrawingCanvas when clicking anywhere on toolbarExtension */
+            enter = AnimUtils.toolbarExpandAnim(),
+            exit = AnimUtils.toolbarCollapseAnim()
+
+        ) {
             ToolbarExtensionView(
-                modifier = Modifier
-                    .constrainAs(bottomToolbarExtension) {
-                        bottom.linkTo(bottomToolbar.top)
-                        width = Dimension.matchParent
-                    }
-                    .clickable(onClick = emptyLambda), /* added clickable{} to avoid triggering touchEvent in DrawingCanvas when clicking anywhere on toolbarExtension */
+                modifier = Modifier.fillMaxWidth(),
+                showSeparationAtBottom = true,
                 width = state.selectedTool.getWidthOrNull(),
                 opacity = state.selectedTool.getOpacityOrNull(),
                 shapeType = state.selectedTool.getShapeTypeOrNull(),

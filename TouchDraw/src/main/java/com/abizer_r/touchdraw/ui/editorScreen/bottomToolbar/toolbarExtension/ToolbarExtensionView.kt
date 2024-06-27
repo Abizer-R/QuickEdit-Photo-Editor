@@ -3,7 +3,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
@@ -16,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.abizer_r.components.R
 import com.abizer_r.components.theme.SketchDraftTheme
@@ -27,6 +30,7 @@ import com.abizer_r.touchdraw.utils.drawMode.DrawingConstants
 @Composable
 fun ToolbarExtensionView(
     modifier: Modifier,
+    showSeparationAtBottom: Boolean = true,
     width: Float? = null,
     onWidthChange: (Float) -> Unit = {},
     opacity: Float? = null,
@@ -38,8 +42,10 @@ fun ToolbarExtensionView(
     Column(
         modifier = modifier
             .background(ToolBarBackgroundColor)
-            .padding(8.dp)
+            .padding(horizontal = 8.dp) // added Spacer for vertical padding
     ) {
+
+        Spacer(modifier = Modifier.fillMaxWidth().height(8.dp))
 
         width?.let {
             CustomSliderItem(
@@ -68,6 +74,18 @@ fun ToolbarExtensionView(
                 modifier = Modifier.padding(8.dp),
                 selectedShape = shapeType,
                 onShapeSelected = onShapeTypeChange
+            )
+        }
+
+
+        Spacer(modifier = Modifier.fillMaxWidth().height(8.dp))
+
+        if (showSeparationAtBottom) {
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.background)
+                    .height(1.dp)
             )
         }
     }

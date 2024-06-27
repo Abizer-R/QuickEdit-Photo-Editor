@@ -6,8 +6,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -38,6 +40,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.abizer_r.components.R
@@ -48,11 +51,43 @@ import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarE
 import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.touchdraw.utils.drawMode.DrawModeUtils
 import com.abizer_r.touchdraw.utils.editorScreen.EditorScreenUtils
-import com.abizer_r.touchdraw.utils.editorScreen.EffectsModeUtils
 import com.abizer_r.touchdraw.utils.textMode.TextModeUtils
 
+val DEFAULT_TOOLBAR_HEIGHT = 64.dp
+
 @Composable
-fun BottomToolBar(
+fun BottomToolBarStatic(
+    modifier: Modifier,
+    toolbarItems: ImmutableList<BottomToolbarItem>,
+    toolbarHeight: Dp = DEFAULT_TOOLBAR_HEIGHT,
+    selectedItem: BottomToolbarItem = BottomToolbarItem.NONE,
+    showColorPickerIcon: Boolean = true,
+    selectedColor: Color = Color.White,
+    onEvent: (BottomToolbarEvent) -> Unit
+) {
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(toolbarHeight)
+            .background(ToolBarBackgroundColor),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        toolbarItems.items.forEachIndexed { index, mToolbarItem ->
+            ToolbarItem(
+                toolbarItem = mToolbarItem,
+                selectedColor = selectedColor,
+                showColorPickerIcon = showColorPickerIcon,
+                isSelected = mToolbarItem == selectedItem,
+                onEvent = onEvent
+            )
+        }
+    }
+}
+
+@Composable
+fun BottomToolBarDynamic(
     modifier: Modifier,
     toolbarItems: ImmutableList<BottomToolbarItem>,
     selectedItem: BottomToolbarItem = BottomToolbarItem.NONE,
@@ -64,8 +99,8 @@ fun BottomToolBar(
     LazyRow(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
             .background(ToolBarBackgroundColor)
+            .padding(vertical = 4.dp)
     ) {
         itemsIndexed(toolbarItems.items) { index, mToolbarItem ->
             val itemModifier = Modifier
@@ -102,9 +137,11 @@ fun ToolbarItem(
 ) {
     val labelFontSize = MaterialTheme.typography.bodySmall.fontSize
 
+    val commonPaddingModifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+
     if (toolbarItem is BottomToolbarItem.ColorItem) {
         ColorToolbarItem(
-            modifier = modifier,
+            modifier = modifier.then(commonPaddingModifier),
             selectedColor = selectedColor,
             showColorPickerIcon = showColorPickerIcon,
             colorItem = toolbarItem,
@@ -113,14 +150,20 @@ fun ToolbarItem(
         )
         return
     }
-    val columnModifier = if (isSelected) {
-        modifier
-            .clip(RoundedCornerShape(5.dp))
-            .background(Color.DarkGray)
-            .padding(start = 8.dp, end = 8.dp, bottom = 4.dp)
-    } else {
-        modifier.padding(start = 8.dp, end = 8.dp, bottom = 4.dp)
+    var columnModifier = modifier.clickable {
+        onEvent(BottomToolbarEvent.OnItemClicked(toolbarItem))
     }
+    if (isSelected) {
+        columnModifier = columnModifier
+            .clip(RoundedCornerShape(3.dp))
+            .background(MaterialTheme.colorScheme.onBackground)
+            .padding((0.5).dp)
+            .clip(RoundedCornerShape(3.dp))
+            .background(Color.DarkGray)
+//            .padding(start = 8.dp, end = 8.dp, bottom = 4.dp)
+    }
+    columnModifier = columnModifier.then(commonPaddingModifier)
+
 
     val (imageVector, labelText) = when (toolbarItem) {
 
@@ -159,44 +202,19 @@ fun ToolbarItem(
         )
     }
 
-    val paddingAfterSize = when (toolbarItem) {
-        is BottomToolbarItem.EffectsMode -> 1.dp
-        else -> 0.dp
-    }
-
 
     Column(
-        modifier = columnModifier.clickable {
-            onEvent(BottomToolbarEvent.OnItemClicked(toolbarItem))
-        },
+        modifier = columnModifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        if (isSelected) {
-            Image(
-                modifier = Modifier
-                    .size(height = 12.dp, width = 24.dp)
-                    .scale(1f),
-                contentDescription = null,
-                imageVector = Icons.Default.ArrowDropDown,
-                contentScale = ContentScale.FillBounds,
-                colorFilter = ColorFilter.tint(
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            )
-        } else {
-            Spacer(modifier = Modifier.size(
-                if (labelText.isNotBlank()) 12.dp else 4.dp
-            ))
-        }
 
-        val verticalPaddingBeforeSize = if (labelText.isBlank()) 8.dp else 0.dp
-        val imageSize = if (labelText.isNotBlank()) 28.dp else 36.dp
+        val verticalPaddingBeforeSize = if (labelText.isBlank()) 4.dp else 0.dp
+        val imageSize = if (labelText.isBlank()) 32.dp else 28.dp
         Image(
             modifier = Modifier
                 .padding(vertical = verticalPaddingBeforeSize)
-                .size(imageSize)
-                .padding(paddingAfterSize),
+                .size(imageSize),
             contentDescription = null,
             imageVector = imageVector,
             colorFilter = ColorFilter.tint(
@@ -229,7 +247,7 @@ fun ColorToolbarItem(
     onEvent: (BottomToolbarEvent) -> Unit
 ) {
     Column(
-        modifier = modifier.padding(start = 8.dp, end = 8.dp, top = 12.dp),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -278,7 +296,7 @@ fun ColorToolbarItem(
 fun EditorScreen_BottomToolbar() {
     SketchDraftTheme {
         val itemsList = EditorScreenUtils.getDefaultBottomToolbarItemsList()
-        BottomToolBar(
+        BottomToolBarStatic(
             modifier = Modifier.fillMaxWidth(),
             toolbarItems = ImmutableList(itemsList),
             onEvent = {}
@@ -291,7 +309,7 @@ fun EditorScreen_BottomToolbar() {
 fun DrawMode_BottomToolbar() {
     SketchDraftTheme {
         val itemsList = DrawModeUtils.getDefaultBottomToolbarItemsList()
-        BottomToolBar(
+        BottomToolBarStatic(
             modifier = Modifier.fillMaxWidth(),
             toolbarItems = ImmutableList(itemsList),
             showColorPickerIcon = true,
@@ -307,7 +325,7 @@ fun DrawMode_BottomToolbar() {
 fun TextMode_BottomToolbar() {
     SketchDraftTheme {
         val itemsList = TextModeUtils.getDefaultBottomToolbarItemsList()
-        BottomToolBar(
+        BottomToolBarStatic(
             modifier = Modifier.fillMaxWidth(),
             toolbarItems = ImmutableList(itemsList),
             showColorPickerIcon = true,

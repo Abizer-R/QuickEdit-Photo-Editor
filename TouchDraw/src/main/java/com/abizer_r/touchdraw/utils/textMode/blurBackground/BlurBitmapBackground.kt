@@ -21,6 +21,7 @@ import com.skydoves.cloudy.Cloudy
 fun BlurBitmapBackground(
     modifier: Modifier,
     imageBitmap: ImageBitmap,
+    contentScale: ContentScale,
     shouldBlur: Boolean,
     blurRadius: Int = 15,
     onBgClicked: () -> Unit
@@ -40,7 +41,7 @@ fun BlurBitmapBackground(
             Image(
                 modifier = Modifier.fillMaxSize(),
                 bitmap = imageBitmap,
-                contentScale = ContentScale.Fit,
+                contentScale = contentScale,
                 contentDescription = null,
                 alpha = 0.5f
             )
@@ -56,7 +57,7 @@ fun BlurBitmapBackground(
                     true
                 },
             bitmap = imageBitmap,
-            contentScale = ContentScale.Fit,
+            contentScale = contentScale,
             contentDescription = null,
             alpha = 1f
         )
@@ -72,6 +73,7 @@ fun PreviewBitmapBg() {
             modifier = Modifier.fillMaxSize(),
             imageBitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_1),
             shouldBlur = false,
+            contentScale = ContentScale.Fit,
             onBgClicked = {}
         )
     }

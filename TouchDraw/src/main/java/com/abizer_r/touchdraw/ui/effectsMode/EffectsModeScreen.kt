@@ -1,9 +1,20 @@
+@file:OptIn(ExperimentalSharedTransitionApi::class)
+
 package com.abizer_r.touchdraw.ui.effectsMode
 
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -45,11 +56,13 @@ import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.components.theme.ToolBarBackgroundColor
 import com.abizer_r.components.util.ImmutableList
 import com.abizer_r.components.util.defaultErrorToast
+import com.abizer_r.touchdraw.ui.editorScreen.bottomToolbar.DEFAULT_TOOLBAR_HEIGHT
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TextModeTopToolbar
 import com.abizer_r.touchdraw.ui.effectsMode.effectsPreview.EffectItem
 import com.abizer_r.touchdraw.ui.effectsMode.effectsPreview.EffectsPreviewListFullWidth
 import com.abizer_r.touchdraw.ui.textMode.TextModeEvent
 import com.abizer_r.touchdraw.ui.textMode.TextModeViewModel
+import com.abizer_r.touchdraw.utils.SharedTransitionPreviewExtension
 import com.abizer_r.touchdraw.utils.editorScreen.EffectsModeUtils
 import com.abizer_r.touchdraw.utils.other.bitmap.ImmutableBitmap
 import com.abizer_r.touchdraw.utils.textMode.colorList.ColorListFullWidth
@@ -68,8 +81,9 @@ import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun EffectsModeScreen(
+fun SharedTransitionScope.EffectsModeScreen(
     modifier: Modifier = Modifier,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     immutableBitmap: ImmutableBitmap,
     onDoneClicked: (bitmap: Bitmap) -> Unit,
     onBackPressed: () -> Unit
@@ -171,7 +185,14 @@ fun EffectsModeScreen(
                     width = Dimension.ratio(aspectRatio.toString())
                     height = Dimension.fillToConstraints
                 }
-                .clipToBounds(),
+                .clipToBounds()
+                .animateContentSize()
+                .sharedBounds(
+                    sharedContentState = rememberSharedContentState(key = "centerImageBound"),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    enter = EnterTransition.None,
+                    exit = ExitTransition.None
+                ),
             screenshotState = screenshotState
         ) {
 
@@ -183,42 +204,38 @@ fun EffectsModeScreen(
 
         }
 
-        if (state.effectsList.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .constrainAs(effectsPreviewList) {
-                        bottom.linkTo(parent.bottom)
-                        width = Dimension.matchParent
-                    }
-                    .background(ToolBarBackgroundColor)
-            ) {
 
+        Box(
+            modifier = Modifier
+                .constrainAs(effectsPreviewList) {
+                    bottom.linkTo(parent.bottom)
+                    width = Dimension.matchParent
+                    height = if (state.effectsList.isEmpty()) {
+                        Dimension.value(DEFAULT_TOOLBAR_HEIGHT)
+                    } else Dimension.wrapContent
+                }
+                .background(ToolBarBackgroundColor)
+                .animateContentSize()
+        ) {
+
+            if (state.effectsList.isEmpty()) {
                 CircularProgressIndicator(
                     modifier = Modifier
-                        .padding(vertical = 12.dp)
-                        .size(48.dp)
+                        .size(36.dp)
                         .align(Alignment.Center),
-
                     color = MaterialTheme.colorScheme.onBackground,
-                    strokeWidth = 4.dp,
+                    strokeWidth = 3.dp,
+                )
+            } else {
+                EffectsPreviewListFullWidth(
+                    modifier = Modifier
+                        .background(ToolBarBackgroundColor)
+                        .padding(vertical = 12.dp),
+                    effectsList = state.effectsList,
+                    selectedIndex = state.selectedEffectIndex,
+                    onItemClicked = onEffectItemClicked
                 )
             }
-
-        } else {
-            Log.e("TEST_LI", "EffectsModeScreen: size = ${state.effectsList.size}", )
-            EffectsPreviewListFullWidth(
-                modifier = Modifier
-                    .constrainAs(effectsPreviewList) {
-                        bottom.linkTo(parent.bottom)
-                        width = Dimension.matchParent
-                        height = Dimension.wrapContent
-                    }
-                    .background(ToolBarBackgroundColor)
-                    .padding(vertical = 12.dp),
-                effectsList = state.effectsList,
-                selectedIndex = state.selectedEffectIndex,
-                onItemClicked = onEffectItemClicked
-            )
 
         }
 
@@ -229,12 +246,16 @@ fun EffectsModeScreen(
 @Composable
 fun Preview_EffectsModeScreen() {
     SketchDraftTheme {
-        EffectsModeScreen(
-            immutableBitmap = ImmutableBitmap(
-                ImageBitmap.imageResource(id = R.drawable.placeholder_image_2).asAndroidBitmap()
-            ),
-            onDoneClicked = {},
-            onBackPressed = {}
-        )
+        SharedTransitionPreviewExtension {
+            EffectsModeScreen(
+                immutableBitmap = ImmutableBitmap(
+                    ImageBitmap.imageResource(id = R.drawable.placeholder_image_2).asAndroidBitmap()
+                ),
+                animatedVisibilityScope = it,
+                onDoneClicked = {},
+                onBackPressed = {}
+            )
+
+        }
     }
 }
