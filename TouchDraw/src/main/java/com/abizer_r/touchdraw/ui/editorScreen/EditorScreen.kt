@@ -157,15 +157,22 @@ private fun SharedTransitionScope.EditorScreenLayout(
                     width = screenShotBoxWidth
                     height = Dimension.fillToConstraints
                 }
+                .sharedElement(
+                    state = rememberSharedContentState(key = "centerImage"),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    boundsTransform = { _, _ ->
+                        tween(300)
+                    },
+                )
                 .sharedBounds(
                     sharedContentState = rememberSharedContentState(key = "centerImageBound"),
                     animatedVisibilityScope = animatedVisibilityScope,
                     enter = EnterTransition.None,
                     exit = ExitTransition.None,
                     boundsTransform = { _, _ ->
-                        tween(durationMillis = 400)
+                        tween(durationMillis = 300)
                     }
-                )
+                ),
         ) {
 
             Image(
@@ -184,7 +191,10 @@ private fun SharedTransitionScope.EditorScreenLayout(
                 bottom.linkTo(parent.bottom)
                 width = Dimension.matchParent
                 height = Dimension.wrapContent
-            },
+            }.sharedElement(
+                state = rememberSharedContentState(key = "bottomToolbar"),
+                animatedVisibilityScope = animatedVisibilityScope,
+            ),
             toolbarItems = bottomToolbarItems,
             onEvent = onBottomToolbarEvent
         )
