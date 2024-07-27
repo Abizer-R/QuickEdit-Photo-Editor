@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.outlined.Brush
 import androidx.compose.material.icons.outlined.Category
+import androidx.compose.material.icons.outlined.Crop
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -167,6 +168,10 @@ fun ToolbarItem(
 
     val (imageVector, labelText) = when (toolbarItem) {
 
+        is BottomToolbarItem.CropMode -> Pair(
+            Icons.Outlined.Crop,
+            stringResource(id = R.string.crop)
+        )
         is BottomToolbarItem.DrawMode -> Pair(
             Icons.Outlined.Brush,
             stringResource(id = R.string.draw)

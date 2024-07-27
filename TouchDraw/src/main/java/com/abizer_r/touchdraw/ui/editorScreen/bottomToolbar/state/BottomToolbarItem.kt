@@ -6,6 +6,7 @@ import com.abizer_r.touchdraw.ui.drawMode.drawingCanvas.drawingTool.shapes.Shape
 @Immutable
 sealed class BottomToolbarItem {
     // ---------- EditorScreen Items - START
+    object CropMode : BottomToolbarItem()
     object DrawMode : BottomToolbarItem()
     object TextMode : BottomToolbarItem()
     object EffectsMode : BottomToolbarItem()

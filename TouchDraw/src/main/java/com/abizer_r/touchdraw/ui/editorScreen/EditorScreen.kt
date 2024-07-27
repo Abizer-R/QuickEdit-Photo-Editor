@@ -48,6 +48,7 @@ fun SharedTransitionScope.EditorScreen(
     modifier: Modifier = Modifier,
     animatedVisibilityScope: AnimatedVisibilityScope,
     initialEditorScreenState: EditorScreenState,
+    goToCropModeScreen: (finalEditorState: EditorScreenState) -> Unit,
     goToDrawModeScreen: (finalEditorState: EditorScreenState) -> Unit,
     goToTextModeScreen: (finalEditorState: EditorScreenState) -> Unit,
     goToEffectsModeScreen: (finalEditorState: EditorScreenState) -> Unit,
@@ -76,6 +77,9 @@ fun SharedTransitionScope.EditorScreen(
         val onBottomToolbarEvent = remember<(BottomToolbarEvent) -> Unit> {{ toolbarEvent ->
             if (toolbarEvent is BottomToolbarEvent.OnItemClicked) {
                 when (toolbarEvent.toolbarItem) {
+                    BottomToolbarItem.CropMode -> {
+                        goToCropModeScreen(state)
+                    }
                     BottomToolbarItem.DrawMode -> {
                         goToDrawModeScreen(state)
                     }
