@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,7 +33,9 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.abizer_r.components.R
 import com.abizer_r.components.theme.SketchDraftTheme
+import com.abizer_r.touchdraw.ui.cropMode.cropperOptions.CropperOptionsFullWidth
 import com.abizer_r.touchdraw.ui.editorScreen.topToolbar.TextModeTopToolbar
+import com.abizer_r.touchdraw.utils.editorScreen.CropModeUtils
 import com.abizer_r.touchdraw.utils.other.bitmap.ImmutableBitmap
 import com.canhub.cropper.CropImageOptions
 import com.canhub.cropper.CropImageView
@@ -50,6 +53,18 @@ fun CropperScreen(
 
     var shouldCrop by remember {
         mutableStateOf(false)
+    }
+
+    val cropperOptionsList = remember {
+        CropModeUtils.getCropperOptionsList()
+    }
+
+    var selectedCropOption by remember {
+        mutableIntStateOf(0)
+    }
+
+    var cropImageOptions = remember {
+        CropImageOptions()
     }
 
     val cropImageLambda = remember<(CropImageView) -> Unit> {{ cropImageView ->
@@ -98,7 +113,7 @@ fun CropperScreen(
             modifier = Modifier
                 .constrainAs(cropView) {
                     top.linkTo(topToolBar.bottom)
-                    bottom.linkTo(parent.bottom)
+                    bottom.linkTo(bottomToolbar.top)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                     width = Dimension.fillToConstraints
@@ -115,30 +130,46 @@ fun CropperScreen(
                             ViewGroup.LayoutParams.MATCH_PARENT
                         )
                         setImageBitmap(immutableBitmap.bitmap)
-                        setImageCropOptions(CropImageOptions())
+                        setImageCropOptions(cropImageOptions)
                         setOnCropImageCompleteListener(cropCompleteListener)
                     }
                 },
                 update = { cropImageView ->
                     Log.e("TEST_crop", "CropperScreen: update", )
                     cropImageLambda(cropImageView)
+                    cropImageView.setImageCropOptions(cropImageOptions)
                 }
             )
         }
 
-//        Button(
-//            modifier = Modifier
-//                .constrainAs(bottomToolbar) {
-//                    bottom.linkTo(parent.bottom)
-//                    width = Dimension.matchParent
-//                    height = Dimension.wrapContent
-//                },
-//            onClick = {
-//                shouldCrop = true
-//            }
-//        ) {
-//            Text("crop")
-//        }
+        CropperOptionsFullWidth(
+            modifier = Modifier.constrainAs(bottomToolbar) {
+                bottom.linkTo(parent.bottom)
+                width = Dimension.matchParent
+                height = Dimension.wrapContent
+            },
+            cropperOptionList = cropperOptionsList,
+            selectedIndex = selectedCropOption,
+            onItemClicked = { position, cropOption ->
+                selectedCropOption = position
+                when (cropOption.aspectRatioX) {
+                    -1f -> {
+                        cropImageOptions = cropImageOptions.copy(
+                            fixAspectRatio = false,
+                            aspectRatioX = 1,
+                            aspectRatioY = 1
+                        )
+                    }
+                    else -> {
+                        cropImageOptions = cropImageOptions.copy(
+                            fixAspectRatio = true,
+                            aspectRatioX = cropOption.aspectRatioX.toInt(),
+                            aspectRatioY = cropOption.aspectRatioY.toInt()
+                        )
+                    }
+                }
+            }
+        )
 
     }
 
