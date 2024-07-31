@@ -1,20 +1,17 @@
 package com.abizer_r.quickedit.utils.other.anim
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
-import androidx.compose.animation.slideIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
 
 object AnimUtils {
+
+    val EMPHASIZED_DECELERATE = CubicBezierEasing(0.05f, 0.7f, 0.1f, 1.0f)
+    val EMPHASIZED_ACCELERATE = CubicBezierEasing(0.3f, 0f, 0.8f, 0.15f)
 
     fun fadeInThenFadeOut(
         fadeInMillis: Int = 200,
@@ -25,16 +22,17 @@ object AnimUtils {
         animationSpec = tween(fadeOutMillis)
     )
 
-    const val TOOLBAR_ANIM_DURATION = 100
+    const val TOOLBAR_EXPAND_ANIM_DURATION = 400
+    const val TOOLBAR_COLLAPSE_ANIM_DURATION = 250
     fun toolbarExpandAnim() = fadeIn(
-        animationSpec = tween(TOOLBAR_ANIM_DURATION, easing = FastOutLinearInEasing)
+        animationSpec = tween(TOOLBAR_EXPAND_ANIM_DURATION, easing = EMPHASIZED_DECELERATE)
     ) + expandIn(
-        animationSpec = tween(TOOLBAR_ANIM_DURATION, easing = FastOutLinearInEasing)
+        animationSpec = tween(TOOLBAR_EXPAND_ANIM_DURATION, easing = EMPHASIZED_DECELERATE)
     )
 
     fun toolbarCollapseAnim() = fadeOut(
-        animationSpec = tween(TOOLBAR_ANIM_DURATION, easing = FastOutLinearInEasing)
+        animationSpec = tween(TOOLBAR_COLLAPSE_ANIM_DURATION, easing = EMPHASIZED_ACCELERATE)
     ) + shrinkOut(
-        animationSpec = tween(TOOLBAR_ANIM_DURATION, easing = FastOutLinearInEasing)
+        animationSpec = tween(TOOLBAR_COLLAPSE_ANIM_DURATION, easing = EMPHASIZED_ACCELERATE)
     )
 }
