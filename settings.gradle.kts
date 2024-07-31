@@ -17,4 +17,4 @@ dependencyResolutionManagement {
 rootProject.name = "SketchDraft"
 include(":app")
 include(":components")
-include(":touchDraw")
+include(":quickedit")
