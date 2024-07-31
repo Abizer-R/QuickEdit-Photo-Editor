@@ -52,7 +52,7 @@ fun EffectsPreviewListFullWidth(
     ) {
         items(
             count = effectsList.size,
-            key = { it },
+            key = { effectsList[it].id },
         ) {index ->
             val effectItem = effectsList[index]
             EffectPreview(

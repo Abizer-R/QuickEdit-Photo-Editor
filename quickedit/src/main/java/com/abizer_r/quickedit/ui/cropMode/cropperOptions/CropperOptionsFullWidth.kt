@@ -52,7 +52,7 @@ fun CropperOptionsFullWidth(
     ) {
         items(
             count = cropperOptionList.size,
-            key = { it },
+            key = { cropperOptionList[it].id },
         ) {index ->
             val cropperOption = cropperOptionList[index]
             CropperOptionView(

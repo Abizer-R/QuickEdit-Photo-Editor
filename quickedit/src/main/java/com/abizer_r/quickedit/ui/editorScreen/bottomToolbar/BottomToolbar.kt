@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -74,45 +72,6 @@ fun BottomToolBarStatic(
     ) {
         toolbarItems.items.forEachIndexed { index, mToolbarItem ->
             ToolbarItem(
-                toolbarItem = mToolbarItem,
-                selectedColor = selectedColor,
-                showColorPickerIcon = showColorPickerIcon,
-                isSelected = mToolbarItem == selectedItem,
-                onEvent = onEvent
-            )
-        }
-    }
-}
-
-@Composable
-fun BottomToolBarDynamic(
-    modifier: Modifier,
-    toolbarItems: ImmutableList<BottomToolbarItem>,
-    selectedItem: BottomToolbarItem = BottomToolbarItem.NONE,
-    showColorPickerIcon: Boolean = true,
-    selectedColor: Color = Color.White,
-    onEvent: (BottomToolbarEvent) -> Unit
-) {
-
-    LazyRow(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(ToolBarBackgroundColor)
-            .padding(vertical = 4.dp)
-    ) {
-        itemsIndexed(toolbarItems.items) { index, mToolbarItem ->
-            val itemModifier = Modifier
-            if (index == 0) {
-                itemModifier.padding(start = 8.dp)
-            } else if (index == toolbarItems.items.size - 1) {
-                itemModifier.padding(end = 8.dp)
-            } else {
-                itemModifier.padding(horizontal = 16.dp)
-            }
-            ToolbarItem(
-                modifier = Modifier.padding(
-                    horizontal = 16.dp
-                ),
                 toolbarItem = mToolbarItem,
                 selectedColor = selectedColor,
                 showColorPickerIcon = showColorPickerIcon,
