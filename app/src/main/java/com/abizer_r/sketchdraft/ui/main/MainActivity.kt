@@ -46,6 +46,7 @@ import com.abizer_r.components.theme.SketchDraftTheme
 import com.abizer_r.touchdraw.ui.SharedEditorViewModel
 import com.abizer_r.touchdraw.ui.common.ErrorView
 import com.abizer_r.touchdraw.ui.common.LoadingView
+import com.abizer_r.touchdraw.ui.cropMode.CropperScreen
 import com.abizer_r.touchdraw.ui.drawMode.DrawModeScreen
 import com.abizer_r.touchdraw.ui.editorScreen.EditorScreen
 import com.abizer_r.touchdraw.ui.editorScreen.EditorScreenState
@@ -199,6 +200,10 @@ fun MainScreenNavigation(
                     sharedEditorViewModel.bitmapStack, sharedEditorViewModel.bitmapRedoStack
                 )
 
+                val goToCropModeScreenLambda = remember<(EditorScreenState) -> Unit> {{ finalEditorState ->
+                    sharedEditorViewModel.updateStacksFromEditorState(finalEditorState)
+                    navController.navigate("cropMode")
+                }}
                 val goToDrawModeScreenLambda = remember<(EditorScreenState) -> Unit> {{ finalEditorState ->
                     sharedEditorViewModel.updateStacksFromEditorState(finalEditorState)
                     navController.navigate("drawMode")
@@ -215,11 +220,38 @@ fun MainScreenNavigation(
                 EditorScreen(
                     animatedVisibilityScope = this,
                     initialEditorScreenState = initialEditorState,
+                    goToCropModeScreen = goToCropModeScreenLambda,
                     goToDrawModeScreen = goToDrawModeScreenLambda,
                     goToTextModeScreen = goToTextModeScreenLambda,
                     goToEffectsModeScreen = goToEffectsModeScreenLambda,
                 )
 
+            }
+
+            composable(route = "cropMode") { entry ->
+
+                val onBackPressedLambda = remember<() -> Unit> {{
+                    navController.navigateUp()
+                }}
+
+                val onDoneClickedLambda = remember<(Bitmap) -> Unit> {{
+                    Log.d("TEST_RECOMP", "DrawModeScreen: addBitmapToStack, bitmap = $it")
+                    sharedEditorViewModel.addBitmapToStack(
+                        bitmap = it.copy(Bitmap.Config.ARGB_8888, false),
+                    )
+                    navController.navigate(
+                        "editorScreen",
+                        navOptions = NavOptions.Builder()
+                            .setPopUpTo(route = "editorScreen", inclusive = true)
+                            .build()
+                    )
+                }}
+
+                CropperScreen(
+                    immutableBitmap = ImmutableBitmap((sharedEditorViewModel.getCurrentBitmap())),
+                    onBackPressed = onBackPressedLambda,
+                    onDoneClicked = onDoneClickedLambda,
+                )
             }
 
             composable(route = "drawMode") { entry ->

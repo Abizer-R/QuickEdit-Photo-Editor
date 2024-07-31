@@ -48,6 +48,7 @@ fun SharedTransitionScope.EditorScreen(
     modifier: Modifier = Modifier,
     animatedVisibilityScope: AnimatedVisibilityScope,
     initialEditorScreenState: EditorScreenState,
+    goToCropModeScreen: (finalEditorState: EditorScreenState) -> Unit,
     goToDrawModeScreen: (finalEditorState: EditorScreenState) -> Unit,
     goToTextModeScreen: (finalEditorState: EditorScreenState) -> Unit,
     goToEffectsModeScreen: (finalEditorState: EditorScreenState) -> Unit,
@@ -76,6 +77,9 @@ fun SharedTransitionScope.EditorScreen(
         val onBottomToolbarEvent = remember<(BottomToolbarEvent) -> Unit> {{ toolbarEvent ->
             if (toolbarEvent is BottomToolbarEvent.OnItemClicked) {
                 when (toolbarEvent.toolbarItem) {
+                    BottomToolbarItem.CropMode -> {
+                        goToCropModeScreen(state)
+                    }
                     BottomToolbarItem.DrawMode -> {
                         goToDrawModeScreen(state)
                     }
@@ -157,15 +161,22 @@ private fun SharedTransitionScope.EditorScreenLayout(
                     width = screenShotBoxWidth
                     height = Dimension.fillToConstraints
                 }
+                .sharedElement(
+                    state = rememberSharedContentState(key = "centerImage"),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    boundsTransform = { _, _ ->
+                        tween(300)
+                    },
+                )
                 .sharedBounds(
                     sharedContentState = rememberSharedContentState(key = "centerImageBound"),
                     animatedVisibilityScope = animatedVisibilityScope,
                     enter = EnterTransition.None,
                     exit = ExitTransition.None,
                     boundsTransform = { _, _ ->
-                        tween(durationMillis = 400)
+                        tween(durationMillis = 300)
                     }
-                )
+                ),
         ) {
 
             Image(
@@ -184,7 +195,10 @@ private fun SharedTransitionScope.EditorScreenLayout(
                 bottom.linkTo(parent.bottom)
                 width = Dimension.matchParent
                 height = Dimension.wrapContent
-            },
+            }.sharedElement(
+                state = rememberSharedContentState(key = "bottomToolbar"),
+                animatedVisibilityScope = animatedVisibilityScope,
+            ),
             toolbarItems = bottomToolbarItems,
             onEvent = onBottomToolbarEvent
         )

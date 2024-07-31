@@ -187,11 +187,12 @@ fun SharedTransitionScope.EffectsModeScreen(
                 }
                 .clipToBounds()
                 .animateContentSize()
-                .sharedBounds(
-                    sharedContentState = rememberSharedContentState(key = "centerImageBound"),
+                .sharedElement(
+                    state = rememberSharedContentState(key = "centerImage"),
                     animatedVisibilityScope = animatedVisibilityScope,
-                    enter = EnterTransition.None,
-                    exit = ExitTransition.None
+                    boundsTransform = { _, _ ->
+                        tween(300)
+                    },
                 ),
             screenshotState = screenshotState
         ) {
@@ -216,6 +217,10 @@ fun SharedTransitionScope.EffectsModeScreen(
                 }
                 .background(ToolBarBackgroundColor)
                 .animateContentSize()
+                .sharedElement(
+                    state = rememberSharedContentState(key = "bottomToolbar"),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                ),
         ) {
 
             if (state.effectsList.isEmpty()) {

@@ -78,6 +78,8 @@ dependencies {
 
     implementation(libs.cloudy)
     implementation(libs.gpuimage)
+
+    implementation(libs.android.image.cropper)
 }
 
 kapt {
