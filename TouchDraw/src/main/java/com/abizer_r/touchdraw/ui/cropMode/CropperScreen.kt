@@ -3,6 +3,7 @@ package com.abizer_r.touchdraw.ui.cropMode
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.util.Log
+import android.view.ViewGroup
 import android.widget.TextView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -103,16 +104,16 @@ fun CropperScreen(
                     width = Dimension.fillToConstraints
                     height = Dimension.fillToConstraints
                 }
-                .background(Color.Yellow)
         ) {
             AndroidView(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .background(Color.White)
-                    .padding(8.dp),
+                modifier = Modifier,
                 factory = { context ->
                     Log.e("TEST_crop", "CropperScreen: factory", )
                     CropImageView(context).apply {
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
                         setImageBitmap(immutableBitmap.bitmap)
                         setImageCropOptions(CropImageOptions())
                         setOnCropImageCompleteListener(cropCompleteListener)
@@ -149,7 +150,7 @@ fun PreviewEditorScreen() {
     SketchDraftTheme {
         CropperScreen(
             immutableBitmap = ImmutableBitmap(
-                ImageBitmap.imageResource(id = R.drawable.placeholder_image_2).asAndroidBitmap()
+                ImageBitmap.imageResource(id = R.drawable.placeholder_image_1).asAndroidBitmap()
             ),
             onDoneClicked = {},
             onBackPressed = {}
