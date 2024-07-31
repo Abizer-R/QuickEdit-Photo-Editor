@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.abizer_r.sketchdraft"
+    namespace = "com.abizer_r.quickedit"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.abizer_r.sketchdraft"
+        applicationId = "com.abizer_r.quickedit"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

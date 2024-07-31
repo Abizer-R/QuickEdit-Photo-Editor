@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,9 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.abizer_r.components.R
 import com.abizer_r.components.theme.Black_alpha_30
-import com.abizer_r.components.theme.SketchDraftTheme
+import com.abizer_r.components.theme.QuickEditTheme
 import com.abizer_r.components.theme.ToolBarBackgroundColor
-import com.abizer_r.components.util.ImmutableList
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -121,7 +119,7 @@ fun EffectPreview(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun Selected_EffectPreviewItem() {
-    SketchDraftTheme {
+    QuickEditTheme {
         val bitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_1).asAndroidBitmap()
         EffectPreview(
             modifier = Modifier.padding(8.dp),
@@ -139,7 +137,7 @@ fun Selected_EffectPreviewItem() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun Unselected_EffectPreviewItem() {
-    SketchDraftTheme {
+    QuickEditTheme {
         val bitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_1).asAndroidBitmap()
         EffectPreview(
             modifier = Modifier.padding(8.dp),
@@ -176,7 +174,7 @@ fun Preview_EffectsPreviewList() {
             label = "poppy dogs"
         )
     )
-    SketchDraftTheme {
+    QuickEditTheme {
         EffectsPreviewListFullWidth(
             modifier = Modifier
                 .background(ToolBarBackgroundColor)

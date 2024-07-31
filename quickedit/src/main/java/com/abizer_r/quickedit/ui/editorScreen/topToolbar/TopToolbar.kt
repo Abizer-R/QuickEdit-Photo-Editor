@@ -22,7 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.abizer_r.components.theme.SketchDraftTheme
+import com.abizer_r.components.theme.QuickEditTheme
 import com.abizer_r.components.theme.ToolBarBackgroundColor
 
 @Composable
@@ -128,7 +128,7 @@ fun TopToolBar(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PreviewTopToolbar() {
-    SketchDraftTheme {
+    QuickEditTheme {
         TopToolBar(
             modifier = Modifier.fillMaxWidth(),
             undoEnabled = true,
@@ -144,7 +144,7 @@ fun PreviewTopToolbar() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PreviewTopToolbar2() {
-    SketchDraftTheme {
+    QuickEditTheme {
         TopToolBar(
             modifier = Modifier.fillMaxWidth(),
             undoEnabled = true,

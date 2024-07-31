@@ -29,7 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import com.abizer_r.components.theme.SketchDraftTheme
+import com.abizer_r.components.theme.QuickEditTheme
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -162,7 +162,7 @@ fun CustomSliderItem(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PreviewCustomSlider() {
-    SketchDraftTheme {
+    QuickEditTheme {
         CustomSliderItem(
             modifier = Modifier.padding(12.dp),
             sliderLabel = "label",

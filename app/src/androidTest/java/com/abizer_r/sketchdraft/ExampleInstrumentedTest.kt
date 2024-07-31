@@ -1,4 +1,4 @@
-package com.abizer_r.sketchdraft
+package com.abizer_r.quickedit
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.abizer_r.sketchdraft", appContext.packageName)
+        assertEquals("com.abizer_r.quickedit", appContext.packageName)
     }
 }

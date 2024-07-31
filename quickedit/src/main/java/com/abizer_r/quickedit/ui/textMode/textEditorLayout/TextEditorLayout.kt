@@ -12,7 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,8 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.abizer_r.components.R
-import com.abizer_r.components.theme.SketchDraftTheme
-import com.abizer_r.components.util.ColorUtils
+import com.abizer_r.components.theme.QuickEditTheme
 import com.abizer_r.quickedit.utils.textMode.colorList.ColorListFullWidth
 import com.abizer_r.components.util.ImmutableList
 import com.abizer_r.quickedit.ui.textMode.TextModeEvent
@@ -175,7 +173,7 @@ fun TextEditorLayout(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun Preview_TextEditorLayout() {
-    SketchDraftTheme {
+    QuickEditTheme {
         TextEditorLayout(
             modifier = Modifier.fillMaxSize(),
             textFieldState = TextModeState.TextFieldState(

@@ -4,14 +4,9 @@ package com.abizer_r.quickedit.ui.effectsMode
 
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
@@ -27,20 +22,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.imageResource
@@ -50,33 +39,23 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
 import com.abizer_r.components.R
-import com.abizer_r.components.theme.SketchDraftTheme
+import com.abizer_r.components.theme.QuickEditTheme
 import com.abizer_r.components.theme.ToolBarBackgroundColor
-import com.abizer_r.components.util.ImmutableList
 import com.abizer_r.components.util.defaultErrorToast
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.DEFAULT_TOOLBAR_HEIGHT
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TextModeTopToolbar
 import com.abizer_r.quickedit.ui.effectsMode.effectsPreview.EffectItem
 import com.abizer_r.quickedit.ui.effectsMode.effectsPreview.EffectsPreviewListFullWidth
-import com.abizer_r.quickedit.ui.textMode.TextModeEvent
-import com.abizer_r.quickedit.ui.textMode.TextModeViewModel
 import com.abizer_r.quickedit.utils.SharedTransitionPreviewExtension
 import com.abizer_r.quickedit.utils.editorScreen.EffectsModeUtils
 import com.abizer_r.quickedit.utils.other.bitmap.ImmutableBitmap
-import com.abizer_r.quickedit.utils.textMode.colorList.ColorListFullWidth
 import com.smarttoolfactory.screenshot.ImageResult
 import com.smarttoolfactory.screenshot.ScreenshotBox
 import com.smarttoolfactory.screenshot.rememberScreenshotState
-import jp.co.cyberagent.android.gpuimage.GPUImage
-import jp.co.cyberagent.android.gpuimage.filter.GPUImageGrayscaleFilter
-import jp.co.cyberagent.android.gpuimage.filter.GPUImageToneCurveFilter
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -250,7 +229,7 @@ fun SharedTransitionScope.EffectsModeScreen(
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun Preview_EffectsModeScreen() {
-    SketchDraftTheme {
+    QuickEditTheme {
         SharedTransitionPreviewExtension {
             EffectsModeScreen(
                 immutableBitmap = ImmutableBitmap(

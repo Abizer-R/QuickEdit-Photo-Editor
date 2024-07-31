@@ -18,10 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.abizer_r.components.R
-import com.abizer_r.components.theme.SketchDraftTheme
+import com.abizer_r.components.theme.QuickEditTheme
 import com.abizer_r.components.theme.ToolBarBackgroundColor
 import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.toolbarExtension.CustomSliderItem
@@ -134,7 +133,7 @@ fun PreviewRadioRow() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PreviewToolbarExtension() {
-    SketchDraftTheme {
+    QuickEditTheme {
         ToolbarExtensionView(
             modifier = Modifier.fillMaxWidth(),
             width = 12f,

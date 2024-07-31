@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.abizer_r.components.theme.SketchDraftTheme
+import com.abizer_r.components.theme.QuickEditTheme
 import com.abizer_r.components.theme.ToolBarBackgroundColor
 import com.abizer_r.components.util.ColorUtils
 import com.abizer_r.components.util.ImmutableList
@@ -62,7 +62,7 @@ fun ColorListFullWidth(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun Preview_ColorList() {
-    SketchDraftTheme {
+    QuickEditTheme {
         ColorListFullWidth(
             colorList = ImmutableList(ColorUtils.defaultColorList),
             selectedIndex = 2,

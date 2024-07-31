@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.abizer_r.components.theme.SketchDraftTheme
+import com.abizer_r.components.theme.QuickEditTheme
 import com.abizer_r.quickedit.ui.transformableViews.TransformableTextBox
 import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
 import com.abizer_r.quickedit.utils.drawMode.toPx
@@ -369,7 +369,7 @@ fun Modifier.dashedBorder(
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PreviewTextItem_NO_BORDER() {
-    SketchDraftTheme {
+    QuickEditTheme {
         Box(
             modifier = Modifier
                 .size(300.dp, 100.dp)
@@ -395,7 +395,7 @@ fun PreviewTextItem_NO_BORDER() {
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PreviewTextItem_WITH_BORDER() {
-    SketchDraftTheme {
+    QuickEditTheme {
         Box(
             modifier = Modifier
                 .size(300.dp, 100.dp)

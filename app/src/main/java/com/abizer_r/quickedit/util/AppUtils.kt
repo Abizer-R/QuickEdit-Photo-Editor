@@ -1,4 +1,4 @@
-package com.abizer_r.sketchdraft.util
+package com.abizer_r.quickedit.util
 
 import androidx.compose.ui.graphics.Color
 

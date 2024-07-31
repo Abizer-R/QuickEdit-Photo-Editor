@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.outlined.Brush
 import androidx.compose.material.icons.outlined.Category
@@ -29,13 +28,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -45,7 +42,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.abizer_r.components.R
-import com.abizer_r.components.theme.SketchDraftTheme
+import com.abizer_r.components.theme.QuickEditTheme
 import com.abizer_r.components.theme.ToolBarBackgroundColor
 import com.abizer_r.components.util.ImmutableList
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
@@ -299,7 +296,7 @@ fun ColorToolbarItem(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun EditorScreen_BottomToolbar() {
-    SketchDraftTheme {
+    QuickEditTheme {
         val itemsList = EditorScreenUtils.getDefaultBottomToolbarItemsList()
         BottomToolBarStatic(
             modifier = Modifier.fillMaxWidth(),
@@ -312,7 +309,7 @@ fun EditorScreen_BottomToolbar() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun DrawMode_BottomToolbar() {
-    SketchDraftTheme {
+    QuickEditTheme {
         val itemsList = DrawModeUtils.getDefaultBottomToolbarItemsList()
         BottomToolBarStatic(
             modifier = Modifier.fillMaxWidth(),
@@ -328,7 +325,7 @@ fun DrawMode_BottomToolbar() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun TextMode_BottomToolbar() {
-    SketchDraftTheme {
+    QuickEditTheme {
         val itemsList = TextModeUtils.getDefaultBottomToolbarItemsList()
         BottomToolBarStatic(
             modifier = Modifier.fillMaxWidth(),

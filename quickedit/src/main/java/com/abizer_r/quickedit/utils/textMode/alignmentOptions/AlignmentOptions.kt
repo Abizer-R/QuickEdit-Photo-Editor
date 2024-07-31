@@ -4,13 +4,10 @@ import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.FormatAlignLeft
@@ -26,7 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.abizer_r.components.theme.SketchDraftTheme
+import com.abizer_r.components.theme.QuickEditTheme
 import com.abizer_r.components.theme.ToolBarBackgroundColor
 import com.abizer_r.quickedit.utils.textMode.TextModeUtils
 
@@ -105,7 +102,7 @@ fun AlignmentItem(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun Preview_AlignmentItem() {
-    SketchDraftTheme {
+    QuickEditTheme {
         Box(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background)
@@ -125,7 +122,7 @@ fun Preview_AlignmentItem() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun Preview_AlignmentOptions() {
-    SketchDraftTheme {
+    QuickEditTheme {
         TextAlignOptions(
             selectedAlignment = TextAlign.Center,
             onItemClicked = { _, _ -> }

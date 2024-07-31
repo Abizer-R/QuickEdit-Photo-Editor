@@ -1,4 +1,4 @@
-package com.abizer_r.sketchdraft
+package com.abizer_r.quickedit
 
 import org.junit.Test
 

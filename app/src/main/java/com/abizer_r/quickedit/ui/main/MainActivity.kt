@@ -1,4 +1,4 @@
-package com.abizer_r.sketchdraft.ui.main
+package com.abizer_r.quickedit.ui.main
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.graphics.Bitmap
@@ -29,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -42,7 +41,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.abizer_r.components.theme.SketchDraftTheme
+import com.abizer_r.components.theme.QuickEditTheme
 import com.abizer_r.quickedit.ui.SharedEditorViewModel
 import com.abizer_r.quickedit.ui.common.ErrorView
 import com.abizer_r.quickedit.ui.common.LoadingView
@@ -66,7 +65,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SketchDraftTheme {
+            QuickEditTheme {
 
                 window.decorView.rootView.setBackgroundColor(Color.Transparent.toArgb());
                 val context = LocalContext.current
@@ -340,7 +339,7 @@ fun MainScreenNavigation(
 @Composable
 fun MainScreenPreview() {
 
-    SketchDraftTheme {
+    QuickEditTheme {
         MainScreen(null)
     }
 }

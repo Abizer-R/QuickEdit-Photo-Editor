@@ -1,4 +1,4 @@
-package com.abizer_r.sketchdraft.ui
+package com.abizer_r.quickedit.ui
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp

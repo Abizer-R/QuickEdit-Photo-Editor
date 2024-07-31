@@ -31,16 +31,14 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.abizer_r.components.R
-import com.abizer_r.components.theme.SketchDraftTheme
+import com.abizer_r.components.theme.QuickEditTheme
 import com.abizer_r.components.util.ImmutableList
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.BottomToolBarStatic
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TopToolBar
-import com.abizer_r.quickedit.ui.effectsMode.EffectsModeScreen
 import com.abizer_r.quickedit.utils.SharedTransitionPreviewExtension
 import com.abizer_r.quickedit.utils.editorScreen.EditorScreenUtils
-import com.abizer_r.quickedit.utils.other.bitmap.ImmutableBitmap
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -213,7 +211,7 @@ private fun SharedTransitionScope.EditorScreenLayout(
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PreviewEditorScreen() {
-    SketchDraftTheme {
+    QuickEditTheme {
         SharedTransitionPreviewExtension {
             EditorScreenLayout(
                 modifier = Modifier,
