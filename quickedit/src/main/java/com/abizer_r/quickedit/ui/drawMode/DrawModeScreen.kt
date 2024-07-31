@@ -8,20 +8,24 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.window.DialogProperties
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -30,10 +34,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.abizer_r.components.util.ImmutableList
 import com.abizer_r.components.util.defaultErrorToast
+import com.abizer_r.quickedit.ui.common.AnimatedToolbarContainer
+import com.abizer_r.quickedit.ui.common.bottomToolbarModifier
+import com.abizer_r.quickedit.ui.common.topToolbarModifier
 import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.DrawingCanvas
 import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
 import com.abizer_r.quickedit.ui.drawMode.stateHandling.DrawModeEvent
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.BottomToolBarStatic
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TopToolBar
 import com.abizer_r.quickedit.utils.drawMode.CustomLayerTypeComposable
@@ -74,13 +83,53 @@ fun DrawModeScreen(
     val bottomToolbarItems = remember {
         ImmutableList(DrawModeUtils.getDefaultBottomToolbarItemsList())
     }
+
+    val topToolbarHeight =  TOOLBAR_HEIGHT_SMALL
+    val bottomToolbarHeight = TOOLBAR_HEIGHT_MEDIUM
+
+    var toolbarVisible by remember { mutableStateOf(false) }
+
     LaunchedEffect(key1 = Unit) {
+        toolbarVisible = true
+        delay(AnimUtils.TOOLBAR_EXPAND_ANIM_DURATION_FAST.toLong())
         viewModel.onBottomToolbarEvent(
             BottomToolbarEvent.OnItemClicked(bottomToolbarItems.items[1])
         )
     }
 
     val screenshotState = rememberScreenshotState()
+
+    val onCloseClickedLambda = remember<() -> Unit> {{
+        lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+            toolbarVisible = false
+            delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST.toLong())
+            onBackPressed()
+        }
+    }}
+
+    BackHandler {
+        if (state.showBottomToolbarExtension) {
+            viewModel.onEvent(DrawModeEvent.UpdateToolbarExtensionVisibility(false))
+        } else {
+            onCloseClickedLambda()
+        }
+    }
+
+    val onDoneClickedLambda = remember<() -> Unit> {{
+        viewModel.handleStateBeforeCaptureScreenshot()
+        lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+            delay(200)  /* Delay to update the ToolbarExtensionView Visibility in ui */
+            screenshotState.capture()
+        }
+    }}
+
+    val handleScreenshotResult = remember<(Bitmap) -> Unit> {{ bitmap ->
+        lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+            toolbarVisible = false
+            delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST.toLong())
+            onDoneClicked(bitmap)
+        }
+    }}
 
     when (screenshotState.imageState.value) {
         ImageResult.Initial -> {}
@@ -92,31 +141,11 @@ fun DrawModeScreen(
             if (viewModel.shouldGoToNextScreen) {
                 viewModel.shouldGoToNextScreen = false
                 screenshotState.bitmap?.let { mBitmap ->
-                    onDoneClicked(mBitmap)
+                    handleScreenshotResult(mBitmap)
                 } ?: context.defaultErrorToast()
             }
         }
     }
-
-    BackHandler {
-        if (state.showBottomToolbarExtension) {
-            viewModel.onEvent(DrawModeEvent.UpdateToolbarExtensionVisibility(false))
-        } else {
-            onBackPressed()
-        }
-    }
-
-    val onCloseClickedLambda = remember<() -> Unit> {{
-        onBackPressed()
-    }}
-
-    val onDoneClickedLambda = remember<() -> Unit> {{
-        viewModel.handleStateBeforeCaptureScreenshot()
-        lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-            delay(200)  /* Delay to update the ToolbarExtensionView Visibility in ui */
-            screenshotState.capture()
-        }
-    }}
 
     val onUndoLambda = remember<() -> Unit> {{
         viewModel.onEvent(DrawModeEvent.OnUndo)
@@ -135,38 +164,34 @@ fun DrawModeScreen(
     ) {
         val (topToolbar, bottomToolbar, bottomToolbarExtension, drawingView) = createRefs()
 
-        TopToolBar(
-            modifier = Modifier.constrainAs(topToolbar) {
-                top.linkTo(parent.top)
-                width = Dimension.matchParent
-                height = Dimension.wrapContent
-            },
-            undoEnabled = state.pathDetailStack.isNotEmpty(),
-            redoEnabled = state.redoStack.isNotEmpty(),
-            onUndo = onUndoLambda,
-            onRedo = onRedoLambda,
-            onCloseClicked = onCloseClickedLambda,
-            onDoneClicked = onDoneClickedLambda
-        )
+        AnimatedToolbarContainer(
+            toolbarVisible = toolbarVisible,
+            modifier = topToolbarModifier(topToolbar)
+        ) {
+            TopToolBar(
+                modifier = Modifier,
+                undoEnabled = state.pathDetailStack.isNotEmpty(),
+                redoEnabled = state.redoStack.isNotEmpty(),
+                toolbarHeight = topToolbarHeight,
+                onUndo = onUndoLambda,
+                onRedo = onRedoLambda,
+                onCloseClicked = onCloseClickedLambda,
+                onDoneClicked = onDoneClickedLambda
+            )
+        }
 
         val bitmap = immutableBitmap.bitmap
-        val aspectRatio = bitmap?.let {
+        val aspectRatio = remember(bitmap) {
             bitmap.width.toFloat() / bitmap.height.toFloat()
         }
-        val screenShotBoxWidth = remember(key1 = bitmap) {
-            if (aspectRatio != null) {
-                Dimension.ratio(aspectRatio.toString())
-            } else Dimension.fillToConstraints
-        }
         ScreenshotBox(
-            modifier = Modifier.constrainAs(drawingView) {
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-                top.linkTo(topToolbar.bottom)
-                bottom.linkTo(bottomToolbar.top)
-                width = screenShotBoxWidth
-                height = Dimension.fillToConstraints
-            },
+            modifier = Modifier
+                .constrainAs(drawingView) {
+                    width = Dimension.matchParent
+                    height = Dimension.matchParent
+                }
+                .padding(top = topToolbarHeight, bottom = bottomToolbarHeight)
+                .aspectRatio(aspectRatio),
             screenshotState = screenshotState
         ) {
 
@@ -191,19 +216,20 @@ fun DrawModeScreen(
             }
         }
 
-
-        BottomToolBarStatic(
-            modifier = Modifier.constrainAs(bottomToolbar) {
-                bottom.linkTo(parent.bottom)
-                width = Dimension.matchParent
-                height = Dimension.wrapContent
-            },
-            toolbarItems = bottomToolbarItems,
-            showColorPickerIcon = viewModel.showColorPickerIconInToolbar,
-            selectedColor = state.selectedColor,
-            selectedItem = state.selectedTool,
-            onEvent = onBottomToolbarEventLambda
-        )
+        AnimatedToolbarContainer(
+            toolbarVisible = toolbarVisible,
+            modifier = bottomToolbarModifier(bottomToolbar)
+        ) {
+            BottomToolBarStatic(
+                modifier = Modifier,
+                toolbarItems = bottomToolbarItems,
+                showColorPickerIcon = viewModel.showColorPickerIconInToolbar,
+                toolbarHeight = bottomToolbarHeight,
+                selectedColor = state.selectedColor,
+                selectedItem = state.selectedTool,
+                onEvent = onBottomToolbarEventLambda
+            )
+        }
 
 
         val emptyLambda = remember<() -> Unit> {{
@@ -232,8 +258,8 @@ fun DrawModeScreen(
                     width = Dimension.matchParent
                 }
                 .clickable(onClick = emptyLambda), /* added clickable{} to avoid triggering touchEvent in DrawingCanvas when clicking anywhere on toolbarExtension */
-            enter = AnimUtils.toolbarExpandAnim(),
-            exit = AnimUtils.toolbarCollapseAnim()
+            enter = AnimUtils.toolbarExtensionExpandAnim(),
+            exit = AnimUtils.toolbarExtensionCollapseAnim()
 
         ) {
             ToolbarExtensionView(

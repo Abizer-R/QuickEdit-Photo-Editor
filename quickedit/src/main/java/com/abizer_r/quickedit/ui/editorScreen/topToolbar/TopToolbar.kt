@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -17,13 +18,17 @@ import androidx.compose.material.icons.filled.Redo
 import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.abizer_r.components.theme.QuickEditTheme
 import com.abizer_r.components.theme.ToolBarBackgroundColor
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 
 @Composable
 fun TopToolBar(
@@ -31,14 +36,18 @@ fun TopToolBar(
     undoEnabled: Boolean = false,
     redoEnabled: Boolean = false,
     showCloseAndDone: Boolean = true,
+    toolbarHeight: Dp = TOOLBAR_HEIGHT_SMALL,
     onUndo: () -> Unit,
     onRedo: () -> Unit,
     onCloseClicked: () -> Unit = {},
     onDoneClicked: () -> Unit = {}
 ) {
     Row(
-        modifier = modifier.background(ToolBarBackgroundColor),
-        horizontalArrangement = Arrangement.Center
+        modifier = modifier
+            .height(toolbarHeight)
+            .background(ToolBarBackgroundColor),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
     ) {
 
         /**
@@ -47,7 +56,7 @@ fun TopToolBar(
         if (showCloseAndDone) {
             Image(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(horizontal = 16.dp)
                     .size(32.dp)
                     .clickable {
                         onCloseClicked()
@@ -67,7 +76,7 @@ fun TopToolBar(
          */
         Image(
             modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 16.dp)
                 .size(32.dp)
                 .clickable {
                     onUndo()
@@ -86,7 +95,7 @@ fun TopToolBar(
          */
         Image(
             modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 16.dp)
                 .size(32.dp)
                 .clickable {
                     onRedo()
@@ -110,7 +119,7 @@ fun TopToolBar(
         if (showCloseAndDone) {
             Image(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(horizontal = 16.dp)
                     .size(32.dp)
                     .clickable {
                         onDoneClicked()

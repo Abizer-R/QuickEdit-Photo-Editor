@@ -49,13 +49,16 @@ import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
 import com.abizer_r.quickedit.utils.editorScreen.EditorScreenUtils
 import com.abizer_r.quickedit.utils.textMode.TextModeUtils
 
-val DEFAULT_TOOLBAR_HEIGHT = 64.dp
+val TOOLBAR_HEIGHT_SMALL = 48.dp
+val TOOLBAR_HEIGHT_MEDIUM = 64.dp
+val TOOLBAR_HEIGHT_LARGE = 88.dp
+val TOOLBAR_HEIGHT_EXTRA_LARGE = 104.dp
 
 @Composable
 fun BottomToolBarStatic(
     modifier: Modifier,
     toolbarItems: ImmutableList<BottomToolbarItem>,
-    toolbarHeight: Dp = DEFAULT_TOOLBAR_HEIGHT,
+    toolbarHeight: Dp = TOOLBAR_HEIGHT_MEDIUM,
     selectedItem: BottomToolbarItem = BottomToolbarItem.NONE,
     showColorPickerIcon: Boolean = true,
     selectedColor: Color = Color.White,

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
@@ -33,12 +34,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.abizer_r.components.theme.QuickEditTheme
 import com.abizer_r.components.theme.ToolBarBackgroundColor
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_LARGE
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
 import com.abizer_r.quickedit.utils.editorScreen.CropModeUtils
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CropperOptionsFullWidth(
     modifier: Modifier = Modifier,
+    toolbarHeight: Dp = TOOLBAR_HEIGHT_LARGE,
     cropperOptionList: ArrayList<CropperOption>,
     selectedIndex: Int,
     onItemClicked: (position: Int, effectItem: CropperOption) -> Unit
@@ -47,13 +51,14 @@ fun CropperOptionsFullWidth(
     LazyRow(
         modifier = modifier
             .fillMaxWidth()
+            .height(toolbarHeight)
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         items(
             count = cropperOptionList.size,
             key = { cropperOptionList[it].id },
-        ) {index ->
+        ) { index ->
             val cropperOption = cropperOptionList[index]
             CropperOptionView(
                 modifier = Modifier

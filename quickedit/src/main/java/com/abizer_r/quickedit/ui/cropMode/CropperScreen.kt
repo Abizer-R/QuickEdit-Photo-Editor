@@ -2,13 +2,15 @@ package com.abizer_r.quickedit.ui.cropMode
 
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.util.Log
 import android.view.ViewGroup
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -17,20 +19,34 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.abizer_r.components.R
 import com.abizer_r.components.theme.QuickEditTheme
+import com.abizer_r.components.util.defaultErrorToast
+import com.abizer_r.quickedit.ui.common.AnimatedToolbarContainer
+import com.abizer_r.quickedit.ui.common.bottomToolbarModifier
+import com.abizer_r.quickedit.ui.common.topToolbarModifier
+import com.abizer_r.quickedit.ui.cropMode.cropperOptions.CropperOption
 import com.abizer_r.quickedit.ui.cropMode.cropperOptions.CropperOptionsFullWidth
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_LARGE
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TextModeTopToolbar
 import com.abizer_r.quickedit.utils.editorScreen.CropModeUtils
+import com.abizer_r.quickedit.utils.other.anim.AnimUtils
 import com.abizer_r.quickedit.utils.other.bitmap.ImmutableBitmap
 import com.canhub.cropper.CropImageOptions
 import com.canhub.cropper.CropImageView
 import com.canhub.cropper.CropImageView.OnCropImageCompleteListener
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun CropperScreen(
@@ -39,40 +55,80 @@ fun CropperScreen(
     onBackPressed: () -> Unit
 ) {
 
+    val context = LocalContext.current
+    val lifeCycleOwner = LocalLifecycleOwner.current
+
     val colorOnBackground = MaterialTheme.colorScheme.onBackground
     val backgroundColor = MaterialTheme.colorScheme.background
 
-    var shouldCrop by remember {
-        mutableStateOf(false)
+    val topToolbarHeight =  TOOLBAR_HEIGHT_SMALL
+    val bottomToolbarHeight = TOOLBAR_HEIGHT_LARGE
+
+    var toolbarVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(key1 = Unit) {
+        toolbarVisible = true
     }
 
-    val cropperOptionsList = remember {
-        CropModeUtils.getCropperOptionsList()
+    var shouldCrop by remember { mutableStateOf(false) }
+    val cropperOptionsList = remember { CropModeUtils.getCropperOptionsList() }
+    var selectedCropOption by remember { mutableIntStateOf(0) }
+    var cropImageOptions by remember {
+        mutableStateOf(CropImageOptions())
     }
-
-    var selectedCropOption by remember {
-        mutableIntStateOf(0)
-    }
-
-    var cropImageOptions = remember {
-        CropImageOptions()
-    }
-
-    val cropImageLambda = remember<(CropImageView) -> Unit> {{ cropImageView ->
-        if (shouldCrop) {
-            cropImageView.croppedImageAsync()
-        }
-    }}
 
     val onCloseClickedLambda = remember<() -> Unit> { {
-        onBackPressed()
+        lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+            toolbarVisible = false
+            delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST.toLong())
+            onBackPressed()
+        }
     }}
 
     val onDoneClickedLambda = remember<() -> Unit> { {
         shouldCrop = true
     }}
 
+    BackHandler {
+        onCloseClickedLambda()
+    }
 
+
+    val handleCropResult = remember<(Bitmap) -> Unit> {{ bitmap ->
+        lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+            toolbarVisible = false
+            delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST.toLong())
+            onDoneClicked(bitmap)
+        }
+    }}
+
+    val cropCompleteListener = remember {
+        OnCropImageCompleteListener { view, result ->
+            result.bitmap?.let {
+                handleCropResult(it)
+            } ?: context.defaultErrorToast()
+        }
+    }
+
+    val onCropOptionItemClicked = remember<(Int, CropperOption) -> Unit> {{ position, cropOption ->
+        selectedCropOption = position
+        when (cropOption.aspectRatioX) {
+            -1f -> {
+                cropImageOptions = cropImageOptions.copy(
+                    fixAspectRatio = false,
+                    aspectRatioX = 1,
+                    aspectRatioY = 1
+                )
+            }
+            else -> {
+                cropImageOptions = cropImageOptions.copy(
+                    fixAspectRatio = true,
+                    aspectRatioX = cropOption.aspectRatioX.toInt(),
+                    aspectRatioY = cropOption.aspectRatioY.toInt()
+                )
+            }
+        }
+    }}
 
     ConstraintLayout(
         modifier = Modifier
@@ -81,40 +137,30 @@ fun CropperScreen(
     ) {
         val (topToolBar, cropView, bottomToolbar) = createRefs()
 
-        val cropCompleteListener = remember {
-            OnCropImageCompleteListener { view, result ->
-                result.bitmap?.let {
-                    onDoneClicked(it)
-                }
-            }
+        AnimatedToolbarContainer(
+            toolbarVisible = toolbarVisible,
+            modifier = topToolbarModifier(topToolBar)
+        ) {
+            TextModeTopToolbar(
+                modifier = Modifier,
+                toolbarHeight = topToolbarHeight,
+                onCloseClicked = onCloseClickedLambda,
+                onDoneClicked = onDoneClickedLambda
+            )
         }
-
-        TextModeTopToolbar(
-            modifier = Modifier.constrainAs(topToolBar) {
-                top.linkTo(parent.top)
-                width = Dimension.matchParent
-                height = Dimension.wrapContent
-            },
-            onCloseClicked = onCloseClickedLambda,
-            onDoneClicked = onDoneClickedLambda
-        )
 
 
         Box(
             modifier = Modifier
                 .constrainAs(cropView) {
-                    top.linkTo(topToolBar.bottom)
-                    bottom.linkTo(bottomToolbar.top)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.fillToConstraints
-                    height = Dimension.fillToConstraints
+                    width = Dimension.matchParent
+                    height = Dimension.matchParent
                 }
+                .padding(top = topToolbarHeight, bottom = bottomToolbarHeight)
         ) {
             AndroidView(
                 modifier = Modifier,
                 factory = { context ->
-                    Log.e("TEST_crop", "CropperScreen: factory", )
                     CropImageView(context).apply {
                         layoutParams = ViewGroup.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
@@ -126,42 +172,27 @@ fun CropperScreen(
                     }
                 },
                 update = { cropImageView ->
-                    Log.e("TEST_crop", "CropperScreen: update", )
-                    cropImageLambda(cropImageView)
+                    if (shouldCrop) {
+                        cropImageView.croppedImageAsync()
+                    }
                     cropImageView.setImageCropOptions(cropImageOptions)
                 }
             )
         }
 
-        CropperOptionsFullWidth(
-            modifier = Modifier.constrainAs(bottomToolbar) {
-                bottom.linkTo(parent.bottom)
-                width = Dimension.matchParent
-                height = Dimension.wrapContent
-            },
-            cropperOptionList = cropperOptionsList,
-            selectedIndex = selectedCropOption,
-            onItemClicked = { position, cropOption ->
-                selectedCropOption = position
-                when (cropOption.aspectRatioX) {
-                    -1f -> {
-                        cropImageOptions = cropImageOptions.copy(
-                            fixAspectRatio = false,
-                            aspectRatioX = 1,
-                            aspectRatioY = 1
-                        )
-                    }
-                    else -> {
-                        cropImageOptions = cropImageOptions.copy(
-                            fixAspectRatio = true,
-                            aspectRatioX = cropOption.aspectRatioX.toInt(),
-                            aspectRatioY = cropOption.aspectRatioY.toInt()
-                        )
-                    }
-                }
-            }
-        )
 
+        AnimatedToolbarContainer(
+            toolbarVisible = toolbarVisible,
+            modifier = bottomToolbarModifier(bottomToolbar),
+        ) {
+            CropperOptionsFullWidth(
+                modifier = Modifier,
+                toolbarHeight = bottomToolbarHeight,
+                cropperOptionList = cropperOptionsList,
+                selectedIndex = selectedCropOption,
+                onItemClicked = onCropOptionItemClicked
+            )
+        }
     }
 
 }

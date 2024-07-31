@@ -2,6 +2,7 @@ package com.abizer_r.quickedit.ui.editorScreen
 
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -11,34 +12,48 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.abizer_r.components.R
 import com.abizer_r.components.theme.QuickEditTheme
 import com.abizer_r.components.util.ImmutableList
+import com.abizer_r.quickedit.ui.common.AnimatedToolbarContainer
+import com.abizer_r.quickedit.ui.common.bottomToolbarModifier
+import com.abizer_r.quickedit.ui.common.topToolbarModifier
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.BottomToolBarStatic
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TopToolBar
 import com.abizer_r.quickedit.utils.SharedTransitionPreviewExtension
 import com.abizer_r.quickedit.utils.editorScreen.EditorScreenUtils
+import com.abizer_r.quickedit.utils.other.anim.AnimUtils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -119,9 +134,30 @@ private fun SharedTransitionScope.EditorScreenLayout(
     onBottomToolbarEvent: (BottomToolbarEvent) -> Unit
 ) {
 
+    val lifeCycleOwner = LocalLifecycleOwner.current
+
     val bottomToolbarItems = remember {
         ImmutableList(EditorScreenUtils.getDefaultBottomToolbarItemsList())
     }
+
+    val topToolbarHeight =  TOOLBAR_HEIGHT_SMALL
+    val bottomToolbarHeight = TOOLBAR_HEIGHT_MEDIUM
+
+    var toolbarVisible by remember {
+        mutableStateOf(false)
+    }
+
+    LaunchedEffect(key1 = Unit) { toolbarVisible = true }
+
+    val mOnBottomToolbarEvent = remember<(BottomToolbarEvent) -> Unit> {{ toolbarEvent ->
+        if (toolbarEvent is BottomToolbarEvent.OnItemClicked) {
+            lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                toolbarVisible = false
+                delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST.toLong())
+                onBottomToolbarEvent(toolbarEvent)
+            }
+        }
+    }}
 
     ConstraintLayout(
         modifier = modifier
@@ -130,50 +166,38 @@ private fun SharedTransitionScope.EditorScreenLayout(
     ) {
         val (topToolbar, bottomToolbar, bgImage) = createRefs()
 
-        TopToolBar(
-            modifier = Modifier.constrainAs(topToolbar) {
-                top.linkTo(parent.top)
-                width = Dimension.matchParent
-                height = Dimension.wrapContent
-            },
-            undoEnabled = undoEnabled,
-            redoEnabled = redoEnabled,
-            showCloseAndDone = false,
-            onUndo = onUndo,
-            onRedo = onRedo
-        )
+        AnimatedToolbarContainer(
+            toolbarVisible = toolbarVisible,
+            modifier = topToolbarModifier(topToolbar)
+        ) {
+            TopToolBar(
+                modifier = Modifier,
+                undoEnabled = undoEnabled,
+                redoEnabled = redoEnabled,
+                toolbarHeight = topToolbarHeight,
+                showCloseAndDone = false,
+                onUndo = onUndo,
+                onRedo = onRedo
+            )
+        }
 
-        val aspectRatio = currentBitmap?.let {
+        val aspectRatio = remember(currentBitmap) {
             currentBitmap.width.toFloat() / currentBitmap.height.toFloat()
         }
-        val screenShotBoxWidth = if (aspectRatio != null) {
-            Dimension.ratio(aspectRatio.toString())
-        } else Dimension.fillToConstraints
         Box(
             modifier = Modifier
                 .constrainAs(bgImage) {
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    top.linkTo(topToolbar.bottom)
-                    bottom.linkTo(bottomToolbar.top)
-                    width = screenShotBoxWidth
-                    height = Dimension.fillToConstraints
+                    width = Dimension.matchParent
+                    height = Dimension.matchParent
                 }
+                .padding(top = topToolbarHeight, bottom = bottomToolbarHeight)
+                .aspectRatio(aspectRatio)
                 .sharedElement(
                     state = rememberSharedContentState(key = "centerImage"),
                     animatedVisibilityScope = animatedVisibilityScope,
                     boundsTransform = { _, _ ->
                         tween(300)
                     },
-                )
-                .sharedBounds(
-                    sharedContentState = rememberSharedContentState(key = "centerImageBound"),
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    enter = EnterTransition.None,
-                    exit = ExitTransition.None,
-                    boundsTransform = { _, _ ->
-                        tween(durationMillis = 300)
-                    }
                 ),
         ) {
 
@@ -188,18 +212,18 @@ private fun SharedTransitionScope.EditorScreenLayout(
         }
 
 
-        BottomToolBarStatic(
-            modifier = Modifier.constrainAs(bottomToolbar) {
-                bottom.linkTo(parent.bottom)
-                width = Dimension.matchParent
-                height = Dimension.wrapContent
-            }.sharedElement(
-                state = rememberSharedContentState(key = "bottomToolbar"),
-                animatedVisibilityScope = animatedVisibilityScope,
-            ),
-            toolbarItems = bottomToolbarItems,
-            onEvent = onBottomToolbarEvent
-        )
+
+        AnimatedToolbarContainer(
+            toolbarVisible = toolbarVisible,
+            modifier = bottomToolbarModifier(bottomToolbar)
+        ) {
+            BottomToolBarStatic(
+                modifier = Modifier,
+                toolbarHeight = bottomToolbarHeight,
+                toolbarItems = bottomToolbarItems,
+                onEvent = mOnBottomToolbarEvent
+            )
+        }
 
 
     }

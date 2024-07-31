@@ -13,7 +13,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,7 +25,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -31,7 +36,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -39,23 +44,35 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.abizer_r.components.R
 import com.abizer_r.components.theme.QuickEditTheme
 import com.abizer_r.components.theme.ToolBarBackgroundColor
 import com.abizer_r.components.util.defaultErrorToast
-import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.DEFAULT_TOOLBAR_HEIGHT
+import com.abizer_r.quickedit.ui.common.AnimatedToolbarContainer
+import com.abizer_r.quickedit.ui.common.LoadingView
+import com.abizer_r.quickedit.ui.common.bottomToolbarModifier
+import com.abizer_r.quickedit.ui.common.topToolbarModifier
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_EXTRA_LARGE
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_LARGE
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TextModeTopToolbar
 import com.abizer_r.quickedit.ui.effectsMode.effectsPreview.EffectItem
 import com.abizer_r.quickedit.ui.effectsMode.effectsPreview.EffectsPreviewListFullWidth
 import com.abizer_r.quickedit.utils.SharedTransitionPreviewExtension
 import com.abizer_r.quickedit.utils.editorScreen.EffectsModeUtils
+import com.abizer_r.quickedit.utils.other.anim.AnimUtils
 import com.abizer_r.quickedit.utils.other.bitmap.ImmutableBitmap
 import com.smarttoolfactory.screenshot.ImageResult
 import com.smarttoolfactory.screenshot.ScreenshotBox
 import com.smarttoolfactory.screenshot.rememberScreenshotState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -78,13 +95,15 @@ fun SharedTransitionScope.EffectsModeScreen(
     val bitmap = immutableBitmap.bitmap
     val currentBitmap = state.filteredBitmap ?: bitmap
 
-    BackHandler {
-        onBackPressed()
-    }
+    val topToolbarHeight =  TOOLBAR_HEIGHT_SMALL
+    val bottomToolbarHeight = TOOLBAR_HEIGHT_EXTRA_LARGE
+
+    var toolbarVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = bitmap) {
         withContext(Dispatchers.IO) {
-
+            toolbarVisible = true
+            delay(AnimUtils.TOOLBAR_EXPAND_ANIM_DURATION_FAST.toLong())
             EffectsModeUtils.getEffectsPreviewList(context, bitmap).onEach {
                 viewModel.addToEffectList(
                     effectItems = it,
@@ -92,16 +111,37 @@ fun SharedTransitionScope.EffectsModeScreen(
                 )
             }.collect()
 
-//            val mEffectList = EffectsModeUtils.getEffectsPreviewList(context, bitmap)
-//            viewModel.updateEffectList(
-//                effectList = mEffectList
-//            )
-//            viewModel.selectEffect(0)
         }
     }
 
     val screenshotState = rememberScreenshotState()
 
+    val onCloseClickedLambda = remember<() -> Unit> { {
+        lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+            toolbarVisible = false
+            delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST.toLong())
+            onBackPressed()
+        }
+    }}
+
+    BackHandler {
+        onCloseClickedLambda()
+    }
+
+    val onDoneClickedLambda = remember<() -> Unit> { {
+        viewModel.shouldGoToNextScreen = true
+        screenshotState.capture()
+    }}
+
+    val handleScreenshotResult = remember<(Bitmap) -> Unit> {{ bitmap ->
+        lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+            toolbarVisible = false
+            delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST.toLong())
+            onDoneClicked(bitmap)
+        }
+    }}
+
+    // TODO effects - Try to use the original bitmap from the effectList instead of taking screenshot
     when (screenshotState.imageState.value) {
         ImageResult.Initial -> {}
         is ImageResult.Error -> {
@@ -113,20 +153,11 @@ fun SharedTransitionScope.EffectsModeScreen(
             if (viewModel.shouldGoToNextScreen) {
                 viewModel.shouldGoToNextScreen = false
                 screenshotState.bitmap?.let { mBitmap ->
-                    onDoneClicked(mBitmap)
+                    handleScreenshotResult(mBitmap)
                 } ?: context.defaultErrorToast()
             }
         }
     }
-
-    val onCloseClickedLambda = remember<() -> Unit> { {
-        onBackPressed()
-    }}
-
-    val onDoneClickedLambda = remember<() -> Unit> { {
-        viewModel.shouldGoToNextScreen = true
-        screenshotState.capture()
-    }}
 
 
     val onEffectItemClicked = remember<(Int, EffectItem) -> Unit> {{ index, effectItem ->
@@ -142,37 +173,36 @@ fun SharedTransitionScope.EffectsModeScreen(
     ) {
         val (topToolBar, screenshotBox, effectsPreviewList) = createRefs()
 
-        TextModeTopToolbar(
-            modifier = Modifier.constrainAs(topToolBar) {
-                top.linkTo(parent.top)
-                width = Dimension.matchParent
-                height = Dimension.wrapContent
-            },
-            onCloseClicked = onCloseClickedLambda,
-            onDoneClicked = onDoneClickedLambda
-        )
+        AnimatedToolbarContainer(
+            toolbarVisible = toolbarVisible,
+            modifier = topToolbarModifier(topToolBar)
+        ) {
+            TextModeTopToolbar(
+                modifier = Modifier,
+                toolbarHeight = topToolbarHeight,
+                onCloseClicked = onCloseClickedLambda,
+                onDoneClicked = onDoneClickedLambda
+            )
+        }
         val aspectRatio = bitmap.let {
             bitmap.width.toFloat() / bitmap.height.toFloat()
         }
         ScreenshotBox(
             modifier = Modifier
                 .constrainAs(screenshotBox) {
-                    top.linkTo(topToolBar.bottom)
-                    bottom.linkTo(effectsPreviewList.top)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.ratio(aspectRatio.toString())
-                    height = Dimension.fillToConstraints
+                    width = Dimension.matchParent
+                    height = Dimension.matchParent
                 }
-                .clipToBounds()
-                .animateContentSize()
+                .padding(top = topToolbarHeight, bottom = bottomToolbarHeight)
+                .aspectRatio(aspectRatio)
                 .sharedElement(
                     state = rememberSharedContentState(key = "centerImage"),
                     animatedVisibilityScope = animatedVisibilityScope,
                     boundsTransform = { _, _ ->
                         tween(300)
                     },
-                ),
+                )
+            ,
             screenshotState = screenshotState
         ) {
 
@@ -185,42 +215,31 @@ fun SharedTransitionScope.EffectsModeScreen(
         }
 
 
-        Box(
-            modifier = Modifier
-                .constrainAs(effectsPreviewList) {
-                    bottom.linkTo(parent.bottom)
-                    width = Dimension.matchParent
-                    height = if (state.effectsList.isEmpty()) {
-                        Dimension.value(DEFAULT_TOOLBAR_HEIGHT)
-                    } else Dimension.wrapContent
-                }
-                .background(ToolBarBackgroundColor)
-                .animateContentSize()
-                .sharedElement(
-                    state = rememberSharedContentState(key = "bottomToolbar"),
-                    animatedVisibilityScope = animatedVisibilityScope,
-                ),
+        AnimatedToolbarContainer(
+            toolbarVisible = toolbarVisible,
+            modifier = bottomToolbarModifier(effectsPreviewList)
         ) {
-
             if (state.effectsList.isEmpty()) {
-                CircularProgressIndicator(
+                LoadingView(
                     modifier = Modifier
-                        .size(36.dp)
-                        .align(Alignment.Center),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    strokeWidth = 3.dp,
+                        .fillMaxWidth()
+                        .height(bottomToolbarHeight)
+                        .background(ToolBarBackgroundColor),
+                    progressBarSize = 36.dp,
+                    progressBarStrokeWidth = 3.dp
                 )
             } else {
                 EffectsPreviewListFullWidth(
                     modifier = Modifier
                         .background(ToolBarBackgroundColor)
-                        .padding(vertical = 12.dp),
+//                        .padding(vertical = 12.dp)
+                    ,
+                    toolbarHeight = bottomToolbarHeight,
                     effectsList = state.effectsList,
                     selectedIndex = state.selectedEffectIndex,
                     onItemClicked = onEffectItemClicked
                 )
             }
-
         }
 
     }

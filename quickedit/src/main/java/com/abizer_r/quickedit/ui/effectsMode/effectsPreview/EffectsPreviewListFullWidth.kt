@@ -6,10 +6,14 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -34,11 +38,15 @@ import com.abizer_r.components.R
 import com.abizer_r.components.theme.Black_alpha_30
 import com.abizer_r.components.theme.QuickEditTheme
 import com.abizer_r.components.theme.ToolBarBackgroundColor
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_EXTRA_LARGE
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_LARGE
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EffectsPreviewListFullWidth(
     modifier: Modifier = Modifier,
+    toolbarHeight: Dp = TOOLBAR_HEIGHT_EXTRA_LARGE,
     effectsList: ArrayList<EffectItem>,
     selectedIndex: Int,
     onItemClicked: (position: Int, effectItem: EffectItem) -> Unit
@@ -47,7 +55,8 @@ fun EffectsPreviewListFullWidth(
     LazyRow(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .height(toolbarHeight)
+            .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         items(
@@ -75,7 +84,6 @@ fun EffectPreview(
     modifier: Modifier = Modifier,
     effectItem: EffectItem,
     isSelected: Boolean,
-    itemSize: Dp = 84.dp,
     selectedBorderWidth: Dp = 1.dp,
     selectedBorderColor: Color = Color.White,
     clipShape: Shape = RectangleShape,
@@ -89,7 +97,8 @@ fun EffectPreview(
             .background(color = borderColor)
             .padding(selectedBorderWidth)
             .clip(clipShape)
-            .size(itemSize)
+            .wrapContentHeight()
+            .aspectRatio(1f)
             .clickable {
                 onClick(effectItem)
             }
@@ -122,7 +131,9 @@ fun Selected_EffectPreviewItem() {
     QuickEditTheme {
         val bitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_1).asAndroidBitmap()
         EffectPreview(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier
+                .size(TOOLBAR_HEIGHT_LARGE)
+                .padding(8.dp),
             effectItem = EffectItem(
                 ogBitmap = bitmap,
                 previewBitmap = bitmap,
@@ -140,7 +151,9 @@ fun Unselected_EffectPreviewItem() {
     QuickEditTheme {
         val bitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_1).asAndroidBitmap()
         EffectPreview(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier
+                .size(TOOLBAR_HEIGHT_LARGE)
+                .padding(8.dp),
             effectItem = EffectItem(
                 ogBitmap = bitmap,
                 previewBitmap = bitmap,
