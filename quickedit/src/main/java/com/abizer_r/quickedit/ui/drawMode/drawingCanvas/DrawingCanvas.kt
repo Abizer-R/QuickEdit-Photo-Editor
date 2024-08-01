@@ -34,7 +34,6 @@ import kotlin.math.roundToInt
 @Composable
 fun DrawingCanvas(
     modifier: Modifier = Modifier,
-    bitmap: Bitmap? = null,
     pathDetailStack: Stack<PathDetails>,
     selectedColor: Color,
     currentTool: BottomToolbarItem,
@@ -49,15 +48,6 @@ fun DrawingCanvas(
      */
     var currentShape: AbstractShape? = null
     var drawPathAction by remember { mutableStateOf<Any?>(null) }
-    var previousY: Float? = remember { null }
-
-    var bitmapReqSize by remember {
-        mutableStateOf(
-            bitmap?.let {
-                IntSize(bitmap.width, bitmap.height)
-            } ?: IntSize.Zero
-        )
-    }
 
     Canvas(
         modifier = modifier
@@ -75,14 +65,6 @@ fun DrawingCanvas(
                         // Below state is just to trigger the draw() phase of canvas
                         // Without it, current path won't be drawn until the "drawState" is changed
                         drawPathAction = Offset(it.x, it.y)
-
-
-                        val delta = previousY?.run { it.y - previousY!! } ?: 0f
-                        Log.d(
-                            "TEST_DRAG",
-                            "y = ${it.y.roundToInt()} | \uD835\uDEE5 ${delta.roundToInt()} | ${it.yPrecision.roundToInt()}"
-                        )
-                        previousY = it.y
                     }
 
                     MotionEvent.ACTION_CANCEL,
