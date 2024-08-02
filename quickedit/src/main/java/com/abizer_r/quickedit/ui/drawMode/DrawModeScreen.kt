@@ -2,31 +2,43 @@ package com.abizer_r.quickedit.ui.drawMode
 
 import ToolbarExtensionView
 import android.graphics.Bitmap
+import android.util.Log
 import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -44,6 +56,7 @@ import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.BottomToolBarStatic
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TopToolBar
 import com.abizer_r.quickedit.utils.drawMode.CustomLayerTypeComposable
 import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
@@ -80,6 +93,14 @@ fun DrawModeScreen(
     val colorOnBackground = MaterialTheme.colorScheme.onBackground
     val backgroundColor = MaterialTheme.colorScheme.background
 
+    var scale by remember { mutableFloatStateOf(1f) }
+    var offset by remember { mutableStateOf(Offset.Zero) }
+    val transformableState = rememberTransformableState { zoomChange, offsetChange, rotationChange ->
+        scale = (scale * zoomChange).coerceIn(0.5f, 5f)
+        offset += (offsetChange * scale)
+        Log.d("TEST_pan", "Pan: scale = $scale, offset = $offset", )
+    }
+
     val bottomToolbarItems = remember {
         ImmutableList(DrawModeUtils.getDefaultBottomToolbarItemsList())
     }
@@ -93,7 +114,9 @@ fun DrawModeScreen(
         toolbarVisible = true
         delay(AnimUtils.TOOLBAR_EXPAND_ANIM_DURATION_FAST.toLong())
         viewModel.onBottomToolbarEvent(
-            BottomToolbarEvent.OnItemClicked(bottomToolbarItems.items[1])
+            BottomToolbarEvent.OnItemClicked(
+                bottomToolbarItems.items[DrawModeUtils.DEFAULT_SELECTED_INDEX]
+            )
         )
     }
 
@@ -116,6 +139,8 @@ fun DrawModeScreen(
     }
 
     val onDoneClickedLambda = remember<() -> Unit> {{
+        scale = 1f // reset zoom
+        offset = Offset.Zero    // reset pan
         viewModel.handleStateBeforeCaptureScreenshot()
         lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
             delay(200)  /* Delay to update the ToolbarExtensionView Visibility in ui */
@@ -166,7 +191,7 @@ fun DrawModeScreen(
 
         AnimatedToolbarContainer(
             toolbarVisible = toolbarVisible,
-            modifier = topToolbarModifier(topToolbar)
+            modifier = topToolbarModifier(topToolbar).zIndex(1f)
         ) {
             TopToolBar(
                 modifier = Modifier,
@@ -184,23 +209,39 @@ fun DrawModeScreen(
         val aspectRatio = remember(bitmap) {
             bitmap.width.toFloat() / bitmap.height.toFloat()
         }
+
+        var screenshotBoxModifier = Modifier
+            .constrainAs(drawingView) {
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                width = Dimension.wrapContent
+                height = Dimension.wrapContent
+            }
+            .padding(top = topToolbarHeight, bottom = bottomToolbarHeight)
+
+
+        if (viewModel.shouldGoToNextScreen) {
+            // constraint the screenshot box to cover only the required area
+            screenshotBoxModifier = screenshotBoxModifier.aspectRatio(aspectRatio)
+        }
+
         ScreenshotBox(
-            modifier = Modifier
-                .constrainAs(drawingView) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.wrapContent
-                    height = Dimension.wrapContent
-                }
-                .padding(top = topToolbarHeight, bottom = bottomToolbarHeight)
-                .aspectRatio(aspectRatio),
+            modifier = screenshotBoxModifier,
             screenshotState = screenshotState
         ) {
 
             Image(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer(
+                        scaleX = scale,
+                        scaleY = scale,
+                        translationX = offset.x,
+                        translationY = offset.y
+                    )
+                ,
                 bitmap = bitmap.asImageBitmap(),
                 contentScale = ContentScale.Fit,
                 contentDescription = null
@@ -211,10 +252,13 @@ fun DrawModeScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 DrawingCanvas(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().aspectRatio(aspectRatio),
                     pathDetailStack = state.pathDetailStack,
                     selectedColor = state.selectedColor,
                     currentTool = state.selectedTool,
+                    scale = scale,
+                    offset = offset,
+                    transformableState = transformableState,
                     onDrawingEvent = viewModel::onEvent
                 )
             }
