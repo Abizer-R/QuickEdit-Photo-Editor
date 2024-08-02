@@ -58,13 +58,14 @@ object DrawModeUtils {
 }
 
 fun BottomToolbarItem.getShape(
-    selectedColor: Color
+    selectedColor: Color,
+    scale: Float = 1f,
 ): AbstractShape {
     return when (val toolbarItem = this) {
         is BottomToolbarItem.BrushTool -> {
             BrushShape(
                 color = selectedColor,
-                width = toolbarItem.width,
+                width = toolbarItem.width / scale,
                 alpha = toolbarItem.opacity / 100f
             )
         }
@@ -72,19 +73,19 @@ fun BottomToolbarItem.getShape(
         is BottomToolbarItem.ShapeTool -> when (toolbarItem.shapeType) {
             ShapeType.LINE -> LineShape(
                 color = selectedColor,
-                width = toolbarItem.width,
+                width = toolbarItem.width / scale,
                 alpha = toolbarItem.opacity / 100f
             )
 
             ShapeType.OVAL -> OvalShape(
                 color = selectedColor,
-                width = toolbarItem.width,
+                width = toolbarItem.width / scale,
                 alpha = toolbarItem.opacity / 100f
             )
 
             ShapeType.RECTANGLE -> RectangleShape(
                 color = selectedColor,
-                width = toolbarItem.width,
+                width = toolbarItem.width / scale,
                 alpha = toolbarItem.opacity / 100f
             )
         }
@@ -98,7 +99,7 @@ fun BottomToolbarItem.getShape(
                 else DrawingConstants.DEFAULT_STROKE_WIDTH
             BrushShape(
                 isEraser = true,
-                width = width
+                width = width / scale
             )
         }
     }

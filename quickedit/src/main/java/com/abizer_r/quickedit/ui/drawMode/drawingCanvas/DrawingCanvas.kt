@@ -72,7 +72,10 @@ fun DrawingCanvas(
 
                 when (it.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        currentShape = currentTool.getShape(selectedColor = selectedColor)
+                        currentShape = currentTool.getShape(
+                            selectedColor = selectedColor,
+                            scale = scale,
+                        )
                         currentShape?.initShape(startX = adjustedX, startY = adjustedY)
                     }
 
