@@ -12,7 +12,7 @@ import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
 import com.abizer_r.quickedit.utils.drawMode.setOpacityIfPossible
 import com.abizer_r.quickedit.utils.drawMode.setShapeTypeIfPossible
 import com.abizer_r.quickedit.utils.drawMode.setWidthIfPossible
-import com.abizer_r.quickedit.utils.other.anim.AnimUtils.TOOLBAR_ANIM_DURATION
+import com.abizer_r.quickedit.utils.other.anim.AnimUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -135,7 +135,7 @@ class DrawModeViewModel @Inject constructor(
                     if (state.value.showBottomToolbarExtension) {
                         // Collapse toolbarExtension and change current item after DELAY
                         _state.update { it.copy(showBottomToolbarExtension = false) }
-                        delay(TOOLBAR_ANIM_DURATION.toLong())
+                        delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION.toLong())
                     }
                     _state.update { it.copy(selectedTool = selectedItem) }
                     // open toolbarExtension for new item

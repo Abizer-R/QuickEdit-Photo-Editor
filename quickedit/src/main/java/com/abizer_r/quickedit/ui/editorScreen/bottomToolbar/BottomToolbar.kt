@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -51,13 +49,16 @@ import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
 import com.abizer_r.quickedit.utils.editorScreen.EditorScreenUtils
 import com.abizer_r.quickedit.utils.textMode.TextModeUtils
 
-val DEFAULT_TOOLBAR_HEIGHT = 64.dp
+val TOOLBAR_HEIGHT_SMALL = 48.dp
+val TOOLBAR_HEIGHT_MEDIUM = 64.dp
+val TOOLBAR_HEIGHT_LARGE = 88.dp
+val TOOLBAR_HEIGHT_EXTRA_LARGE = 104.dp
 
 @Composable
 fun BottomToolBarStatic(
     modifier: Modifier,
     toolbarItems: ImmutableList<BottomToolbarItem>,
-    toolbarHeight: Dp = DEFAULT_TOOLBAR_HEIGHT,
+    toolbarHeight: Dp = TOOLBAR_HEIGHT_MEDIUM,
     selectedItem: BottomToolbarItem = BottomToolbarItem.NONE,
     showColorPickerIcon: Boolean = true,
     selectedColor: Color = Color.White,
@@ -74,45 +75,6 @@ fun BottomToolBarStatic(
     ) {
         toolbarItems.items.forEachIndexed { index, mToolbarItem ->
             ToolbarItem(
-                toolbarItem = mToolbarItem,
-                selectedColor = selectedColor,
-                showColorPickerIcon = showColorPickerIcon,
-                isSelected = mToolbarItem == selectedItem,
-                onEvent = onEvent
-            )
-        }
-    }
-}
-
-@Composable
-fun BottomToolBarDynamic(
-    modifier: Modifier,
-    toolbarItems: ImmutableList<BottomToolbarItem>,
-    selectedItem: BottomToolbarItem = BottomToolbarItem.NONE,
-    showColorPickerIcon: Boolean = true,
-    selectedColor: Color = Color.White,
-    onEvent: (BottomToolbarEvent) -> Unit
-) {
-
-    LazyRow(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(ToolBarBackgroundColor)
-            .padding(vertical = 4.dp)
-    ) {
-        itemsIndexed(toolbarItems.items) { index, mToolbarItem ->
-            val itemModifier = Modifier
-            if (index == 0) {
-                itemModifier.padding(start = 8.dp)
-            } else if (index == toolbarItems.items.size - 1) {
-                itemModifier.padding(end = 8.dp)
-            } else {
-                itemModifier.padding(horizontal = 16.dp)
-            }
-            ToolbarItem(
-                modifier = Modifier.padding(
-                    horizontal = 16.dp
-                ),
                 toolbarItem = mToolbarItem,
                 selectedColor = selectedColor,
                 showColorPickerIcon = showColorPickerIcon,
