@@ -15,6 +15,7 @@ sealed class BottomToolbarItem {
 
     // ---------- DrawModeScreen Items - START
     object ColorItem : BottomToolbarItem()
+    object PanItem : BottomToolbarItem()
     class BrushTool(var width: Float, var opacity: Float) : BottomToolbarItem()
     class ShapeTool(var width: Float, var opacity: Float, var shapeType: ShapeType) : BottomToolbarItem()
     class EraserTool(var width: Float) : BottomToolbarItem()
