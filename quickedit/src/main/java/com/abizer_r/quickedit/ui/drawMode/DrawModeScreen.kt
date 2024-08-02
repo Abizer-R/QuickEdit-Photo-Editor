@@ -187,8 +187,12 @@ fun DrawModeScreen(
         ScreenshotBox(
             modifier = Modifier
                 .constrainAs(drawingView) {
-                    width = Dimension.matchParent
-                    height = Dimension.matchParent
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    width = Dimension.wrapContent
+                    height = Dimension.wrapContent
                 }
                 .padding(top = topToolbarHeight, bottom = bottomToolbarHeight)
                 .aspectRatio(aspectRatio),
