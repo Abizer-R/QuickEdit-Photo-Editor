@@ -247,6 +247,7 @@ fun MainScreenNavigation(
                 }}
 
                 CropperScreen(
+                    animatedVisibilityScope = this,
                     immutableBitmap = ImmutableBitmap((sharedEditorViewModel.getCurrentBitmap())),
                     onBackPressed = onBackPressedLambda,
                     onDoneClicked = onDoneClickedLambda,

@@ -4,6 +4,12 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,6 +45,8 @@ import com.abizer_r.quickedit.ui.cropMode.cropperOptions.CropperOptionsFullWidth
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_LARGE
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TextModeTopToolbar
+import com.abizer_r.quickedit.ui.effectsMode.EffectsModeScreen
+import com.abizer_r.quickedit.utils.SharedTransitionPreviewExtension
 import com.abizer_r.quickedit.utils.editorScreen.CropModeUtils
 import com.abizer_r.quickedit.utils.other.anim.AnimUtils
 import com.abizer_r.quickedit.utils.other.bitmap.ImmutableBitmap
@@ -48,8 +57,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun CropperScreen(
+fun SharedTransitionScope.CropperScreen(
+    animatedVisibilityScope: AnimatedVisibilityScope,
     immutableBitmap: ImmutableBitmap,
     onDoneClicked: (bitmap: Bitmap) -> Unit,
     onBackPressed: () -> Unit
@@ -153,14 +164,22 @@ fun CropperScreen(
         Box(
             modifier = Modifier
                 .constrainAs(cropView) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.wrapContent
-                    height = Dimension.wrapContent
+                    width = Dimension.matchParent
+                    height = Dimension.matchParent
                 }
                 .padding(top = topToolbarHeight, bottom = bottomToolbarHeight)
+                .sharedBounds(
+                    sharedContentState = rememberSharedContentState(key = "centerImageBounds"),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    enter = EnterTransition.None,
+                    exit = ExitTransition.None,
+                    boundsTransform = { _, _ ->
+                        tween(300)
+                    },
+                    resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds(
+                        contentScale = ContentScale.Fit
+                    )
+                )
         ) {
             AndroidView(
                 modifier = Modifier,
@@ -201,16 +220,20 @@ fun CropperScreen(
 
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PreviewEditorScreen() {
     QuickEditTheme {
-        CropperScreen(
-            immutableBitmap = ImmutableBitmap(
-                ImageBitmap.imageResource(id = R.drawable.placeholder_image_1).asAndroidBitmap()
-            ),
-            onDoneClicked = {},
-            onBackPressed = {}
-        )
+        SharedTransitionPreviewExtension {
+            CropperScreen(
+                animatedVisibilityScope = it,
+                immutableBitmap = ImmutableBitmap(
+                    ImageBitmap.imageResource(id = R.drawable.placeholder_image_1).asAndroidBitmap()
+                ),
+                onDoneClicked = {},
+                onBackPressed = {}
+            )
+        }
     }
 }
