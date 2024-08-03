@@ -9,13 +9,10 @@ import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBoxState
 
 data class TextModeState(
     val textFieldState: TextFieldState = TextFieldState(),
-    val collapseToolbar: Boolean = false,
-    val showBlurredBg: Boolean = false,
     val transformableViewStateList: ArrayList<TransformableBoxState> = arrayListOf(),
     val recompositionTrigger: Long = 0
 ) {
     data class TextFieldState(
-        val isVisible: Boolean = false,
         val textStateId: String? = null,
         val shouldRequestFocus: Boolean = true, /* initial value is true as the textField is visible initially */
         val text: String = "",
