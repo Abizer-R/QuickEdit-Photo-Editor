@@ -32,11 +32,9 @@ import kotlin.math.abs
 fun DrawingCanvasContainer(
     state: DrawModeState,
     immutableBitmap: ImmutableBitmap,
-    verticalToolbarPaddingPx: Float,
     scale: Float,
     offset: Offset,
     transformableState: TransformableState,
-    onOffsetChange: (Offset) -> Unit,
     onDrawingEvent: (DrawModeEvent) -> Unit
 ) {
 
