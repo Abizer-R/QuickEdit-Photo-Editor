@@ -13,10 +13,13 @@ import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -96,7 +99,10 @@ fun DrawModeScreen(
     var scale by remember { mutableFloatStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
     val transformableState = rememberTransformableState { zoomChange, offsetChange, rotationChange ->
-        scale = (scale * zoomChange).coerceIn(0.5f, 5f)
+        // <--- NOTE --->
+        // Making the min scale less than 1f will break the constrain calculation code in the DrawingCanvas
+        // The constrain calculation code allows us to hold the canvas within the screen
+        scale = (scale * zoomChange).coerceIn(1f, 5f)
         offset += (offsetChange * scale)
         Log.d("TEST_pan", "Pan: scale = $scale, offset = $offset", )
     }
@@ -143,7 +149,7 @@ fun DrawModeScreen(
         offset = Offset.Zero    // reset pan
         viewModel.handleStateBeforeCaptureScreenshot()
         lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-            delay(200)  /* Delay to update the ToolbarExtensionView Visibility in ui */
+            delay(400)  /* Delay to update the ToolbarExtensionView Visibility and zoom/pan in ui */
             screenshotState.capture()
         }
     }}
@@ -232,36 +238,17 @@ fun DrawModeScreen(
             screenshotState = screenshotState
         ) {
 
-            Image(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer(
-                        scaleX = scale,
-                        scaleY = scale,
-                        translationX = offset.x,
-                        translationY = offset.y
-                    )
-                ,
-                bitmap = bitmap.asImageBitmap(),
-                contentScale = ContentScale.Fit,
-                contentDescription = null
+            DrawingCanvasContainer(
+                state = state,
+                immutableBitmap = immutableBitmap,
+                scale = scale,
+                offset = offset,
+                transformableState = transformableState,
+                onOffsetChange = {
+                    offset = it
+                },
+                onDrawingEvent = viewModel::onEvent
             )
-
-            CustomLayerTypeComposable(
-                layerType = View.LAYER_TYPE_HARDWARE,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                DrawingCanvas(
-                    modifier = Modifier.fillMaxSize().aspectRatio(aspectRatio),
-                    pathDetailStack = state.pathDetailStack,
-                    selectedColor = state.selectedColor,
-                    currentTool = state.selectedTool,
-                    scale = scale,
-                    offset = offset,
-                    transformableState = transformableState,
-                    onDrawingEvent = viewModel::onEvent
-                )
-            }
         }
 
         AnimatedToolbarContainer(
