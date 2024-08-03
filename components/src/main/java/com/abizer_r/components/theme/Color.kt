@@ -20,5 +20,8 @@ val ToolBarBackgroundColor = DarkerGray
 val BackgroundColor_Dark = Color(0xFF141414)
 val ColorOnBackground_Dark = Color.White
 
-val BackgroundColor_Light = ColorOnBackground_Dark
-val ColorOnBackground_Light = BackgroundColor_Dark
+/**
+ * NOTE: While changing Light theme colors, we also need to change static colors, such as "ToolBarBackgroundColor"
+ */
+val BackgroundColor_Light = BackgroundColor_Dark
+val ColorOnBackground_Light = ColorOnBackground_Dark
