@@ -45,40 +45,6 @@ fun DrawingCanvasContainer(
         bitmap.width.toFloat() / bitmap.height.toFloat()
     }
 
-    val initialWidthPx: Float
-    val initialHeightPx: Float
-
-    if (aspectRatio >= 1) {
-        initialWidthPx = LocalConfiguration.current.screenWidthDp.dp.toPx()
-        initialHeightPx = (initialWidthPx / aspectRatio)
-
-    } else {
-        initialHeightPx = LocalConfiguration.current.screenHeightDp.dp.toPx() - verticalToolbarPaddingPx
-        initialWidthPx = initialHeightPx * aspectRatio
-    }
-
-    val canvasWidth = initialWidthPx * scale
-    val canvasHeight = canvasWidth / aspectRatio
-
-    val outlierSpaceEachSideHorizontal = abs(canvasWidth - initialWidthPx) / 2
-    val outlierSpaceEachSideVertical = abs(canvasHeight - initialHeightPx) / 2
-
-    val horizontalConstrain = initialWidthPx * 0.3f
-    val verticalConstrain = initialHeightPx * 0.1f
-
-    val adjustedHorizontalConstrain = horizontalConstrain + outlierSpaceEachSideHorizontal
-    val adjustedVerticalConstrain = verticalConstrain + outlierSpaceEachSideVertical
-
-    val constrainedOffset = Offset(
-        x = offset.x.coerceIn(-1 * adjustedHorizontalConstrain, adjustedHorizontalConstrain),
-        y = offset.y.coerceIn(-1 * adjustedVerticalConstrain, adjustedVerticalConstrain)
-    )
-
-    Log.i("TEST_constrain", "offset = $offset, cHeight = $canvasHeight, sHeight = $initialHeightPx, outlier = $outlierSpaceEachSideVertical verticalConstrain = $adjustedVerticalConstrain")
-    if (offset != constrainedOffset) {
-        onOffsetChange(constrainedOffset)
-    }
-
     Image(
         modifier = Modifier
             .fillMaxSize()

@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -61,6 +62,7 @@ import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TopToolBar
+import com.abizer_r.quickedit.utils.AppUtils
 import com.abizer_r.quickedit.utils.drawMode.CustomLayerTypeComposable
 import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
 import com.abizer_r.quickedit.utils.drawMode.getOpacityOrNull
@@ -77,6 +79,7 @@ import io.mhssn.colorpicker.ColorPickerType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -97,23 +100,37 @@ fun DrawModeScreen(
     val colorOnBackground = MaterialTheme.colorScheme.onBackground
     val backgroundColor = MaterialTheme.colorScheme.background
 
-    var scale by remember { mutableFloatStateOf(1f) }
-    var offset by remember { mutableStateOf(Offset.Zero) }
-    val transformableState = rememberTransformableState { zoomChange, offsetChange, rotationChange ->
-        // <--- NOTE --->
-        // Making the min scale less than 1f will break the constrain calculation code in the DrawingCanvas
-        // The constrain calculation code allows us to hold the canvas within the screen
-        scale = (scale * zoomChange).coerceIn(1f, 5f)
-        offset += (offsetChange * scale)
-        Log.d("TEST_pan", "Pan: scale = $scale, offset = $offset", )
-    }
-
     val bottomToolbarItems = remember {
         ImmutableList(DrawModeUtils.getDefaultBottomToolbarItemsList())
     }
 
     val topToolbarHeight =  TOOLBAR_HEIGHT_SMALL
     val bottomToolbarHeight = TOOLBAR_HEIGHT_MEDIUM
+    val verticalToolbarPaddingPx = topToolbarHeight.toPx() + bottomToolbarHeight.toPx()
+
+    val bitmap = immutableBitmap.bitmap
+    val aspectRatio = remember(bitmap) {
+        bitmap.width.toFloat() / bitmap.height.toFloat()
+    }
+
+    var scale by remember { mutableFloatStateOf(1f) }
+    var offset by remember { mutableStateOf(Offset.Zero) }
+    val constrainedOffsetScale = remember(scale, verticalToolbarPaddingPx) {
+        AppUtils.getConstrainOffsetScaleOnly(context, aspectRatio, verticalToolbarPaddingPx, scale)
+    }
+    val transformableState = rememberTransformableState { zoomChange, offsetChange, rotationChange ->
+        // <--- NOTE --->
+        // Making the min scale less than 1f will break the constrain calculation code in the DrawingCanvas
+        // The constrain calculation code allows us to hold the canvas within the screen
+        scale = (scale * zoomChange).coerceIn(1f, 5f)
+        val newOffset = offset + (offsetChange * scale)
+        val constrainedOffset = Offset(
+            x = newOffset.x.coerceIn(-1 * constrainedOffsetScale.x, constrainedOffsetScale.x),
+            y = newOffset.y.coerceIn(-1 * constrainedOffsetScale.y, constrainedOffsetScale.y)
+        )
+        offset = constrainedOffset
+        Log.d("TEST_pan", "Pan: scale = $scale, offset = $offset", )
+    }
 
     var toolbarVisible by remember { mutableStateOf(false) }
 
@@ -210,11 +227,6 @@ fun DrawModeScreen(
                 onCloseClicked = onCloseClickedLambda,
                 onDoneClicked = onDoneClickedLambda
             )
-        }
-
-        val bitmap = immutableBitmap.bitmap
-        val aspectRatio = remember(bitmap) {
-            bitmap.width.toFloat() / bitmap.height.toFloat()
         }
 
         var screenshotBoxModifier = Modifier
