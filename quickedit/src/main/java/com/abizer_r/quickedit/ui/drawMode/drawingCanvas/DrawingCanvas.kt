@@ -3,10 +3,8 @@ package com.abizer_r.quickedit.ui.drawMode.drawingCanvas
 import android.util.Log
 import android.view.MotionEvent
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.TransformableState
 import androidx.compose.foundation.gestures.transformable
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
@@ -16,18 +14,22 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInteropFilter
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import com.abizer_r.quickedit.ui.drawMode.stateHandling.DrawModeEvent
 import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.AbstractShape
 import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.models.PathDetails
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.quickedit.utils.drawMode.getShape
+import com.abizer_r.quickedit.utils.drawMode.toPx
 import java.util.Stack
+import kotlin.math.abs
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -41,7 +43,6 @@ fun DrawingCanvas(
     transformableState: TransformableState,
     offset: Offset
 ) {
-//    Log.e("TEST", "DrawingCanvas: drawingTool = ${drawingState.drawingTool}", )
 
     /**
      * The variables/states below are changed inside the ".pointerInteropFilter" modifier
@@ -120,3 +121,4 @@ fun DrawingCanvas(
         }
     }
 }
+

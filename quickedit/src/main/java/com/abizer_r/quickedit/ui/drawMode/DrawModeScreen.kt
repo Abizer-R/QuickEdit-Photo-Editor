@@ -66,6 +66,7 @@ import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
 import com.abizer_r.quickedit.utils.drawMode.getOpacityOrNull
 import com.abizer_r.quickedit.utils.drawMode.getShapeTypeOrNull
 import com.abizer_r.quickedit.utils.drawMode.getWidthOrNull
+import com.abizer_r.quickedit.utils.drawMode.toPx
 import com.abizer_r.quickedit.utils.other.anim.AnimUtils
 import com.abizer_r.quickedit.utils.other.bitmap.ImmutableBitmap
 import com.smarttoolfactory.screenshot.ImageResult
@@ -241,6 +242,7 @@ fun DrawModeScreen(
             DrawingCanvasContainer(
                 state = state,
                 immutableBitmap = immutableBitmap,
+                verticalToolbarPaddingPx = topToolbarHeight.toPx() + bottomToolbarHeight.toPx(),
                 scale = scale,
                 offset = offset,
                 transformableState = transformableState,
