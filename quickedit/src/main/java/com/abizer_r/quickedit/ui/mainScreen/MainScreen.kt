@@ -1,5 +1,6 @@
 package com.abizer_r.quickedit.ui.mainScreen
 
+import android.Manifest
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.net.Uri
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,17 +27,27 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.abizer_r.quickedit.R
 import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.ui.common.ErrorView
 import com.abizer_r.quickedit.ui.common.LoadingView
-import com.abizer_r.quickedit.utils.AppUtils
+import com.abizer_r.quickedit.ui.common.PermissionDeniedView
+import com.abizer_r.quickedit.ui.common.permission.PermissionDialog
+import com.abizer_r.quickedit.ui.common.permission.StoragePermissionTextProvider
+import com.abizer_r.quickedit.ui.navigation.NavDestinations
 import com.abizer_r.quickedit.utils.FileUtils
+import com.abizer_r.quickedit.utils.PermissionUtils
+import com.abizer_r.quickedit.utils.PermissionUtils.PermissionTypes
+import com.abizer_r.quickedit.utils.getActivity
+import com.abizer_r.quickedit.utils.getOpenAppSettingsIntent
 import com.abizer_r.quickedit.utils.other.bitmap.BitmapStatus
 import com.abizer_r.quickedit.utils.other.bitmap.BitmapUtils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -45,10 +57,38 @@ import java.io.File
 fun MainScreen(
     onImageSelected: (Bitmap) -> Unit
 ) {
-
     val context = LocalContext.current
+    val activity = context.getActivity()
     val lifeCycleOwner = LocalLifecycleOwner.current
     val lifecycleScope = lifeCycleOwner.lifecycleScope
+
+    val viewModel = hiltViewModel<MainScreenViewModel>()
+    val dialogQueue = viewModel.visiblePermissionDialogQueue
+    val permissionsGranted = viewModel.permissionsGranted.value
+
+    val storagePermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+    ) { perms ->
+        perms.keys.forEach { permission ->
+            viewModel.onPermissionResult(
+                permission = permission,
+                isGranted = perms[permission] == true
+            )
+        }
+        if (perms.values.all { true }) {
+            viewModel.permissionsGranted.value = true
+        }
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        storagePermissionLauncher.launch(PermissionUtils.getInternalStoragePermissions())
+    }
+
+    val appSettingsLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+    ) {
+        storagePermissionLauncher.launch(PermissionUtils.getInternalStoragePermissions())
+    }
 
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var scaledBitmapStatus by remember { mutableStateOf<BitmapStatus>(BitmapStatus.None) }
@@ -58,17 +98,13 @@ fun MainScreen(
         FileUtils.getUriForFile(context, imgFile)
     }
 
-    val onPhotoPicked = remember<(Uri?) -> Unit> {
-        {
-            imageUri = it
-        }
-    }
+    val onPhotoPicked = remember<(Uri?) -> Unit> {{
+        imageUri = it
+    }}
 
-    val onPhotoCaptured = remember<(Uri?) -> Unit> {
-        {
-            imageUri = it
-        }
-    }
+    val onPhotoCaptured = remember<(Uri?) -> Unit> {{
+        imageUri = it
+    }}
 
     LaunchedEffect(key1 = imageUri) {
         imageUri?.let { imgUri ->
@@ -80,13 +116,28 @@ fun MainScreen(
         }
     }
 
+    val handleImageSelected = remember<(Bitmap) -> Unit> {{
+        lifecycleScope.launch {
+//            delay(1000)
+            onImageSelected(it)
+        }
+    }}
+
     when (val bitmapStatus = scaledBitmapStatus) {
         BitmapStatus.None -> {
-            if (cameraImageUri != null) {
+            if (cameraImageUri != null && permissionsGranted) {
                 MainScreenLayout(
                     cameraImageUri,
                     onPhotoPicked,
                     onPhotoCaptured
+                )
+            } else if (permissionsGranted.not()){
+                PermissionDeniedView(
+                    modifier = Modifier.fillMaxSize().padding(48.dp),
+                    permissionTypes = arrayListOf(PermissionTypes.INTERNAL_STORAGE),
+                    launchAppSettings = {
+                        appSettingsLauncher.launch(context.getOpenAppSettingsIntent())
+                    }
                 )
             } else {
                 ErrorView(modifier = Modifier.fillMaxSize())
@@ -107,11 +158,43 @@ fun MainScreen(
         }
 
         is BitmapStatus.Success -> {
-            onImageSelected(bitmapStatus.scaledBitmap)
+            handleImageSelected(bitmapStatus.scaledBitmap)
+            // show layout to avoid showing blank screen while transition animation is played
+            MainScreenLayout(
+                cameraImageUri!!,
+                onPhotoPicked,
+                onPhotoCaptured
+            )
         }
     }
 
-
+    dialogQueue.reversed().forEach { permission ->
+        PermissionDialog(
+            permissionTextProvider = when (permission) {
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE -> {
+                    StoragePermissionTextProvider()
+                }
+                else -> return@forEach
+            },
+            isPermanentlyDeclined = !shouldShowRequestPermissionRationale(
+                activity ?: return@forEach,
+                permission
+            ),
+            onDismiss = viewModel::dismissDialog,
+            onOkayClick = {
+                viewModel.dismissDialog()
+                storagePermissionLauncher.launch(
+                    arrayOf(permission)
+                )
+            },
+            onGoToAppSettingsClick = {
+                appSettingsLauncher.launch(
+                    context.getOpenAppSettingsIntent()
+                )
+            }
+        )
+    }
 }
 
 @Composable

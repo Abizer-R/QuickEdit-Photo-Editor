@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarData
+import androidx.compose.material3.SnackbarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -162,18 +165,17 @@ private fun EditorScreenLayout(
 
     val onDoneClickedLambda = remember<() -> Unit> {{
         // TODO - confirmation dialog before saving image
-
-        // TODO - show loading dialog or something
-
-        context.toast(R.string.saving_image)
         val imgFile = File(context.filesDir, "edited_image.jpg")
         BitmapUtils.saveBitmap(currentBitmap, imgFile)
         FileUtils.saveFileToAppFolder(
             context = context,
             file = imgFile,
             onSuccess = {
-                context.toast(R.string.image_saved_successfully)
-                goToMainScreen()
+                lifeCycleOwner.lifecycleScope.launch {
+                    context.toast(R.string.image_saved_successfully)
+                    delay(500)
+                    goToMainScreen()
+                }
             },
             onFailure = {
                 context.toast(R.string.something_went_wrong)
