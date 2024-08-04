@@ -161,6 +161,10 @@ fun DrawModeScreen(
     val onCloseClickedLambda = remember<() -> Unit> {{
         lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
             resetZoomAndPan()
+            if (state.showBottomToolbarExtension) {
+                viewModel.onEvent(DrawModeEvent.UpdateToolbarExtensionVisibility(false))
+                delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION.toLong())
+            }
             toolbarVisible = false
             delay(200 + AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST.toLong())
             onBackPressed()
