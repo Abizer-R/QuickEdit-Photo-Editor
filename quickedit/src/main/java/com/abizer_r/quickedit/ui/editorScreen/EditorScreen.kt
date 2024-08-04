@@ -2,8 +2,6 @@ package com.abizer_r.quickedit.ui.editorScreen
 
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -43,7 +41,6 @@ import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TopToolBar
-import com.abizer_r.quickedit.utils.SharedTransitionPreviewExtension
 import com.abizer_r.quickedit.utils.editorScreen.EditorScreenUtils
 import com.abizer_r.quickedit.utils.other.anim.AnimUtils
 import kotlinx.coroutines.Dispatchers
@@ -53,7 +50,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun EditorScreen(
     modifier: Modifier = Modifier,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
     initialEditorScreenState: EditorScreenState,
     goToCropModeScreen: (finalEditorState: EditorScreenState) -> Unit,
     goToDrawModeScreen: (finalEditorState: EditorScreenState) -> Unit,
@@ -103,7 +99,6 @@ fun EditorScreen(
 
         EditorScreenLayout(
             modifier = modifier,
-            animatedVisibilityScope = animatedVisibilityScope,
             currentBitmap = currentBitmap,
             undoEnabled = viewModel.undoEnabled(),
             redoEnabled = viewModel.redoEnabled(),
@@ -118,7 +113,6 @@ fun EditorScreen(
 @Composable
 private fun EditorScreenLayout(
     modifier: Modifier,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
     currentBitmap: Bitmap,
     undoEnabled: Boolean,
     redoEnabled: Boolean,
@@ -221,24 +215,18 @@ private fun EditorScreenLayout(
 
 
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PreviewEditorScreen() {
     QuickEditTheme {
-        SharedTransitionPreviewExtension {
-            EditorScreenLayout(
-                modifier = Modifier,
-                animatedVisibilityScope = it,
-                currentBitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_3).asAndroidBitmap(),
-                undoEnabled = false,
-                redoEnabled = false,
-                onUndo = {},
-                onRedo = {},
-                onBottomToolbarEvent = {}
-            )
-
-        }
-
+        EditorScreenLayout(
+            modifier = Modifier,
+            currentBitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_3).asAndroidBitmap(),
+            undoEnabled = false,
+            redoEnabled = false,
+            onUndo = {},
+            onRedo = {},
+            onBottomToolbarEvent = {}
+        )
     }
 }

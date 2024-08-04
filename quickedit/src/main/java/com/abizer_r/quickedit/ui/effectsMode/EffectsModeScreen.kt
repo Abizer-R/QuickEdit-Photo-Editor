@@ -5,7 +5,6 @@ package com.abizer_r.quickedit.ui.effectsMode
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -66,7 +65,6 @@ import kotlinx.coroutines.withContext
 @Composable
 fun EffectsModeScreen(
     modifier: Modifier = Modifier,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
     immutableBitmap: ImmutableBitmap,
     onDoneClicked: (bitmap: Bitmap) -> Unit,
     onBackPressed: () -> Unit
@@ -240,16 +238,12 @@ fun EffectsModeScreen(
 @Composable
 fun Preview_EffectsModeScreen() {
     QuickEditTheme {
-        SharedTransitionPreviewExtension {
-            EffectsModeScreen(
-                immutableBitmap = ImmutableBitmap(
-                    ImageBitmap.imageResource(id = R.drawable.placeholder_image_3).asAndroidBitmap()
-                ),
-                animatedVisibilityScope = it,
-                onDoneClicked = {},
-                onBackPressed = {}
-            )
-
-        }
+        EffectsModeScreen(
+            immutableBitmap = ImmutableBitmap(
+                ImageBitmap.imageResource(id = R.drawable.placeholder_image_3).asAndroidBitmap()
+            ),
+            onDoneClicked = {},
+            onBackPressed = {}
+        )
     }
 }

@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -40,7 +39,6 @@ import com.abizer_r.quickedit.ui.cropMode.cropperOptions.CropperOptionsFullWidth
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_LARGE
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TextModeTopToolbar
-import com.abizer_r.quickedit.utils.SharedTransitionPreviewExtension
 import com.abizer_r.quickedit.utils.editorScreen.CropModeUtils
 import com.abizer_r.quickedit.utils.other.anim.AnimUtils
 import com.abizer_r.quickedit.utils.other.bitmap.ImmutableBitmap
@@ -53,7 +51,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun CropperScreen(
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
     immutableBitmap: ImmutableBitmap,
     onDoneClicked: (bitmap: Bitmap) -> Unit,
     onBackPressed: () -> Unit
@@ -206,15 +203,12 @@ fun CropperScreen(
 @Composable
 fun PreviewEditorScreen() {
     QuickEditTheme {
-        SharedTransitionPreviewExtension {
-            CropperScreen(
-                animatedVisibilityScope = it,
-                immutableBitmap = ImmutableBitmap(
-                    ImageBitmap.imageResource(id = R.drawable.placeholder_image_3).asAndroidBitmap()
-                ),
-                onDoneClicked = {},
-                onBackPressed = {}
-            )
-        }
+        CropperScreen(
+            immutableBitmap = ImmutableBitmap(
+                ImageBitmap.imageResource(id = R.drawable.placeholder_image_3).asAndroidBitmap()
+            ),
+            onDoneClicked = {},
+            onBackPressed = {}
+        )
     }
 }

@@ -13,4 +13,6 @@
     <string name="done">Done</string>
     <string name="something_went_wrong">Something went wrong</string>
     <string name="enter_your_text">Enter your text</string>
+
+    <string name="pick_image">Pick Image</string>
 </resources>
