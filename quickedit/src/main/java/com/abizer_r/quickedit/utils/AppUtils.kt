@@ -8,6 +8,8 @@ import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.FileProvider
+import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
@@ -67,5 +69,9 @@ object AppUtils {
         val adjustedVerticalConstrain = verticalConstrain + outlierSpaceEachSideVertical
 
         return Offset(adjustedHorizontalConstrain, adjustedVerticalConstrain)
+    }
+
+    fun getUriForFile(context: Context, file: File): Uri? {
+        return FileProvider.getUriForFile(context, "com.abizer_r.quickedit.fileprovider", file)
     }
 }

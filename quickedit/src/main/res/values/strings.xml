@@ -15,4 +15,5 @@
     <string name="enter_your_text">Enter your text</string>
 
     <string name="pick_image">Pick Image</string>
+    <string name="capture_image">Capture Image</string>
 </resources>
