@@ -237,6 +237,7 @@ fun DrawModeScreen(
                 modifier = Modifier,
                 undoEnabled = state.pathDetailStack.isNotEmpty(),
                 redoEnabled = state.redoStack.isNotEmpty(),
+                doneEnabled = state.pathDetailStack.isNotEmpty(),
                 toolbarHeight = topToolbarHeight,
                 onUndo = onUndoLambda,
                 onRedo = onRedoLambda,

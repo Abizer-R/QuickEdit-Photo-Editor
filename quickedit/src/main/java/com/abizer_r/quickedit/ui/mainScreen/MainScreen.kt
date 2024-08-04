@@ -32,6 +32,7 @@ import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.ui.common.ErrorView
 import com.abizer_r.quickedit.ui.common.LoadingView
 import com.abizer_r.quickedit.utils.AppUtils
+import com.abizer_r.quickedit.utils.FileUtils
 import com.abizer_r.quickedit.utils.other.bitmap.BitmapStatus
 import com.abizer_r.quickedit.utils.other.bitmap.BitmapUtils
 import kotlinx.coroutines.Dispatchers
@@ -54,7 +55,7 @@ fun MainScreen(
 
     val cameraImageUri = remember {
         val imgFile = File(context.filesDir, "camera_photo.jpg")
-        AppUtils.getUriForFile(context, imgFile)
+        FileUtils.getUriForFile(context, imgFile)
     }
 
     val onPhotoPicked = remember<(Uri?) -> Unit> {

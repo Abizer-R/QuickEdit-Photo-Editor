@@ -36,6 +36,8 @@ fun TopToolBar(
     undoEnabled: Boolean = false,
     redoEnabled: Boolean = false,
     showCloseAndDone: Boolean = true,
+    closeEnabled: Boolean = true,
+    doneEnabled: Boolean = false,
     toolbarHeight: Dp = TOOLBAR_HEIGHT_SMALL,
     onUndo: () -> Unit,
     onRedo: () -> Unit,
@@ -64,7 +66,9 @@ fun TopToolBar(
                 contentDescription = null,
                 imageVector = Icons.Default.Close,
                 colorFilter = ColorFilter.tint(
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = if (closeEnabled) {
+                        MaterialTheme.colorScheme.onBackground
+                    } else Color.DarkGray
                 )
             )
         }
@@ -127,7 +131,9 @@ fun TopToolBar(
                 contentDescription = null,
                 imageVector = Icons.Default.Check,
                 colorFilter = ColorFilter.tint(
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = if (doneEnabled) {
+                        MaterialTheme.colorScheme.onBackground
+                    } else Color.DarkGray
                 )
             )
         }

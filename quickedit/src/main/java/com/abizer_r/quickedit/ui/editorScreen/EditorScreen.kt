@@ -35,17 +35,22 @@ import com.abizer_r.quickedit.utils.ImmutableList
 import com.abizer_r.quickedit.ui.common.AnimatedToolbarContainer
 import com.abizer_r.quickedit.ui.common.bottomToolbarModifier
 import com.abizer_r.quickedit.ui.common.topToolbarModifier
+import com.abizer_r.quickedit.ui.drawMode.stateHandling.DrawModeEvent
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.BottomToolBarStatic
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TopToolBar
+import com.abizer_r.quickedit.utils.FileUtils
 import com.abizer_r.quickedit.utils.editorScreen.EditorScreenUtils
 import com.abizer_r.quickedit.utils.other.anim.AnimUtils
+import com.abizer_r.quickedit.utils.other.bitmap.BitmapUtils
+import com.abizer_r.quickedit.utils.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.File
 
 @Composable
 fun EditorScreen(
@@ -55,6 +60,7 @@ fun EditorScreen(
     goToDrawModeScreen: (finalEditorState: EditorScreenState) -> Unit,
     goToTextModeScreen: (finalEditorState: EditorScreenState) -> Unit,
     goToEffectsModeScreen: (finalEditorState: EditorScreenState) -> Unit,
+    goToMainScreen: () -> Unit,
 ) {
     if (initialEditorScreenState.bitmapStack.isEmpty()) {
         throw Exception("EmptyStackException: The bitmapStack of initial state should contain at least one bitmap")
@@ -104,7 +110,8 @@ fun EditorScreen(
             redoEnabled = viewModel.redoEnabled(),
             onUndo = viewModel::onUndo,
             onRedo = viewModel::onRedo,
-            onBottomToolbarEvent = onBottomToolbarEvent
+            onBottomToolbarEvent = onBottomToolbarEvent,
+            goToMainScreen = goToMainScreen
         )
     }
 
@@ -118,9 +125,11 @@ private fun EditorScreenLayout(
     redoEnabled: Boolean,
     onUndo: () -> Unit,
     onRedo: () -> Unit,
-    onBottomToolbarEvent: (BottomToolbarEvent) -> Unit
+    onBottomToolbarEvent: (BottomToolbarEvent) -> Unit,
+    goToMainScreen: () -> Unit,
 ) {
 
+    val context = LocalContext.current
     val lifeCycleOwner = LocalLifecycleOwner.current
 
     val bottomToolbarItems = remember {
@@ -146,6 +155,32 @@ private fun EditorScreenLayout(
         }
     }}
 
+    val onCloseClickedLambda = remember<() -> Unit> {{
+        // TODO - confirmation dialog (add throughout the app)
+        goToMainScreen()
+    }}
+
+    val onDoneClickedLambda = remember<() -> Unit> {{
+        // TODO - confirmation dialog before saving image
+
+        // TODO - show loading dialog or something
+
+        context.toast(R.string.saving_image)
+        val imgFile = File(context.filesDir, "edited_image.jpg")
+        BitmapUtils.saveBitmap(currentBitmap, imgFile)
+        FileUtils.saveFileToAppFolder(
+            context = context,
+            file = imgFile,
+            onSuccess = {
+                context.toast(R.string.image_saved_successfully)
+                goToMainScreen()
+            },
+            onFailure = {
+                context.toast(R.string.something_went_wrong)
+            },
+        )
+    }}
+
     ConstraintLayout(
         modifier = modifier
             .fillMaxSize()
@@ -162,9 +197,12 @@ private fun EditorScreenLayout(
                 undoEnabled = undoEnabled,
                 redoEnabled = redoEnabled,
                 toolbarHeight = topToolbarHeight,
-                showCloseAndDone = false,
+                showCloseAndDone = true,
+                doneEnabled = undoEnabled,
                 onUndo = onUndo,
-                onRedo = onRedo
+                onRedo = onRedo,
+                onCloseClicked = onCloseClickedLambda,
+                onDoneClicked = onDoneClickedLambda
             )
         }
 
@@ -226,7 +264,8 @@ fun PreviewEditorScreen() {
             redoEnabled = false,
             onUndo = {},
             onRedo = {},
-            onBottomToolbarEvent = {}
+            onBottomToolbarEvent = {},
+            goToMainScreen = {}
         )
     }
 }

@@ -39,6 +39,11 @@ class SharedEditorViewModel @Inject constructor(
         return bitmapStack.peek()
     }
 
+    fun resetStacks() {
+        bitmapStack.clear()
+        bitmapRedoStack.clear()
+    }
+
     fun addBitmapToStack(
         bitmap: Bitmap,
         triggerRecomposition: Boolean = false,

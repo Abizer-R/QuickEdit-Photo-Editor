@@ -48,6 +48,10 @@ fun QuickEditNavigation() {
         sharedEditorViewModel.updateStacksFromEditorState(finalEditorState)
         navController.navigate(NavDestinations.EFFECTS_MODE_SCREEN)
     }}
+    val goToMainScreenLambda = remember<() -> Unit> {{
+        sharedEditorViewModel.resetStacks()
+        navController.navigate(NavDestinations.MAIN_SCREEN)
+    }}
 
 
     val onBackPressedLambda = remember<() -> Unit> {{
@@ -88,6 +92,7 @@ fun QuickEditNavigation() {
                 goToDrawModeScreen = goToDrawModeScreenLambda,
                 goToTextModeScreen = goToTextModeScreenLambda,
                 goToEffectsModeScreen = goToEffectsModeScreenLambda,
+                goToMainScreen = goToMainScreenLambda
             )
 
         }

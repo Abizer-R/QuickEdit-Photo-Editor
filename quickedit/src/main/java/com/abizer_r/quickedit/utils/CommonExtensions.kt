@@ -2,12 +2,14 @@ package com.abizer_r.quickedit.utils
 
 import android.content.Context
 import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import com.abizer_r.quickedit.R
 
 val Any.TAG: String
@@ -30,6 +32,10 @@ fun SharedTransitionPreviewExtension(
 
 fun Context.toast(message: String) {
     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+}
+
+fun Context.toast(@StringRes stringRes: Int) {
+    Toast.makeText(this, getString(stringRes), Toast.LENGTH_SHORT).show()
 }
 
 fun Context.defaultErrorToast() {

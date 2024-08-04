@@ -16,4 +16,7 @@
 
     <string name="pick_image">Pick Image</string>
     <string name="capture_image">Capture Image</string>
+
+    <string name="saving_image">Saving Image</string>
+    <string name="image_saved_successfully">Image Saved Successfully</string>
 </resources>

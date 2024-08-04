@@ -71,7 +71,4 @@ object AppUtils {
         return Offset(adjustedHorizontalConstrain, adjustedVerticalConstrain)
     }
 
-    fun getUriForFile(context: Context, file: File): Uri? {
-        return FileProvider.getUriForFile(context, "com.abizer_r.quickedit.fileprovider", file)
-    }
 }
