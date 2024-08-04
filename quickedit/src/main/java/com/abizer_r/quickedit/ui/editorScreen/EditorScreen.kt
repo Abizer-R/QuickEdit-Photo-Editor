@@ -202,6 +202,18 @@ private fun SharedTransitionScope.EditorScreenLayout(
                     boundsTransform = { _, _ ->
                         tween(300)
                     },
+                )
+                .sharedBounds(
+                    sharedContentState = rememberSharedContentState(key = "centerImageBounds"),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    enter = EnterTransition.None,
+                    exit = ExitTransition.None,
+                    boundsTransform = { _, _ ->
+                        tween(300)
+                    },
+                    resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds(
+                        contentScale = ContentScale.Fit
+                    )
                 ),
         ) {
 

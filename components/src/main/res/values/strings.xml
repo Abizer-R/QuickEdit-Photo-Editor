@@ -1,6 +1,7 @@
 <resources>
     <string name="color">Color</string>
     <string name="brush">Brush</string>
+    <string name="pan">Pan</string>
     <string name="shape">Shape</string>
     <string name="eraser">Eraser</string>
     <string name="crop">Crop</string>

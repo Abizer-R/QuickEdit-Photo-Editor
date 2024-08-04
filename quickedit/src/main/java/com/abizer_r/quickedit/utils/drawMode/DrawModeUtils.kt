@@ -1,15 +1,10 @@
 package com.abizer_r.quickedit.utils.drawMode
 
-import android.graphics.RectF
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Matrix
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
-import androidx.core.graphics.transform
 import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.BrushShape
 import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.AbstractShape
 import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.LineShape
@@ -22,9 +17,12 @@ import kotlin.math.sin
 
 object DrawModeUtils {
 
+    const val DEFAULT_SELECTED_INDEX = 2
+
     fun getDefaultBottomToolbarItemsList(): ArrayList<BottomToolbarItem> {
         return arrayListOf(
             BottomToolbarItem.ColorItem,
+            BottomToolbarItem.PanItem,
             BottomToolbarItem.BrushTool(
                 width = DrawingConstants.DEFAULT_STROKE_WIDTH,
                 opacity = DrawingConstants.DEFAULT_STROKE_OPACITY
@@ -37,7 +35,6 @@ object DrawModeUtils {
             BottomToolbarItem.EraserTool(
                 width = DrawingConstants.DEFAULT_STROKE_WIDTH
             ),
-//            BottomToolbarItem.TextMode
         )
     }
 
@@ -61,13 +58,14 @@ object DrawModeUtils {
 }
 
 fun BottomToolbarItem.getShape(
-    selectedColor: Color
+    selectedColor: Color,
+    scale: Float = 1f,
 ): AbstractShape {
     return when (val toolbarItem = this) {
         is BottomToolbarItem.BrushTool -> {
             BrushShape(
                 color = selectedColor,
-                width = toolbarItem.width,
+                width = toolbarItem.width / scale,
                 alpha = toolbarItem.opacity / 100f
             )
         }
@@ -75,33 +73,33 @@ fun BottomToolbarItem.getShape(
         is BottomToolbarItem.ShapeTool -> when (toolbarItem.shapeType) {
             ShapeType.LINE -> LineShape(
                 color = selectedColor,
-                width = toolbarItem.width,
+                width = toolbarItem.width / scale,
                 alpha = toolbarItem.opacity / 100f
             )
 
             ShapeType.OVAL -> OvalShape(
                 color = selectedColor,
-                width = toolbarItem.width,
+                width = toolbarItem.width / scale,
                 alpha = toolbarItem.opacity / 100f
             )
 
             ShapeType.RECTANGLE -> RectangleShape(
                 color = selectedColor,
-                width = toolbarItem.width,
+                width = toolbarItem.width / scale,
                 alpha = toolbarItem.opacity / 100f
             )
         }
 
         else -> {
             /**
-             * this else block represents the EraserTool, as ColorItem won't be sent here
+             * this else block represents the EraserTool, as any other item (ColorItem, PanItem) won't be sent here
              */
             val width =
                 if (toolbarItem is BottomToolbarItem.EraserTool) toolbarItem.width
                 else DrawingConstants.DEFAULT_STROKE_WIDTH
             BrushShape(
                 isEraser = true,
-                width = width
+                width = width / scale
             )
         }
     }

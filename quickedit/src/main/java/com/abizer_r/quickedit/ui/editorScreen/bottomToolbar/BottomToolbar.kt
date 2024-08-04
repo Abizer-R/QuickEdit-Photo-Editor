@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.outlined.Brush
 import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.Crop
+import androidx.compose.material.icons.outlined.PanTool
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -160,6 +161,11 @@ fun ToolbarItem(
             stringResource(id = R.string.brush)
         )
 
+        is BottomToolbarItem.PanItem -> Pair(
+            Icons.Outlined.PanTool,
+            stringResource(id = R.string.pan)
+        )
+
         else -> Pair(
             Icons.Default.AddCircleOutline,
             ""
@@ -278,7 +284,7 @@ fun DrawMode_BottomToolbar() {
             toolbarItems = ImmutableList(itemsList),
             showColorPickerIcon = true,
             selectedColor = Color.White,
-            selectedItem = itemsList[1],
+            selectedItem = itemsList[DrawModeUtils.DEFAULT_SELECTED_INDEX],
             onEvent = {}
         )
     }

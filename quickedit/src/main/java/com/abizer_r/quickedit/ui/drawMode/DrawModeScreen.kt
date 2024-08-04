@@ -2,31 +2,58 @@ package com.abizer_r.quickedit.ui.drawMode
 
 import ToolbarExtensionView
 import android.graphics.Bitmap
+import android.util.Log
 import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateOffsetAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -44,12 +71,15 @@ import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.BottomToolBarStatic
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TopToolBar
+import com.abizer_r.quickedit.utils.AppUtils
 import com.abizer_r.quickedit.utils.drawMode.CustomLayerTypeComposable
 import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
 import com.abizer_r.quickedit.utils.drawMode.getOpacityOrNull
 import com.abizer_r.quickedit.utils.drawMode.getShapeTypeOrNull
 import com.abizer_r.quickedit.utils.drawMode.getWidthOrNull
+import com.abizer_r.quickedit.utils.drawMode.toPx
 import com.abizer_r.quickedit.utils.other.anim.AnimUtils
 import com.abizer_r.quickedit.utils.other.bitmap.ImmutableBitmap
 import com.smarttoolfactory.screenshot.ImageResult
@@ -60,6 +90,7 @@ import io.mhssn.colorpicker.ColorPickerType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -86,23 +117,69 @@ fun DrawModeScreen(
 
     val topToolbarHeight =  TOOLBAR_HEIGHT_SMALL
     val bottomToolbarHeight = TOOLBAR_HEIGHT_MEDIUM
+    val verticalToolbarPaddingPx = topToolbarHeight.toPx() + bottomToolbarHeight.toPx()
+
+    val bitmap = immutableBitmap.bitmap
+    val aspectRatio = remember(bitmap) {
+        bitmap.width.toFloat() / bitmap.height.toFloat()
+    }
+
+    var scale by remember { mutableFloatStateOf(1f) }
+    var offset by remember { mutableStateOf(Offset.Zero) }
+
+    val animatedScale = animateFloatAsState(targetValue = scale)
+    val animatedOffset = animateOffsetAsState(targetValue = offset)
+    var animateZoomPan by remember { mutableStateOf(false) }
+
+    val constrainedOffsetScale = remember(scale, verticalToolbarPaddingPx) {
+        AppUtils.getConstrainOffsetScaleOnly(context, aspectRatio, verticalToolbarPaddingPx, scale)
+    }
+    val transformableState = rememberTransformableState { zoomChange, offsetChange, rotationChange ->
+        // <--- NOTE --->
+        // Making the min scale less than 1f will break the constrain calculation code in the DrawingCanvas
+        // The constrain calculation code allows us to hold the canvas within the screen
+        scale = (scale * zoomChange).coerceIn(1f, 5f)
+        val newOffset = offset + (offsetChange * scale)
+        val constrainedOffset = Offset(
+            x = newOffset.x.coerceIn(-1 * constrainedOffsetScale.x, constrainedOffsetScale.x),
+            y = newOffset.y.coerceIn(-1 * constrainedOffsetScale.y, constrainedOffsetScale.y)
+        )
+        offset = constrainedOffset
+        Log.d("TEST_pan", "Pan: scale = $scale, offset = $offset", )
+    }
 
     var toolbarVisible by remember { mutableStateOf(false) }
+    val showResetZoomPanBtn by remember {
+        derivedStateOf { scale != 1f || offset != Offset.Zero }
+    }
 
     LaunchedEffect(key1 = Unit) {
         toolbarVisible = true
         delay(AnimUtils.TOOLBAR_EXPAND_ANIM_DURATION_FAST.toLong())
         viewModel.onBottomToolbarEvent(
-            BottomToolbarEvent.OnItemClicked(bottomToolbarItems.items[1])
+            BottomToolbarEvent.OnItemClicked(
+                bottomToolbarItems.items[DrawModeUtils.DEFAULT_SELECTED_INDEX]
+            )
         )
     }
+
+    val resetZoomAndPan = remember<() -> Unit> {{
+        lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+            animateZoomPan = true
+            scale = 1f // reset zoom
+            offset = Offset.Zero    // reset pan
+            delay(300)
+            animateZoomPan = false
+        }
+    }}
 
     val screenshotState = rememberScreenshotState()
 
     val onCloseClickedLambda = remember<() -> Unit> {{
         lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+            resetZoomAndPan()
             toolbarVisible = false
-            delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST.toLong())
+            delay(200 + AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST.toLong())
             onBackPressed()
         }
     }}
@@ -116,9 +193,10 @@ fun DrawModeScreen(
     }
 
     val onDoneClickedLambda = remember<() -> Unit> {{
-        viewModel.handleStateBeforeCaptureScreenshot()
         lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-            delay(200)  /* Delay to update the ToolbarExtensionView Visibility in ui */
+            resetZoomAndPan()
+            viewModel.handleStateBeforeCaptureScreenshot()
+            delay(400)  /* Delay to update the ToolbarExtensionView Visibility and zoom/pan in ui */
             screenshotState.capture()
         }
     }}
@@ -162,11 +240,11 @@ fun DrawModeScreen(
             .fillMaxSize()
             .background(backgroundColor)
     ) {
-        val (topToolbar, bottomToolbar, bottomToolbarExtension, drawingView) = createRefs()
+        val (topToolbar, bottomToolbar, bottomToolbarExtension, drawingView, resetZoomPanBtn) = createRefs()
 
         AnimatedToolbarContainer(
             toolbarVisible = toolbarVisible,
-            modifier = topToolbarModifier(topToolbar)
+            modifier = topToolbarModifier(topToolbar).zIndex(1f)
         ) {
             TopToolBar(
                 modifier = Modifier,
@@ -180,44 +258,39 @@ fun DrawModeScreen(
             )
         }
 
-        val bitmap = immutableBitmap.bitmap
-        val aspectRatio = remember(bitmap) {
-            bitmap.width.toFloat() / bitmap.height.toFloat()
+        var screenshotBoxModifier = Modifier
+            .constrainAs(drawingView) {
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                width = Dimension.wrapContent
+                height = Dimension.wrapContent
+            }
+            .padding(top = topToolbarHeight, bottom = bottomToolbarHeight)
+
+
+        if (viewModel.shouldGoToNextScreen) {
+            // constraint the screenshot box to cover only the required area
+            screenshotBoxModifier = screenshotBoxModifier.aspectRatio(aspectRatio)
         }
+
         ScreenshotBox(
-            modifier = Modifier
-                .constrainAs(drawingView) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.wrapContent
-                    height = Dimension.wrapContent
-                }
-                .padding(top = topToolbarHeight, bottom = bottomToolbarHeight)
-                .aspectRatio(aspectRatio),
+            modifier = screenshotBoxModifier,
             screenshotState = screenshotState
         ) {
 
-            Image(
-                modifier = Modifier.fillMaxSize(),
-                bitmap = bitmap.asImageBitmap(),
-                contentScale = ContentScale.Fit,
-                contentDescription = null
-            )
+            val canvasScale = if(animateZoomPan) animatedScale.value else scale
+            val canvasOffset = if(animateZoomPan) animatedOffset.value else offset
 
-            CustomLayerTypeComposable(
-                layerType = View.LAYER_TYPE_HARDWARE,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                DrawingCanvas(
-                    modifier = Modifier.fillMaxSize(),
-                    pathDetailStack = state.pathDetailStack,
-                    selectedColor = state.selectedColor,
-                    currentTool = state.selectedTool,
-                    onDrawingEvent = viewModel::onEvent
-                )
-            }
+            DrawingCanvasContainer(
+                state = state,
+                immutableBitmap = immutableBitmap,
+                scale = canvasScale,
+                offset = canvasOffset,
+                transformableState = transformableState,
+                onDrawingEvent = viewModel::onEvent
+            )
         }
 
         AnimatedToolbarContainer(
@@ -232,6 +305,38 @@ fun DrawModeScreen(
                 selectedColor = state.selectedColor,
                 selectedItem = state.selectedTool,
                 onEvent = onBottomToolbarEventLambda
+            )
+        }
+
+        AnimatedVisibility(
+            visible = showResetZoomPanBtn,
+            modifier = Modifier
+                .constrainAs(resetZoomPanBtn) {
+                    top.linkTo(topToolbar.bottom)
+                    end.linkTo(parent.end)
+                    width = Dimension.wrapContent
+                    height = Dimension.wrapContent
+                }
+                .padding(8.dp),
+            enter = fadeIn(),
+            exit = fadeOut()
+
+        ) {
+
+            Image(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(5.dp))
+                    .background(Color.DarkGray)
+                    .padding(8.dp)
+                    .size(32.dp)
+                    .clickable {
+                        resetZoomAndPan()
+                    },
+                imageVector = ImageVector.vectorResource(id = com.abizer_r.quickedit.R.drawable.baseline_fit_screen_24),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(
+                    color = MaterialTheme.colorScheme.onBackground
+                ),
             )
         }
 

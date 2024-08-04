@@ -3,7 +3,6 @@ package com.abizer_r.quickedit.ui.textMode
 import android.graphics.Bitmap
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -76,6 +75,9 @@ fun TextModeScreen(
     val state by viewModel.state.collectAsStateWithLifecycle(
         lifecycleOwner = lifeCycleOwner
     )
+    val showTextField by viewModel.showTextField.collectAsStateWithLifecycle(
+        lifecycleOwner = lifeCycleOwner
+    )
 
     val bottomToolbarItems = remember {
         ImmutableList(TextModeUtils.getDefaultBottomToolbarItemsList())
@@ -109,7 +111,7 @@ fun TextModeScreen(
     }
 
     val onCloseClickedLambda = remember<() -> Unit> {{
-        if (state.textFieldState.isVisible) {
+        if (showTextField) {
             viewModel.onEvent(HideTextField)
         } else {
             lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
@@ -121,7 +123,7 @@ fun TextModeScreen(
     }}
 
     BackHandler {
-        if (state.textFieldState.isVisible) {
+        if (showTextField) {
             viewModel.onEvent(HideTextField)
         } else {
             onCloseClickedLambda()
@@ -129,7 +131,7 @@ fun TextModeScreen(
     }
 
     val onDoneClickedLambda = remember<() -> Unit> {{
-        if (state.textFieldState.isVisible) {
+        if (showTextField) {
             viewModel.onEvent(AddTransformableTextBox(
                 textBoxState = TransformableTextBoxState(
                     id = state.textFieldState.textStateId ?: UUID.randomUUID().toString(),
@@ -189,8 +191,6 @@ fun TextModeScreen(
     ) {
         val (topToolBar, bottomToolbar, editorBox, editorBoxBgStretched, textInputView) = createRefs()
 
-        val showBottomToolbar = state.collapseToolbar.not()
-
         AnimatedToolbarContainer(
             toolbarVisible = toolbarVisible,
             modifier = topToolbarModifier(topToolBar)
@@ -226,14 +226,14 @@ fun TextModeScreen(
             BlurBitmapBackground(
                 modifier = Modifier.fillMaxSize(),
                 imageBitmap = bitmap.asImageBitmap(),
-                shouldBlur = state.showBlurredBg,
-                contentScale = if (showBottomToolbar) ContentScale.Fit else ContentScale.Crop,
+                shouldBlur = showTextField,
+                contentScale = if (showTextField.not()) ContentScale.Fit else ContentScale.Crop,
                 blurRadius = 15,
                 onBgClicked = onBgClickedLambda
             )
 
             Box(modifier = Modifier.fillMaxSize()) {
-                if (showBottomToolbar) {
+                if (showTextField.not()) {
                     DrawAllTransformableViews(
                         centerAlignModifier = Modifier.align(Alignment.Center),
                         transformableViewsList = state.transformableViewStateList,
@@ -258,7 +258,7 @@ fun TextModeScreen(
         ) {
 
 
-            if (showBottomToolbar) {
+            if (showTextField.not()) {
                 BorderForSelectedViews(
                     centerAlignModifier = Modifier.align(Alignment.Center),
                     transformableViewsList = state.transformableViewStateList,
@@ -269,7 +269,7 @@ fun TextModeScreen(
         }
 
         AnimatedVisibility(
-            visible = state.textFieldState.isVisible,
+            visible = showTextField,
             modifier = Modifier.constrainAs(textInputView) {
                 top.linkTo(topToolBar.bottom)
                 bottom.linkTo(parent.bottom)
@@ -290,7 +290,7 @@ fun TextModeScreen(
 
 
         AnimatedToolbarContainer(
-            toolbarVisible = showBottomToolbar && toolbarVisible,
+            toolbarVisible = showTextField.not() && toolbarVisible,
             modifier = bottomToolbarModifier(bottomToolbar)
         ) {
             BottomToolBarStatic(

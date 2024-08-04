@@ -124,8 +124,10 @@ class DrawModeViewModel @Inject constructor(
 
             // Clicked on already selected item
             state.value.selectedTool -> {
-                _state.update {
-                    it.copy(showBottomToolbarExtension = it.showBottomToolbarExtension.not())
+                if (selectedItem != BottomToolbarItem.PanItem) {
+                    _state.update {
+                        it.copy(showBottomToolbarExtension = it.showBottomToolbarExtension.not())
+                    }
                 }
             }
 
@@ -138,8 +140,10 @@ class DrawModeViewModel @Inject constructor(
                         delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION.toLong())
                     }
                     _state.update { it.copy(selectedTool = selectedItem) }
-                    // open toolbarExtension for new item
-                    _state.update { it.copy(showBottomToolbarExtension = true) }
+                    if (selectedItem != BottomToolbarItem.PanItem) {
+                        // open toolbarExtension for new item
+                        _state.update { it.copy(showBottomToolbarExtension = true) }
+                    }
                 }
             }
         }

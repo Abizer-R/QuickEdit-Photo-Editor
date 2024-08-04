@@ -25,6 +25,13 @@ class TextModeViewModel @Inject constructor(
     private val _state = MutableStateFlow(TextModeState())
     val state: StateFlow<TextModeState> = _state
 
+    private val _showTextField = MutableStateFlow(false)
+    val showTextField: StateFlow<Boolean> = _showTextField
+
+    fun updateShowTextField(value: Boolean) {
+        _showTextField.value = value
+    }
+
     init {
 //        debugTrackViewListSize()
     }
@@ -50,13 +57,10 @@ class TextModeViewModel @Inject constructor(
 
             is TextModeEvent.ShowTextField -> viewModelScope.launch {
                 Log.e("TEST_BLUR", "PlaceHolder Text: ", )
-                _state.update { it.copy(collapseToolbar = true) }
-                delay(100)  /* delay to prepare views before blurring the image */
-                _state.update { it.copy(showBlurredBg = true) }
-                delay(200)  /* delay to let Cloudy library make actual bitmap blurry, before textEditor is shown */
+
+                updateShowTextField(true)
                 _state.update { it.copy(
                     textFieldState = event.textFieldState.copy(
-                        isVisible = true,
                         shouldRequestFocus = true
                     )
                 ) }
@@ -87,10 +91,9 @@ class TextModeViewModel @Inject constructor(
             }
 
             is TextModeEvent.HideTextField -> viewModelScope.launch {
-                _state.update { it.copy(collapseToolbar = false, showBlurredBg = false) }
+                updateShowTextField(false)
                 _state.update { it.copy(
                     textFieldState = it.textFieldState.copy(
-                        isVisible = false,
                         shouldRequestFocus = false
                     )
                 ) }
