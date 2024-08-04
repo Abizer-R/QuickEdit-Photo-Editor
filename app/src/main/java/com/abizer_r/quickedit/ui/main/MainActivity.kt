@@ -41,7 +41,8 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.abizer_r.components.theme.QuickEditTheme
+import com.abizer_r.quickedit.R
+import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.ui.SharedEditorViewModel
 import com.abizer_r.quickedit.ui.common.ErrorView
 import com.abizer_r.quickedit.ui.common.LoadingView
@@ -112,7 +113,7 @@ class MainActivity : ComponentActivity() {
                         }
                         is BitmapStatus.Failed -> {
                             val errorText = bitmapStatus.errorMsg ?: bitmapStatus.exception?.message
-                                ?: getString(com.abizer_r.components.R.string.something_went_wrong)
+                                ?: getString(R.string.something_went_wrong)
                             ErrorView(
                                 modifier = Modifier.align(Alignment.Center),
                                 errorText = errorText
@@ -137,7 +138,7 @@ fun MainScreen(
      * This should be passed dynamically
      */
     val initialBitmap = mInitialBitmap ?: ImageBitmap.imageResource(
-        id = com.abizer_r.components.R.drawable.placeholder_image_3
+        id = R.drawable.placeholder_image_3
     ).asAndroidBitmap()
 
     val sharedEditorViewModel: SharedEditorViewModel = hiltViewModel()

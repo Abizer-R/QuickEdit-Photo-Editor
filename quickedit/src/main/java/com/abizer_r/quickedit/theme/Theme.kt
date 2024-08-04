@@ -1,4 +1,4 @@
-package com.abizer_r.components.theme
+package com.abizer_r.quickedit.theme
 
 import android.app.Activity
 import android.os.Build

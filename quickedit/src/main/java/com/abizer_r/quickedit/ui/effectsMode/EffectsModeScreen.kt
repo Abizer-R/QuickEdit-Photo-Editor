@@ -45,10 +45,10 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import com.abizer_r.components.R
-import com.abizer_r.components.theme.QuickEditTheme
-import com.abizer_r.components.theme.ToolBarBackgroundColor
-import com.abizer_r.components.util.defaultErrorToast
+import com.abizer_r.quickedit.R
+import com.abizer_r.quickedit.theme.QuickEditTheme
+import com.abizer_r.quickedit.theme.ToolBarBackgroundColor
+import com.abizer_r.quickedit.utils.defaultErrorToast
 import com.abizer_r.quickedit.ui.common.AnimatedToolbarContainer
 import com.abizer_r.quickedit.ui.common.LoadingView
 import com.abizer_r.quickedit.ui.common.bottomToolbarModifier
@@ -256,7 +256,7 @@ fun Preview_EffectsModeScreen() {
         SharedTransitionPreviewExtension {
             EffectsModeScreen(
                 immutableBitmap = ImmutableBitmap(
-                    ImageBitmap.imageResource(id = R.drawable.placeholder_image_2).asAndroidBitmap()
+                    ImageBitmap.imageResource(id = R.drawable.placeholder_image_3).asAndroidBitmap()
                 ),
                 animatedVisibilityScope = it,
                 onDoneClicked = {},

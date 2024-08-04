@@ -1,4 +1,4 @@
-package com.abizer_r.components.util
+package com.abizer_r.quickedit.utils
 
 import androidx.compose.runtime.Immutable
 

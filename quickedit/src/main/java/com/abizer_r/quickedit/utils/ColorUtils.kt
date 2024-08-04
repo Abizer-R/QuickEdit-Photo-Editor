@@ -1,19 +1,20 @@
-package com.abizer_r.quickedit.util
+package com.abizer_r.quickedit.utils
 
 import androidx.compose.ui.graphics.Color
 
-object AppUtils {
-    val colorList = arrayListOf(
-        Color.Blue,
+object ColorUtils {
+
+    val defaultColorList = arrayListOf(
+        Color.White,
+        Color.Black,
         Color.Red,
         Color.Green,
-        Color.Magenta,
+        Color.Blue,
         Color.Yellow,
         Color.Cyan,
+        Color.Magenta,
         Color.LightGray,
         Color.Gray,
         Color.DarkGray,
-        Color.Black,
-        Color.White,
     )
 }

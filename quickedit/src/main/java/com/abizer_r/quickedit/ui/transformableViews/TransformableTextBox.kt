@@ -13,7 +13,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import com.abizer_r.components.theme.QuickEditTheme
+import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBox
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBoxEvents

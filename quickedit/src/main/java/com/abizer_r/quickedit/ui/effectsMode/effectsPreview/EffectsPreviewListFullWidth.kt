@@ -34,10 +34,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.abizer_r.components.R
-import com.abizer_r.components.theme.Black_alpha_30
-import com.abizer_r.components.theme.QuickEditTheme
-import com.abizer_r.components.theme.ToolBarBackgroundColor
+import com.abizer_r.quickedit.R
+import com.abizer_r.quickedit.theme.Black_alpha_30
+import com.abizer_r.quickedit.theme.QuickEditTheme
+import com.abizer_r.quickedit.theme.ToolBarBackgroundColor
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_EXTRA_LARGE
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_LARGE
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
@@ -129,7 +129,7 @@ fun EffectPreview(
 @Composable
 fun Selected_EffectPreviewItem() {
     QuickEditTheme {
-        val bitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_1).asAndroidBitmap()
+        val bitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_3).asAndroidBitmap()
         EffectPreview(
             modifier = Modifier
                 .size(TOOLBAR_HEIGHT_LARGE)
@@ -149,7 +149,7 @@ fun Selected_EffectPreviewItem() {
 @Composable
 fun Unselected_EffectPreviewItem() {
     QuickEditTheme {
-        val bitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_1).asAndroidBitmap()
+        val bitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_3).asAndroidBitmap()
         EffectPreview(
             modifier = Modifier
                 .size(TOOLBAR_HEIGHT_LARGE)
@@ -169,7 +169,7 @@ fun Unselected_EffectPreviewItem() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun Preview_EffectsPreviewList() {
-    val bitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_1).asAndroidBitmap()
+    val bitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_3).asAndroidBitmap()
     val mEffectsList = arrayListOf(
         EffectItem(
             ogBitmap = bitmap,

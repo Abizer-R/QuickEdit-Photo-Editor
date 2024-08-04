@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.abizer_r.components.theme.QuickEditTheme
+import com.abizer_r.quickedit.theme.QuickEditTheme
 
 /**
  * The total size of this item is the adding of [itemSize] and [selectedBorderWidth]

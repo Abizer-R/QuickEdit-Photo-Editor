@@ -16,5 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "QuickEdit"
 include(":app")
-include(":components")
 include(":quickedit")
