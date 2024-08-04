@@ -3,11 +3,7 @@ package com.abizer_r.quickedit.ui.editorScreen
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -54,11 +50,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun SharedTransitionScope.EditorScreen(
+fun EditorScreen(
     modifier: Modifier = Modifier,
-    animatedVisibilityScope: AnimatedVisibilityScope,
+    animatedVisibilityScope: AnimatedVisibilityScope? = null,
     initialEditorScreenState: EditorScreenState,
     goToCropModeScreen: (finalEditorState: EditorScreenState) -> Unit,
     goToDrawModeScreen: (finalEditorState: EditorScreenState) -> Unit,
@@ -120,11 +115,10 @@ fun SharedTransitionScope.EditorScreen(
 
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun SharedTransitionScope.EditorScreenLayout(
+private fun EditorScreenLayout(
     modifier: Modifier,
-    animatedVisibilityScope: AnimatedVisibilityScope,
+    animatedVisibilityScope: AnimatedVisibilityScope? = null,
     currentBitmap: Bitmap,
     undoEnabled: Boolean,
     redoEnabled: Boolean,
@@ -194,26 +188,7 @@ private fun SharedTransitionScope.EditorScreenLayout(
                     height = Dimension.wrapContent
                 }
                 .padding(top = topToolbarHeight, bottom = bottomToolbarHeight)
-                .aspectRatio(aspectRatio)
-                .sharedElement(
-                    state = rememberSharedContentState(key = "centerImage"),
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    boundsTransform = { _, _ ->
-                        tween(300)
-                    },
-                )
-                .sharedBounds(
-                    sharedContentState = rememberSharedContentState(key = "centerImageBounds"),
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    enter = EnterTransition.None,
-                    exit = ExitTransition.None,
-                    boundsTransform = { _, _ ->
-                        tween(300)
-                    },
-                    resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds(
-                        contentScale = ContentScale.Fit
-                    )
-                ),
+                .aspectRatio(aspectRatio),
         ) {
 
             Image(
