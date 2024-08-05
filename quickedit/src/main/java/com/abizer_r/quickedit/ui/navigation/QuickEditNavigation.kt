@@ -25,8 +25,10 @@ import com.abizer_r.quickedit.ui.effectsMode.EffectsModeScreen
 import com.abizer_r.quickedit.ui.mainScreen.MainScreen
 import com.abizer_r.quickedit.ui.textMode.TextModeScreen
 import com.abizer_r.quickedit.utils.other.anim.AnimUtils
-import com.abizer_r.quickedit.utils.other.anim.getDefaultEnterTransition
-import com.abizer_r.quickedit.utils.other.anim.getDefaultExitTransition
+import com.abizer_r.quickedit.utils.other.anim.enterTransition
+import com.abizer_r.quickedit.utils.other.anim.exitTransition
+import com.abizer_r.quickedit.utils.other.anim.popEnterTransition
+import com.abizer_r.quickedit.utils.other.anim.popExitTransition
 import com.abizer_r.quickedit.utils.other.bitmap.ImmutableBitmap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -67,7 +69,7 @@ fun QuickEditNavigation() {
     val goToMainScreenLambda = remember<() -> Unit> {{
         sharedEditorViewModel.resetStacks()
         sharedEditorViewModel.useTransition = true
-        navController.navigate(NavDestinations.MAIN_SCREEN)
+        navController.navigateUp()
     }}
 
 
@@ -94,15 +96,12 @@ fun QuickEditNavigation() {
         exitTransition = { ExitTransition.None }
     ) {
 
-        /**
-         * TODO - Make the transition between main screen and editor screen smooth and nice
-         */
         composable(
             route = NavDestinations.MAIN_SCREEN,
-            enterTransition = { getDefaultEnterTransition() },
-            popEnterTransition = { getDefaultEnterTransition() },
-            exitTransition = { getDefaultExitTransition() },
-            popExitTransition = { getDefaultExitTransition() }
+            enterTransition = { enterTransition() },
+            exitTransition = { exitTransition() },
+            popEnterTransition = { popEnterTransition() },
+            popExitTransition = { popExitTransition() }
         ) {
             MainScreen(onImageSelected = onImageSelected)
         }
@@ -110,27 +109,23 @@ fun QuickEditNavigation() {
         composable(
             route = NavDestinations.EDITOR_SCREEN,
             enterTransition = {
-                if (sharedEditorViewModel.useTransition) getDefaultEnterTransition()
+                if (sharedEditorViewModel.useTransition) enterTransition()
                 else EnterTransition.None
             },
             popEnterTransition = {
-                if (sharedEditorViewModel.useTransition) getDefaultEnterTransition()
+                if (sharedEditorViewModel.useTransition) popEnterTransition()
                 else EnterTransition.None
             },
             exitTransition = {
-                if (sharedEditorViewModel.useTransition) getDefaultExitTransition()
+                if (sharedEditorViewModel.useTransition) exitTransition()
                 else ExitTransition.None
             },
             popExitTransition = {
-                if (sharedEditorViewModel.useTransition) getDefaultExitTransition()
+                if (sharedEditorViewModel.useTransition) popExitTransition()
                 else ExitTransition.None
             }
         ) {
             sharedEditorViewModel.useTransition = false
-            /**
-             * TODO - FIX BUG: undo and redo not resetting when selecting another image by going back to main screen
-             * -> select image -> do some stuff -> go back -> select another image -> UNDO/REDO DOESN'T RESET!!!!
-             */
             val initialEditorState = EditorScreenState(
                 sharedEditorViewModel.bitmapStack, sharedEditorViewModel.bitmapRedoStack
             )

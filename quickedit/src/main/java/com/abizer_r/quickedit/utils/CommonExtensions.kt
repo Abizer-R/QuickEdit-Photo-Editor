@@ -15,8 +15,10 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.abizer_r.quickedit.R
+import java.util.Locale
 
 val Any.TAG: String
     get() {
@@ -42,6 +44,17 @@ fun Context.toast(message: String) {
 
 fun Context.toast(@StringRes stringRes: Int) {
     Toast.makeText(this, getString(stringRes), Toast.LENGTH_SHORT).show()
+}
+
+
+@Composable
+fun toast(message: String) {
+    LocalContext.current.toast(message)
+}
+
+@Composable
+fun toast(@StringRes stringRes: Int) {
+    LocalContext.current.toast(stringRes)
 }
 
 fun Context.defaultErrorToast() {

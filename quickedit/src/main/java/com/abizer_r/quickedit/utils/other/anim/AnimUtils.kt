@@ -14,8 +14,12 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.animation.slideIn
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOut
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.IntOffset
 import androidx.navigation.NavBackStackEntry
 
 object AnimUtils {
@@ -59,15 +63,42 @@ object AnimUtils {
     )
 }
 
+val TRANSITION_DURATION = 500
 
-fun AnimatedContentTransitionScope<NavBackStackEntry>.getDefaultEnterTransition(): EnterTransition {
-    return slideIntoContainer(
-        AnimatedContentTransitionScope.SlideDirection.Start, tween(500, easing = LinearOutSlowInEasing)
+fun enterTransition(): EnterTransition {
+    return slideIn(
+        animationSpec = tween(durationMillis = TRANSITION_DURATION, easing = FastOutSlowInEasing),
+        initialOffset = { IntOffset(it.width, 0) }
+    ) + fadeIn(
+        animationSpec = tween(durationMillis = TRANSITION_DURATION, easing = FastOutSlowInEasing),
     )
 }
 
-fun AnimatedContentTransitionScope<NavBackStackEntry>.getDefaultExitTransition(): ExitTransition {
-    return slideOutOfContainer(
-        AnimatedContentTransitionScope.SlideDirection.End, tween(500, easing = FastOutSlowInEasing)
+fun exitTransition(): ExitTransition {
+    return slideOut(
+        animationSpec = tween(durationMillis = TRANSITION_DURATION, easing = FastOutSlowInEasing),
+        targetOffset = { IntOffset(-1 * (it.width / 2), 0) }
+    ) + fadeOut(
+        animationSpec = tween(durationMillis = TRANSITION_DURATION, easing = FastOutSlowInEasing),
+    )
+}
+
+fun popEnterTransition(): EnterTransition {
+    return slideIn(
+        animationSpec = tween(durationMillis = TRANSITION_DURATION, easing = FastOutSlowInEasing),
+        initialOffset = { IntOffset(-1 * (it.width / 2), 0) }
+//        initialOffset = { IntOffset(it.width, 0) }
+    ) + fadeIn(
+        animationSpec = tween(durationMillis = TRANSITION_DURATION, easing = FastOutSlowInEasing),
+    )
+}
+
+fun popExitTransition(): ExitTransition {
+    return slideOut(
+        animationSpec = tween(durationMillis = TRANSITION_DURATION, easing = FastOutSlowInEasing),
+        targetOffset = { IntOffset(it.width, 0) }
+//        targetOffset = { IntOffset(-1 * (it.width / 2), 0) }
+    ) + fadeOut(
+        animationSpec = tween(durationMillis = TRANSITION_DURATION, easing = FastOutSlowInEasing),
     )
 }

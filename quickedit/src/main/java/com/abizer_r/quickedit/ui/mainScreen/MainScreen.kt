@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,6 +48,7 @@ import com.abizer_r.quickedit.utils.getActivity
 import com.abizer_r.quickedit.utils.getOpenAppSettingsIntent
 import com.abizer_r.quickedit.utils.other.bitmap.BitmapStatus
 import com.abizer_r.quickedit.utils.other.bitmap.BitmapUtils
+import com.abizer_r.quickedit.utils.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
@@ -125,27 +128,33 @@ fun MainScreen(
 
     when (val bitmapStatus = scaledBitmapStatus) {
         BitmapStatus.None -> {
-            if (cameraImageUri != null && permissionsGranted) {
+            if (permissionsGranted) {
                 MainScreenLayout(
                     cameraImageUri,
                     onPhotoPicked,
                     onPhotoCaptured
                 )
-            } else if (permissionsGranted.not()){
+            } else {
                 PermissionDeniedView(
-                    modifier = Modifier.fillMaxSize().padding(48.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(48.dp),
                     permissionTypes = arrayListOf(PermissionTypes.INTERNAL_STORAGE),
                     launchAppSettings = {
                         appSettingsLauncher.launch(context.getOpenAppSettingsIntent())
                     }
                 )
-            } else {
-                ErrorView(modifier = Modifier.fillMaxSize())
             }
         }
 
         BitmapStatus.Processing -> {
-            LoadingView(modifier = Modifier.fillMaxSize())
+            MainScreenLayout(
+                cameraImageUri,
+                onPhotoPicked,
+                onPhotoCaptured,
+                showLoading = true
+            )
+//            LoadingView(modifier = Modifier.fillMaxSize())
         }
 
         is BitmapStatus.Failed -> {
@@ -199,11 +208,11 @@ fun MainScreen(
 
 @Composable
 fun MainScreenLayout(
-    cameraImageUri: Uri,
+    cameraImageUri: Uri?,
     onPhotoPicked: (Uri?) -> Unit,
     onPhotoCaptured: (Uri?) -> Unit,
-
-    ) {
+    showLoading: Boolean = false
+) {
     val context = LocalContext.current
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
@@ -218,6 +227,15 @@ fun MainScreenLayout(
         }
     )
 
+    /**
+     *
+     *
+     *
+     * TODO - add some title or logo for "QuickEdit"
+     *
+     *
+     *
+     */
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -233,9 +251,23 @@ fun MainScreenLayout(
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(onClick = {
-            photoCaptureLauncher.launch(cameraImageUri)
+            if (cameraImageUri != null) {
+                photoCaptureLauncher.launch(cameraImageUri)
+            } else {
+                context.toast(R.string.something_went_wrong)
+            }
         }
         ) { Text(stringResource(R.string.capture_image)) }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        LoadingView(
+            modifier = Modifier
+                .size(48.dp)
+                .alpha(if (showLoading) 1f else 0f),
+            progressBarSize = 32.dp,
+            progressBarStrokeWidth = 3.dp
+        )
     }
 }
 
