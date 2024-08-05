@@ -14,8 +14,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Redo
+import androidx.compose.material.icons.filled.SaveAlt
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Undo
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,22 +31,21 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.theme.ToolBarBackgroundColor
-import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 
 @Composable
-fun TopToolBar(
+fun EditorTopToolBar(
     modifier: Modifier,
     undoEnabled: Boolean = false,
     redoEnabled: Boolean = false,
-    showCloseAndDone: Boolean = true,
     closeEnabled: Boolean = true,
-    doneEnabled: Boolean = false,
+    saveEnabled: Boolean = false,
     toolbarHeight: Dp = TOOLBAR_HEIGHT_SMALL,
     onUndo: () -> Unit,
     onRedo: () -> Unit,
     onCloseClicked: () -> Unit = {},
-    onDoneClicked: () -> Unit = {}
+    onSaveClicked: () -> Unit = {},
+    onShareClicked: () -> Unit = {}
 ) {
     Row(
         modifier = modifier
@@ -55,23 +58,21 @@ fun TopToolBar(
         /**
          * Tool Item: CLOSE
          */
-        if (showCloseAndDone) {
-            Image(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .size(32.dp)
-                    .clickable {
-                        onCloseClicked()
-                    },
-                contentDescription = null,
-                imageVector = Icons.Default.Close,
-                colorFilter = ColorFilter.tint(
-                    color = if (closeEnabled) {
-                        MaterialTheme.colorScheme.onBackground
-                    } else Color.DarkGray
-                )
+        Image(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .size(32.dp)
+                .clickable {
+                    onCloseClicked()
+                },
+            contentDescription = null,
+            imageVector = Icons.Default.Close,
+            colorFilter = ColorFilter.tint(
+                color = if (closeEnabled) {
+                    MaterialTheme.colorScheme.onBackground
+                } else Color.DarkGray
             )
-        }
+        )
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -118,25 +119,37 @@ fun TopToolBar(
 
 
         /**
-         * Tool Item: DONE
+         * Tool Item: SAVE
          */
-        if (showCloseAndDone) {
-            Image(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .size(32.dp)
-                    .clickable {
-                        onDoneClicked()
-                    },
-                contentDescription = null,
-                imageVector = Icons.Default.Check,
-                colorFilter = ColorFilter.tint(
-                    color = if (doneEnabled) {
-                        MaterialTheme.colorScheme.onBackground
-                    } else Color.DarkGray
-                )
+        Image(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .size(32.dp)
+                .clickable {
+                    onSaveClicked()
+                },
+            contentDescription = null,
+            imageVector = Icons.Default.SaveAlt,
+            colorFilter = ColorFilter.tint(
+                color = if (saveEnabled) {
+                    MaterialTheme.colorScheme.onBackground
+                } else Color.DarkGray
             )
-        }
+        )
+
+        Image(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .size(26.dp)
+                .clickable {
+                    onShareClicked()
+                },
+            contentDescription = null,
+            imageVector = Icons.Rounded.Share,
+            colorFilter = ColorFilter.tint(
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        )
     }
 }
 
@@ -144,30 +157,13 @@ fun TopToolBar(
 @Composable
 fun PreviewTopToolbar() {
     QuickEditTheme {
-        TopToolBar(
+        EditorTopToolBar(
             modifier = Modifier.fillMaxWidth(),
             undoEnabled = true,
             onUndo = {},
             onRedo = {},
             onCloseClicked = {},
-            onDoneClicked = {}
-        )
-    }
-}
-
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-fun PreviewTopToolbar2() {
-    QuickEditTheme {
-        TopToolBar(
-            modifier = Modifier.fillMaxWidth(),
-            undoEnabled = true,
-            showCloseAndDone = false,
-            onUndo = {},
-            onRedo = {},
-            onCloseClicked = {},
-            onDoneClicked = {}
+            onSaveClicked = {}
         )
     }
 }

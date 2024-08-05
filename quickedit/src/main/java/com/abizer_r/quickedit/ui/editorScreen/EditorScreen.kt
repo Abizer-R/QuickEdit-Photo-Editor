@@ -2,6 +2,7 @@ package com.abizer_r.quickedit.ui.editorScreen
 
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -9,9 +10,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarData
-import androidx.compose.material3.SnackbarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,13 +36,13 @@ import com.abizer_r.quickedit.utils.ImmutableList
 import com.abizer_r.quickedit.ui.common.AnimatedToolbarContainer
 import com.abizer_r.quickedit.ui.common.bottomToolbarModifier
 import com.abizer_r.quickedit.ui.common.topToolbarModifier
-import com.abizer_r.quickedit.ui.drawMode.stateHandling.DrawModeEvent
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.BottomToolBarStatic
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
-import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TopToolBar
+import com.abizer_r.quickedit.ui.editorScreen.topToolbar.EditorTopToolBar
+import com.abizer_r.quickedit.utils.AppUtils
 import com.abizer_r.quickedit.utils.FileUtils
 import com.abizer_r.quickedit.utils.editorScreen.EditorScreenUtils
 import com.abizer_r.quickedit.utils.other.anim.AnimUtils
@@ -163,23 +161,40 @@ private fun EditorScreenLayout(
         goToMainScreen()
     }}
 
-    val onDoneClickedLambda = remember<() -> Unit> {{
-        // TODO - confirmation dialog before saving image
+    BackHandler {
+        onCloseClickedLambda()
+    }
+    val onSaveClickedLambda = remember<() -> Unit> {{
+        val imgFile = File(context.filesDir, "edited_image.jpg")
+        BitmapUtils.saveBitmap(currentBitmap, imgFile)
+        FileUtils.saveFileToAppFolder(
+            context = context,
+            file = imgFile,
+            onSuccess = { context.toast(R.string.image_saved_successfully) },
+            onFailure = { context.toast(R.string.failed_to_save_image) },
+        )
+    }}
+
+    val onShareClickedLambda = remember<() -> Unit> {{
         val imgFile = File(context.filesDir, "edited_image.jpg")
         BitmapUtils.saveBitmap(currentBitmap, imgFile)
         FileUtils.saveFileToAppFolder(
             context = context,
             file = imgFile,
             onSuccess = {
-                lifeCycleOwner.lifecycleScope.launch {
-                    context.toast(R.string.image_saved_successfully)
-                    delay(500)
-                    goToMainScreen()
+                val uri = FileUtils.getUriForFile(context, imgFile)
+                if (uri != null) {
+                    AppUtils.shareOnApp(
+                        context = context,
+                        appName = null,
+                        uri = uri,
+                        type = "image/jpeg"
+                    )
+                } else {
+                    context.toast(R.string.something_went_wrong)
                 }
             },
-            onFailure = {
-                context.toast(R.string.something_went_wrong)
-            },
+            onFailure = { context.toast(R.string.failed_to_save_image) },
         )
     }}
 
@@ -194,17 +209,17 @@ private fun EditorScreenLayout(
             toolbarVisible = toolbarVisible,
             modifier = topToolbarModifier(topToolbar)
         ) {
-            TopToolBar(
+            EditorTopToolBar(
                 modifier = Modifier,
                 undoEnabled = undoEnabled,
                 redoEnabled = redoEnabled,
                 toolbarHeight = topToolbarHeight,
-                showCloseAndDone = true,
-                doneEnabled = undoEnabled,
+                saveEnabled = undoEnabled,
                 onUndo = onUndo,
                 onRedo = onRedo,
                 onCloseClicked = onCloseClickedLambda,
-                onDoneClicked = onDoneClickedLambda
+                onSaveClicked = onSaveClickedLambda,
+                onShareClicked = onShareClickedLambda
             )
         }
 

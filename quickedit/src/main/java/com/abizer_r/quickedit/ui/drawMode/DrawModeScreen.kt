@@ -57,7 +57,7 @@ import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.BottomToolBarStatic
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
-import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TopToolBar
+import com.abizer_r.quickedit.ui.drawMode.toptoolbar.DrawModeTopToolBar
 import com.abizer_r.quickedit.utils.AppUtils
 import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
 import com.abizer_r.quickedit.utils.drawMode.getOpacityOrNull
@@ -233,7 +233,7 @@ fun DrawModeScreen(
             toolbarVisible = toolbarVisible,
             modifier = topToolbarModifier(topToolbar).zIndex(1f)
         ) {
-            TopToolBar(
+            DrawModeTopToolBar(
                 modifier = Modifier,
                 undoEnabled = state.pathDetailStack.isNotEmpty(),
                 redoEnabled = state.redoStack.isNotEmpty(),
