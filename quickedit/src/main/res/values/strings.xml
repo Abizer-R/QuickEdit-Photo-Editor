@@ -1,0 +1,34 @@
+<resources>
+    <string name="app_name">QuickEdit</string>
+
+    <string name="color">Color</string>
+    <string name="brush">Brush</string>
+    <string name="pan">Pan</string>
+    <string name="shape">Shape</string>
+    <string name="eraser">Eraser</string>
+    <string name="crop">Crop</string>
+    <string name="draw">Draw</string>
+    <string name="text">Text</string>
+    <string name="effects">Effects</string>
+    <string name="width">Width</string>
+    <string name="opacity">Opacity</string>
+    <string name="done">Done</string>
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="enter_your_text">Enter your text</string>
+
+    <string name="pick_image">Pick Image</string>
+    <string name="capture_image">Capture Image</string>
+
+    <string name="saving_image">Saving Image</string>
+    <string name="image_saved_successfully">Image Saved Successfully</string>
+    <string name="failed_to_save_image">Failed to save image</string>
+
+    <string name="permission_required">Permission Required</string>
+    <string name="grant_permission">Grant Permission</string>
+    <string name="okay">Okay</string>
+    <string name="storage_permission_rationale">This app needs storage permission to be able to save the edited media files in your device.</string>
+    <string name="storage_permission_permanently_declined">It seems you permanently declined storage permission. You can grant it in app settings.</string>
+    <string name="following_permissions_are_required">Following permissions are required to perform this action:\n</string>
+    <string name="perm_item_storage">- Storage\n</string>
+    <string name="app_not_found">App not found</string>
+</resources>

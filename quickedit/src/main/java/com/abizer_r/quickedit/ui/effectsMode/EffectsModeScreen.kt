@@ -5,22 +5,15 @@ package com.abizer_r.quickedit.ui.effectsMode
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,10 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -45,19 +35,16 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import com.abizer_r.components.R
-import com.abizer_r.components.theme.QuickEditTheme
-import com.abizer_r.components.theme.ToolBarBackgroundColor
-import com.abizer_r.components.util.defaultErrorToast
+import com.abizer_r.quickedit.R
+import com.abizer_r.quickedit.theme.QuickEditTheme
+import com.abizer_r.quickedit.theme.ToolBarBackgroundColor
+import com.abizer_r.quickedit.utils.defaultErrorToast
 import com.abizer_r.quickedit.ui.common.AnimatedToolbarContainer
 import com.abizer_r.quickedit.ui.common.LoadingView
 import com.abizer_r.quickedit.ui.common.bottomToolbarModifier
 import com.abizer_r.quickedit.ui.common.topToolbarModifier
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_EXTRA_LARGE
-import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_LARGE
-import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
-import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TextModeTopToolbar
 import com.abizer_r.quickedit.ui.effectsMode.effectsPreview.EffectItem
 import com.abizer_r.quickedit.ui.effectsMode.effectsPreview.EffectsPreviewListFullWidth
@@ -75,11 +62,9 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun SharedTransitionScope.EffectsModeScreen(
+fun EffectsModeScreen(
     modifier: Modifier = Modifier,
-    animatedVisibilityScope: AnimatedVisibilityScope,
     immutableBitmap: ImmutableBitmap,
     onDoneClicked: (bitmap: Bitmap) -> Unit,
     onBackPressed: () -> Unit
@@ -199,13 +184,13 @@ fun SharedTransitionScope.EffectsModeScreen(
                 }
                 .padding(top = topToolbarHeight, bottom = bottomToolbarHeight)
                 .aspectRatio(aspectRatio)
-                .sharedElement(
-                    state = rememberSharedContentState(key = "centerImage"),
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    boundsTransform = { _, _ ->
-                        tween(300)
-                    },
-                )
+//                .sharedElement(
+//                    state = rememberSharedContentState(key = "centerImage"),
+//                    animatedVisibilityScope = animatedVisibilityScope,
+//                    boundsTransform = { _, _ ->
+//                        tween(300)
+//                    },
+//                )
             ,
             screenshotState = screenshotState
         ) {
@@ -253,16 +238,12 @@ fun SharedTransitionScope.EffectsModeScreen(
 @Composable
 fun Preview_EffectsModeScreen() {
     QuickEditTheme {
-        SharedTransitionPreviewExtension {
-            EffectsModeScreen(
-                immutableBitmap = ImmutableBitmap(
-                    ImageBitmap.imageResource(id = R.drawable.placeholder_image_2).asAndroidBitmap()
-                ),
-                animatedVisibilityScope = it,
-                onDoneClicked = {},
-                onBackPressed = {}
-            )
-
-        }
+        EffectsModeScreen(
+            immutableBitmap = ImmutableBitmap(
+                ImageBitmap.imageResource(id = R.drawable.placeholder_image_3).asAndroidBitmap()
+            ),
+            onDoneClicked = {},
+            onBackPressed = {}
+        )
     }
 }

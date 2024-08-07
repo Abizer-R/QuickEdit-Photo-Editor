@@ -6,6 +6,8 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import com.abizer_r.quickedit.utils.AppUtils
 import kotlinx.coroutines.flow.flow
+import java.io.File
+import java.io.FileOutputStream
 
 
 object BitmapUtils {
@@ -77,5 +79,11 @@ object BitmapUtils {
             BitmapFactory.decodeStream(inputStream, null, onlyBoundsOptions)
         }
         return Pair(onlyBoundsOptions.outWidth, onlyBoundsOptions.outHeight)
+    }
+
+    fun saveBitmap(bitmap: Bitmap, file: File) {
+        FileOutputStream(file).use { out ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+        }
     }
 }

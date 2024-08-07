@@ -20,7 +20,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.asImageBitmap
@@ -33,9 +32,9 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import com.abizer_r.components.util.ImmutableList
+import com.abizer_r.quickedit.utils.ImmutableList
 import com.abizer_r.quickedit.utils.textMode.blurBackground.BlurBitmapBackground
-import com.abizer_r.components.util.defaultErrorToast
+import com.abizer_r.quickedit.utils.defaultErrorToast
 import com.abizer_r.quickedit.ui.common.AnimatedToolbarContainer
 import com.abizer_r.quickedit.ui.common.bottomToolbarModifier
 import com.abizer_r.quickedit.ui.common.topToolbarModifier
@@ -60,7 +59,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TextModeScreen(
     modifier: Modifier = Modifier,

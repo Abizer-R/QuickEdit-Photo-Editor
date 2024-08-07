@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.abizer_r.components.theme.QuickEditTheme
+import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.ui.transformableViews.TransformableTextBox
 import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
 import com.abizer_r.quickedit.utils.drawMode.toPx

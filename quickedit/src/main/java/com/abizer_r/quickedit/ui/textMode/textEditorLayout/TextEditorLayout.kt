@@ -27,10 +27,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import com.abizer_r.components.R
-import com.abizer_r.components.theme.QuickEditTheme
+import com.abizer_r.quickedit.R
+import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.utils.textMode.colorList.ColorListFullWidth
-import com.abizer_r.components.util.ImmutableList
+import com.abizer_r.quickedit.utils.ImmutableList
 import com.abizer_r.quickedit.ui.textMode.TextModeEvent
 import com.abizer_r.quickedit.ui.textMode.TextModeState
 import com.abizer_r.quickedit.ui.textMode.getSelectedColor

@@ -2,11 +2,6 @@ package com.abizer_r.quickedit.ui.editorScreen
 
 import android.graphics.Bitmap
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
-import com.abizer_r.components.util.ColorUtils
-import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.models.PathDetails
-import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBoxState
 import java.util.Stack
 
 @Immutable

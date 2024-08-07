@@ -2,13 +2,7 @@ package com.abizer_r.quickedit.ui.editorScreen
 
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.tween
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -36,9 +30,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import com.abizer_r.components.R
-import com.abizer_r.components.theme.QuickEditTheme
-import com.abizer_r.components.util.ImmutableList
+import com.abizer_r.quickedit.R
+import com.abizer_r.quickedit.theme.QuickEditTheme
+import com.abizer_r.quickedit.utils.ImmutableList
 import com.abizer_r.quickedit.ui.common.AnimatedToolbarContainer
 import com.abizer_r.quickedit.ui.common.bottomToolbarModifier
 import com.abizer_r.quickedit.ui.common.topToolbarModifier
@@ -47,24 +41,27 @@ import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIU
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
-import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TopToolBar
-import com.abizer_r.quickedit.utils.SharedTransitionPreviewExtension
+import com.abizer_r.quickedit.ui.editorScreen.topToolbar.EditorTopToolBar
+import com.abizer_r.quickedit.utils.AppUtils
+import com.abizer_r.quickedit.utils.FileUtils
 import com.abizer_r.quickedit.utils.editorScreen.EditorScreenUtils
 import com.abizer_r.quickedit.utils.other.anim.AnimUtils
+import com.abizer_r.quickedit.utils.other.bitmap.BitmapUtils
+import com.abizer_r.quickedit.utils.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.File
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun SharedTransitionScope.EditorScreen(
+fun EditorScreen(
     modifier: Modifier = Modifier,
-    animatedVisibilityScope: AnimatedVisibilityScope,
     initialEditorScreenState: EditorScreenState,
     goToCropModeScreen: (finalEditorState: EditorScreenState) -> Unit,
     goToDrawModeScreen: (finalEditorState: EditorScreenState) -> Unit,
     goToTextModeScreen: (finalEditorState: EditorScreenState) -> Unit,
     goToEffectsModeScreen: (finalEditorState: EditorScreenState) -> Unit,
+    goToMainScreen: () -> Unit,
 ) {
     if (initialEditorScreenState.bitmapStack.isEmpty()) {
         throw Exception("EmptyStackException: The bitmapStack of initial state should contain at least one bitmap")
@@ -109,31 +106,31 @@ fun SharedTransitionScope.EditorScreen(
 
         EditorScreenLayout(
             modifier = modifier,
-            animatedVisibilityScope = animatedVisibilityScope,
             currentBitmap = currentBitmap,
             undoEnabled = viewModel.undoEnabled(),
             redoEnabled = viewModel.redoEnabled(),
             onUndo = viewModel::onUndo,
             onRedo = viewModel::onRedo,
-            onBottomToolbarEvent = onBottomToolbarEvent
+            onBottomToolbarEvent = onBottomToolbarEvent,
+            goToMainScreen = goToMainScreen
         )
     }
 
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun SharedTransitionScope.EditorScreenLayout(
+private fun EditorScreenLayout(
     modifier: Modifier,
-    animatedVisibilityScope: AnimatedVisibilityScope,
     currentBitmap: Bitmap,
     undoEnabled: Boolean,
     redoEnabled: Boolean,
     onUndo: () -> Unit,
     onRedo: () -> Unit,
-    onBottomToolbarEvent: (BottomToolbarEvent) -> Unit
+    onBottomToolbarEvent: (BottomToolbarEvent) -> Unit,
+    goToMainScreen: () -> Unit,
 ) {
 
+    val context = LocalContext.current
     val lifeCycleOwner = LocalLifecycleOwner.current
 
     val bottomToolbarItems = remember {
@@ -159,6 +156,48 @@ private fun SharedTransitionScope.EditorScreenLayout(
         }
     }}
 
+    val onCloseClickedLambda = remember<() -> Unit> {{
+        // TODO - confirmation dialog (add throughout the app)
+        goToMainScreen()
+    }}
+
+    BackHandler {
+        onCloseClickedLambda()
+    }
+    val onSaveClickedLambda = remember<() -> Unit> {{
+        val imgFile = File(context.filesDir, "edited_image.jpg")
+        BitmapUtils.saveBitmap(currentBitmap, imgFile)
+        FileUtils.saveFileToAppFolder(
+            context = context,
+            file = imgFile,
+            onSuccess = { context.toast(R.string.image_saved_successfully) },
+            onFailure = { context.toast(R.string.failed_to_save_image) },
+        )
+    }}
+
+    val onShareClickedLambda = remember<() -> Unit> {{
+        val imgFile = File(context.filesDir, "edited_image.jpg")
+        BitmapUtils.saveBitmap(currentBitmap, imgFile)
+        FileUtils.saveFileToAppFolder(
+            context = context,
+            file = imgFile,
+            onSuccess = {
+                val uri = FileUtils.getUriForFile(context, imgFile)
+                if (uri != null) {
+                    AppUtils.shareOnApp(
+                        context = context,
+                        appName = null,
+                        uri = uri,
+                        type = "image/jpeg"
+                    )
+                } else {
+                    context.toast(R.string.something_went_wrong)
+                }
+            },
+            onFailure = { context.toast(R.string.failed_to_save_image) },
+        )
+    }}
+
     ConstraintLayout(
         modifier = modifier
             .fillMaxSize()
@@ -170,14 +209,17 @@ private fun SharedTransitionScope.EditorScreenLayout(
             toolbarVisible = toolbarVisible,
             modifier = topToolbarModifier(topToolbar)
         ) {
-            TopToolBar(
+            EditorTopToolBar(
                 modifier = Modifier,
                 undoEnabled = undoEnabled,
                 redoEnabled = redoEnabled,
                 toolbarHeight = topToolbarHeight,
-                showCloseAndDone = false,
+                saveEnabled = undoEnabled,
                 onUndo = onUndo,
-                onRedo = onRedo
+                onRedo = onRedo,
+                onCloseClicked = onCloseClickedLambda,
+                onSaveClicked = onSaveClickedLambda,
+                onShareClicked = onShareClickedLambda
             )
         }
 
@@ -195,26 +237,7 @@ private fun SharedTransitionScope.EditorScreenLayout(
                     height = Dimension.wrapContent
                 }
                 .padding(top = topToolbarHeight, bottom = bottomToolbarHeight)
-                .aspectRatio(aspectRatio)
-                .sharedElement(
-                    state = rememberSharedContentState(key = "centerImage"),
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    boundsTransform = { _, _ ->
-                        tween(300)
-                    },
-                )
-                .sharedBounds(
-                    sharedContentState = rememberSharedContentState(key = "centerImageBounds"),
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    enter = EnterTransition.None,
-                    exit = ExitTransition.None,
-                    boundsTransform = { _, _ ->
-                        tween(300)
-                    },
-                    resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds(
-                        contentScale = ContentScale.Fit
-                    )
-                ),
+                .aspectRatio(aspectRatio),
         ) {
 
             Image(
@@ -247,24 +270,19 @@ private fun SharedTransitionScope.EditorScreenLayout(
 
 
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PreviewEditorScreen() {
     QuickEditTheme {
-        SharedTransitionPreviewExtension {
-            EditorScreenLayout(
-                modifier = Modifier,
-                animatedVisibilityScope = it,
-                currentBitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_2).asAndroidBitmap(),
-                undoEnabled = false,
-                redoEnabled = false,
-                onUndo = {},
-                onRedo = {},
-                onBottomToolbarEvent = {}
-            )
-
-        }
-
+        EditorScreenLayout(
+            modifier = Modifier,
+            currentBitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_3).asAndroidBitmap(),
+            undoEnabled = false,
+            redoEnabled = false,
+            onUndo = {},
+            onRedo = {},
+            onBottomToolbarEvent = {},
+            goToMainScreen = {}
+        )
     }
 }

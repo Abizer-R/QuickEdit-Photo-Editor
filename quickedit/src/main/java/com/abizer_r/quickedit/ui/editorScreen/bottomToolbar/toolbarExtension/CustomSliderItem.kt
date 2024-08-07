@@ -29,7 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import com.abizer_r.components.theme.QuickEditTheme
+import com.abizer_r.quickedit.theme.QuickEditTheme
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt

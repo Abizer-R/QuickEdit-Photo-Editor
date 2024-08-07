@@ -4,12 +4,7 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,7 +20,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,9 +28,9 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.abizer_r.components.R
-import com.abizer_r.components.theme.QuickEditTheme
-import com.abizer_r.components.util.defaultErrorToast
+import com.abizer_r.quickedit.R
+import com.abizer_r.quickedit.theme.QuickEditTheme
+import com.abizer_r.quickedit.utils.defaultErrorToast
 import com.abizer_r.quickedit.ui.common.AnimatedToolbarContainer
 import com.abizer_r.quickedit.ui.common.bottomToolbarModifier
 import com.abizer_r.quickedit.ui.common.topToolbarModifier
@@ -45,8 +39,6 @@ import com.abizer_r.quickedit.ui.cropMode.cropperOptions.CropperOptionsFullWidth
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_LARGE
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TextModeTopToolbar
-import com.abizer_r.quickedit.ui.effectsMode.EffectsModeScreen
-import com.abizer_r.quickedit.utils.SharedTransitionPreviewExtension
 import com.abizer_r.quickedit.utils.editorScreen.CropModeUtils
 import com.abizer_r.quickedit.utils.other.anim.AnimUtils
 import com.abizer_r.quickedit.utils.other.bitmap.ImmutableBitmap
@@ -57,10 +49,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun SharedTransitionScope.CropperScreen(
-    animatedVisibilityScope: AnimatedVisibilityScope,
+fun CropperScreen(
     immutableBitmap: ImmutableBitmap,
     onDoneClicked: (bitmap: Bitmap) -> Unit,
     onBackPressed: () -> Unit
@@ -168,18 +158,6 @@ fun SharedTransitionScope.CropperScreen(
                     height = Dimension.matchParent
                 }
                 .padding(top = topToolbarHeight, bottom = bottomToolbarHeight)
-                .sharedBounds(
-                    sharedContentState = rememberSharedContentState(key = "centerImageBounds"),
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    enter = EnterTransition.None,
-                    exit = ExitTransition.None,
-                    boundsTransform = { _, _ ->
-                        tween(300)
-                    },
-                    resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds(
-                        contentScale = ContentScale.Fit
-                    )
-                )
         ) {
             AndroidView(
                 modifier = Modifier,
@@ -225,15 +203,12 @@ fun SharedTransitionScope.CropperScreen(
 @Composable
 fun PreviewEditorScreen() {
     QuickEditTheme {
-        SharedTransitionPreviewExtension {
-            CropperScreen(
-                animatedVisibilityScope = it,
-                immutableBitmap = ImmutableBitmap(
-                    ImageBitmap.imageResource(id = R.drawable.placeholder_image_1).asAndroidBitmap()
-                ),
-                onDoneClicked = {},
-                onBackPressed = {}
-            )
-        }
+        CropperScreen(
+            immutableBitmap = ImmutableBitmap(
+                ImageBitmap.imageResource(id = R.drawable.placeholder_image_3).asAndroidBitmap()
+            ),
+            onDoneClicked = {},
+            onBackPressed = {}
+        )
     }
 }

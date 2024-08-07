@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.abizer_r.quickedit.ui.editorScreen.EditorScreenState
+import com.abizer_r.quickedit.ui.navigation.NavDestinations
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +17,8 @@ import javax.inject.Inject
 class SharedEditorViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ): ViewModel() {
+
+    var useTransition = false
 
     var bitmapStack = Stack<Bitmap>()
         private set
@@ -37,6 +40,11 @@ class SharedEditorViewModel @Inject constructor(
             throw Exception("EmptyStackException: The bitmapStack should contain at least one bitmap")
         }
         return bitmapStack.peek()
+    }
+
+    fun resetStacks() {
+        bitmapStack.clear()
+        bitmapRedoStack.clear()
     }
 
     fun addBitmapToStack(

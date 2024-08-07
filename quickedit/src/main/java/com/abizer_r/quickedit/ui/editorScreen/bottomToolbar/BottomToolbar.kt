@@ -40,10 +40,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import com.abizer_r.components.R
-import com.abizer_r.components.theme.QuickEditTheme
-import com.abizer_r.components.theme.ToolBarBackgroundColor
-import com.abizer_r.components.util.ImmutableList
+import com.abizer_r.quickedit.R
+import com.abizer_r.quickedit.theme.QuickEditTheme
+import com.abizer_r.quickedit.theme.ToolBarBackgroundColor
+import com.abizer_r.quickedit.utils.ImmutableList
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils

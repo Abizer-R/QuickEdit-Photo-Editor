@@ -54,7 +54,6 @@ android {
 
 dependencies {
 
-    implementation(project(":components"))
     implementation(project(":quickedit"))
 
     implementation(libs.androidx.core.ktx)

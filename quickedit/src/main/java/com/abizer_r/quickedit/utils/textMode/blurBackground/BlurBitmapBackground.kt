@@ -12,8 +12,8 @@ import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.abizer_r.components.R
-import com.abizer_r.components.theme.QuickEditTheme
+import com.abizer_r.quickedit.R
+import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.skydoves.cloudy.Cloudy
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -71,7 +71,7 @@ fun PreviewBitmapBg() {
 
         BlurBitmapBackground(
             modifier = Modifier.fillMaxSize(),
-            imageBitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_1),
+            imageBitmap = ImageBitmap.imageResource(id = R.drawable.placeholder_image_3),
             shouldBlur = false,
             contentScale = ContentScale.Fit,
             onBgClicked = {}
