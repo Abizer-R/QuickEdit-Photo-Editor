@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -19,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
@@ -27,22 +29,26 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.abizer_r.quickedit.R
 import com.abizer_r.quickedit.theme.QuickEditTheme
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
+import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TextModeTopToolbar
 import com.abizer_r.quickedit.utils.textMode.colorList.ColorListFullWidth
 import com.abizer_r.quickedit.utils.ImmutableList
-import com.abizer_r.quickedit.ui.textMode.TextModeEvent
-import com.abizer_r.quickedit.ui.textMode.TextModeState
-import com.abizer_r.quickedit.ui.textMode.getSelectedColor
 import com.abizer_r.quickedit.utils.textMode.TextModeUtils
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.alignmentOptions.TextAlignOptions
 import kotlinx.coroutines.delay
+import java.util.UUID
 
 @Composable
 fun TextEditorLayout(
     modifier: Modifier,
-    textFieldState: TextModeState.TextFieldState,
-    onTextModeEvent: (TextModeEvent) -> Unit
+    initialEditorState: TextEditorState? = null,
+    onDoneClicked: (TextEditorState) -> Unit,
+    onClosedClicked: () -> Unit,
 ) {
 
 
@@ -62,30 +68,65 @@ fun TextEditorLayout(
      *
      */
 
+    val context = LocalContext.current
+    val lifeCycleOwner = LocalLifecycleOwner.current
 
+
+    val viewModel: TextEditorViewModel = hiltViewModel()
+    val editorState by viewModel.editorState.collectAsStateWithLifecycle(
+        lifecycleOwner = lifeCycleOwner
+    )
+
+    LaunchedEffect(key1 = Unit) {
+        // updating the initialState is necessary even if "initialEditorState" argument is null
+        // This is because the "hiltViewModel" is scoped to navigation destination and will keep holding the previous editorState
+        val initialState = initialEditorState ?: TextEditorState(UUID.randomUUID().toString())
+        Log.d("TEST_editor", "TextEditorLayout: id = ${initialState.textStateId}", )
+        viewModel.updateInitialState(initialState = initialState)
+    }
+
+    val defaultTextFont = MaterialTheme.typography.headlineMedium.fontSize
     val focusRequesterForTextField = remember { FocusRequester() }
 
-    val showPlaceHolder by remember(key1 = textFieldState.text.isBlank()) {
-        Log.e("TEST_text_mode", "TextEditorLayout: showPlaceHolder = ${textFieldState.text.isBlank()}", )
-        mutableStateOf(textFieldState.text.isBlank())
+    val topToolbarHeight =  TOOLBAR_HEIGHT_SMALL
+
+    val onDoneClickedLambda = remember<() -> Unit> {{
+        onDoneClicked(editorState)
+    }}
+
+    val showPlaceHolder by remember(key1 = editorState.text.isBlank()) {
+        Log.e("TEST_text_mode", "TextEditorLayout: showPlaceHolder = ${editorState.text.isBlank()}", )
+        mutableStateOf(editorState.text.isBlank())
     }
 
     val onColorItemClicked = remember<(Int, Color) -> Unit> {{ index, color ->
-        onTextModeEvent(TextModeEvent.SelectTextColor(index, color))
+        viewModel.onEvent(TextEditorEvent.SelectTextColor(index, color))
     }}
 
     val onTextAlignItemClicked = remember<(Int, TextAlign) -> Unit> {{ index, textAlign ->
-        onTextModeEvent(TextModeEvent.SelectTextAlign(index, textAlign))
+        viewModel.onEvent(TextEditorEvent.SelectTextAlign(index, textAlign))
     }}
 
     val onTextFieldValueChange = remember<(TextFieldValue) -> Unit> {{ mValue ->
-        onTextModeEvent(TextModeEvent.UpdateTextFieldValue(mValue.text))
+        viewModel.onEvent(TextEditorEvent.UpdateTextFieldValue(mValue.text))
     }}
 
     ConstraintLayout(
         modifier = modifier
     ) {
-        val (textField, placeHolderText, colorList, textAlignOptions) = createRefs()
+        val (topToolBar, textField, placeHolderText, colorList, textAlignOptions) = createRefs()
+
+        TextModeTopToolbar(
+            modifier = Modifier.constrainAs(topToolBar) {
+                top.linkTo(parent.top)
+                width = Dimension.matchParent
+                height = Dimension.wrapContent
+            },
+            toolbarHeight = topToolbarHeight,
+            onCloseClicked = onClosedClicked,
+            onDoneClicked = onDoneClickedLambda
+        )
+
         TextField(
             modifier = Modifier
                 .constrainAs(textField) {
@@ -93,50 +134,52 @@ fun TextEditorLayout(
                     bottom.linkTo(parent.bottom)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                    width = Dimension.matchParent
+                    width = Dimension.wrapContent
                     height = Dimension.wrapContent
                 }
+                .padding(top = topToolbarHeight)
                 .background(Color.Transparent)
-//                .background(Color.Red)
                 .focusRequester(focusRequesterForTextField),
             value = TextFieldValue(
-                text = textFieldState.text,
-                selection = TextRange(textFieldState.text.length)
+                text = editorState.text,
+                selection = TextRange(editorState.text.length)
             ),
             onValueChange = onTextFieldValueChange,
             colors = TextModeUtils.getColorsForTextField(
-                cursorColor = textFieldState.getSelectedColor()
+                cursorColor = editorState.selectedColor
             ),
             textStyle = TextStyle(
-                color = textFieldState.getSelectedColor(),
-                textAlign = textFieldState.textAlign,
-                fontSize = textFieldState.textFont
+                color = editorState.selectedColor,
+                textAlign = editorState.textAlign,
+                fontSize = defaultTextFont
             ),
         )
 
         // PlaceHolder Text
         AnimatedVisibility(
             visible = showPlaceHolder,
-            modifier = Modifier.constrainAs(placeHolderText) {
-                top.linkTo(parent.top)
-                bottom.linkTo(parent.bottom)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-                width = Dimension.matchParent
-                height = Dimension.wrapContent
-            },
+            modifier = Modifier
+                .constrainAs(placeHolderText) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    width = Dimension.matchParent
+                    height = Dimension.wrapContent
+                }
+                .padding(top = topToolbarHeight),
             enter = fadeIn(),
             exit = fadeOut()
         ) {
             Text(
                 text = stringResource(id = R.string.enter_your_text),
-                textAlign = textFieldState.textAlign,
-                color = textFieldState.getSelectedColor(),
-                fontSize = textFieldState.textFont
+                textAlign = editorState.textAlign,
+                color = editorState.selectedColor,
+                fontSize = defaultTextFont
             )
         }
 
-        if (textFieldState.shouldRequestFocus) {
+        if (editorState.shouldRequestFocus) {
             LaunchedEffect(key1 = Unit) {
                 delay(100)  /* Delay to allow textField to become visible */
                 focusRequesterForTextField.requestFocus()
@@ -150,9 +193,9 @@ fun TextEditorLayout(
                 width = Dimension.matchParent
                 height = Dimension.wrapContent
             },
-            colorList = ImmutableList(textFieldState.textColorList),
+            colorList = ImmutableList(editorState.textColorList),
             backgroundColor = Color.Transparent,
-            selectedIndex = textFieldState.selectedColorIndex,
+            selectedColor = editorState.selectedColor,
             onItemClicked = onColorItemClicked
         )
 
@@ -161,7 +204,7 @@ fun TextEditorLayout(
                 bottom.linkTo(colorList.top)
                 start.linkTo(parent.start)
             },
-            selectedAlignment = textFieldState.textAlign,
+            selectedAlignment = editorState.textAlign,
             optionList = TextModeUtils.getTextAlignOptions(),
             backgroundColor = Color.Transparent,
             onItemClicked = onTextAlignItemClicked
@@ -176,10 +219,12 @@ fun Preview_TextEditorLayout() {
     QuickEditTheme {
         TextEditorLayout(
             modifier = Modifier.fillMaxSize(),
-            textFieldState = TextModeState.TextFieldState(
+            initialEditorState = TextEditorState(
+                textStateId = UUID.randomUUID().toString(),
                 textFont = MaterialTheme.typography.headlineMedium.fontSize // defaultTextFont in "TextModeScreen"
             ),
-            onTextModeEvent = {}
+            onDoneClicked = {},
+            onClosedClicked = {}
         )
 
     }

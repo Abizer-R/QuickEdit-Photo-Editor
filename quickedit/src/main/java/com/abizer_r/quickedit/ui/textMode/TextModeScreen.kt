@@ -6,6 +6,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,7 +45,9 @@ import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIU
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TextModeTopToolbar
+import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.TextModeToolbarExtension
 import com.abizer_r.quickedit.ui.textMode.textEditorLayout.TextEditorLayout
+import com.abizer_r.quickedit.ui.textMode.textEditorLayout.TextEditorState
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.quickedit.utils.other.anim.AnimUtils
 import com.abizer_r.quickedit.utils.other.bitmap.ImmutableBitmap
@@ -57,7 +60,6 @@ import com.smarttoolfactory.screenshot.rememberScreenshotState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 @Composable
 fun TextModeScreen(
@@ -73,9 +75,12 @@ fun TextModeScreen(
     val state by viewModel.state.collectAsStateWithLifecycle(
         lifecycleOwner = lifeCycleOwner
     )
-    val showTextField by viewModel.showTextField.collectAsStateWithLifecycle(
+    val showTextEditor by viewModel.showTextEditor.collectAsStateWithLifecycle(
         lifecycleOwner = lifeCycleOwner
     )
+//    val toolbarExtensionVisible by viewModel.toolbarExtensionVisible.collectAsStateWithLifecycle(
+//        lifecycleOwner = lifeCycleOwner
+//    )
 
     val bottomToolbarItems = remember {
         ImmutableList(TextModeUtils.getDefaultBottomToolbarItemsList())
@@ -96,57 +101,56 @@ fun TextModeScreen(
 
     val screenshotState = rememberScreenshotState()
 
-    val defaultTextFont = MaterialTheme.typography.headlineMedium.fontSize
     LaunchedEffect(key1 = Unit) {
         toolbarVisible = true
         delay(AnimUtils.TOOLBAR_EXPAND_ANIM_DURATION_FAST.toLong())
-        viewModel.onEvent(
-            UpdateTextFont(textFont = defaultTextFont)
-        )
-        viewModel.onEvent(
-            ShowTextField(state.textFieldState)
-        )
+        viewModel.onEvent(ShowTextEditor())
     }
 
     val onCloseClickedLambda = remember<() -> Unit> {{
-        if (showTextField) {
-            viewModel.onEvent(HideTextField)
-        } else {
-            lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-                toolbarVisible = false
-                delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST.toLong())
-                onBackPressed()
+        lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+            if (state.showBottomToolbarExtension) {
+                viewModel.onEvent(UpdateToolbarExtensionVisibility(false))
+                delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION.toLong())
             }
+            toolbarVisible = false
+            delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST.toLong())
+            onBackPressed()
         }
     }}
 
     BackHandler {
-        if (showTextField) {
-            viewModel.onEvent(HideTextField)
+        if (showTextEditor) {
+            viewModel.onEvent(HideTextEditor)
+        } else if (state.showBottomToolbarExtension) {
+            viewModel.onEvent(UpdateToolbarExtensionVisibility(false))
         } else {
             onCloseClickedLambda()
         }
     }
 
     val onDoneClickedLambda = remember<() -> Unit> {{
-        if (showTextField) {
-            viewModel.onEvent(AddTransformableTextBox(
-                textBoxState = TransformableTextBoxState(
-                    id = state.textFieldState.textStateId ?: UUID.randomUUID().toString(),
-                    text = state.textFieldState.text,
-                    textColor = state.textFieldState.getSelectedColor(),
-                    textAlign = state.textFieldState.textAlign,
-                    textFont = state.textFieldState.textFont
-                )
-            ))
-            viewModel.onEvent(HideTextField)
-        } else {
-            viewModel.handleStateBeforeCaptureScreenshot()
-            lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-                delay(200)  /* Delay to update the selection in ui */
-                screenshotState.capture()
-            }
+        viewModel.handleStateBeforeCaptureScreenshot()
+        lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+            delay(200)  /* Delay to update the selection in ui */
+            screenshotState.capture()
         }
+    }}
+
+    val onCloseClickedTextEditorLambda = remember<() -> Unit> {{
+        viewModel.onEvent(HideTextEditor)
+    }}
+
+    val onDoneClickedTextEditorLambda = remember<(TextEditorState) -> Unit> {{ editorState ->
+        viewModel.onEvent(AddTransformableTextBox(
+            textBoxState = TransformableTextBoxState(
+                id = editorState.textStateId,
+                text = editorState.text,
+                textColor = editorState.selectedColor,
+                textAlign = editorState.textAlign,
+                textFont = editorState.textFont
+            )
+        ))
     }}
 
     val handleScreenshotResult = remember<(Bitmap) -> Unit> {{ bitmap ->
@@ -187,10 +191,10 @@ fun TextModeScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        val (topToolBar, bottomToolbar, editorBox, editorBoxBgStretched, textInputView) = createRefs()
+        val (topToolBar, bottomToolbar, bottomToolbarExtension, editorBox, editorBoxBgStretched, textInputView) = createRefs()
 
         AnimatedToolbarContainer(
-            toolbarVisible = toolbarVisible,
+            toolbarVisible = showTextEditor.not() && toolbarVisible,
             modifier = topToolbarModifier(topToolBar)
         ) {
             TextModeTopToolbar(
@@ -224,14 +228,14 @@ fun TextModeScreen(
             BlurBitmapBackground(
                 modifier = Modifier.fillMaxSize(),
                 imageBitmap = bitmap.asImageBitmap(),
-                shouldBlur = showTextField,
-                contentScale = if (showTextField.not()) ContentScale.Fit else ContentScale.Crop,
+                shouldBlur = showTextEditor,
+                contentScale = if (showTextEditor.not()) ContentScale.Fit else ContentScale.Crop,
                 blurRadius = 15,
                 onBgClicked = onBgClickedLambda
             )
 
             Box(modifier = Modifier.fillMaxSize()) {
-                if (showTextField.not()) {
+                if (showTextEditor.not()) {
                     DrawAllTransformableViews(
                         centerAlignModifier = Modifier.align(Alignment.Center),
                         transformableViewsList = state.transformableViewStateList,
@@ -256,7 +260,7 @@ fun TextModeScreen(
         ) {
 
 
-            if (showTextField.not()) {
+            if (showTextEditor.not()) {
                 BorderForSelectedViews(
                     centerAlignModifier = Modifier.align(Alignment.Center),
                     transformableViewsList = state.transformableViewStateList,
@@ -267,35 +271,58 @@ fun TextModeScreen(
         }
 
         AnimatedVisibility(
-            visible = showTextField,
+            visible = showTextEditor,
             modifier = Modifier.constrainAs(textInputView) {
-                top.linkTo(topToolBar.bottom)
-                bottom.linkTo(parent.bottom)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-                width = Dimension.fillToConstraints
-                height = Dimension.fillToConstraints
+//                top.linkTo(parent.top)
+//                bottom.linkTo(parent.bottom)
+//                start.linkTo(parent.start)
+//                end.linkTo(parent.end)
+                width = Dimension.matchParent
+                height = Dimension.matchParent
             },
             enter = fadeIn(),
             exit = fadeOut()
         ) {
             TextEditorLayout(
                 modifier = Modifier,
-                textFieldState = state.textFieldState,
-                onTextModeEvent = viewModel::onEvent
+                initialEditorState = viewModel.initialTextEditorState,
+                onDoneClicked = onDoneClickedTextEditorLambda,
+                onClosedClicked = onCloseClickedTextEditorLambda,
             )
         }
 
 
         AnimatedToolbarContainer(
-            toolbarVisible = showTextField.not() && toolbarVisible,
+            toolbarVisible = showTextEditor.not() && toolbarVisible,
             modifier = bottomToolbarModifier(bottomToolbar)
         ) {
             BottomToolBarStatic(
                 modifier = Modifier.fillMaxWidth(),
                 toolbarItems = bottomToolbarItems,
                 toolbarHeight = bottomToolbarHeight,
+                selectedItem = state.selectedTool,
                 onEvent = onBottomToolbarEventLambda
+            )
+        }
+
+        val emptyLambda = remember<() -> Unit> {{
+        }}
+
+        AnimatedVisibility(
+            visible = state.showBottomToolbarExtension,
+            modifier = Modifier
+                .constrainAs(bottomToolbarExtension) {
+                    bottom.linkTo(bottomToolbar.top)
+                    width = Dimension.matchParent
+                }
+                .clickable(onClick = emptyLambda), /* added clickable{} to avoid triggering touchEvent in DrawingCanvas when clicking anywhere on toolbarExtension */
+            enter = AnimUtils.toolbarExtensionExpandAnim(),
+            exit = AnimUtils.toolbarExtensionCollapseAnim()
+
+        ) {
+            TextModeToolbarExtension(
+                modifier = Modifier.fillMaxWidth(),
+                bottomToolbarItem = state.selectedTool
             )
         }
     }

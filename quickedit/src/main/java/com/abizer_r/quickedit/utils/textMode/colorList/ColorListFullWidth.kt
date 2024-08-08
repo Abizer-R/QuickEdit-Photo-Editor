@@ -29,7 +29,7 @@ fun ColorListFullWidth(
     modifier: Modifier = Modifier,
     backgroundColor: Color = ToolBarBackgroundColor,
     colorList: ImmutableList<Color>,
-    selectedIndex: Int,
+    selectedColor: Color,
     onItemClicked: (position: Int, color: Color) -> Unit
 ) {
 
@@ -46,7 +46,7 @@ fun ColorListFullWidth(
                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
                 itemColor = color,
                 itemSize = 32.dp,
-                isSelected = index == selectedIndex,
+                isSelected = selectedColor == color,
                 selectedBorderWidth = 2.dp,
                 selectedBorderColor = MaterialTheme.colorScheme.onBackground,
                 clipShape = CircleShape,
@@ -65,7 +65,7 @@ fun Preview_ColorList() {
     QuickEditTheme {
         ColorListFullWidth(
             colorList = ImmutableList(ColorUtils.defaultColorList),
-            selectedIndex = 2,
+            selectedColor = Color.Red,
             onItemClicked = { _, _ -> }
         )
 

@@ -76,13 +76,19 @@ object TextModeUtils {
     }
 
     fun getDefaultBottomToolbarItemsList(): ArrayList<BottomToolbarItem> {
+        val textFormatToolItem: BottomToolbarItem.TextFormat = getDefaultTextFormat()
         return arrayListOf(
             BottomToolbarItem.AddItem,
-            BottomToolbarItem.TextFormat(
-                textStyleAttr = TextStyleAttr(),
-                textCaseType = TextCaseType.DEFAULT,
-                alignment = DEFAULT_TEXT_ALIGN
-            )
+            textFormatToolItem
+
+        )
+    }
+
+    fun getDefaultTextFormat(): BottomToolbarItem.TextFormat {
+        return BottomToolbarItem.TextFormat(
+            textStyleAttr = TextStyleAttr(),
+            textCaseType = TextCaseType.DEFAULT,
+            alignment = DEFAULT_TEXT_ALIGN
         )
     }
 
