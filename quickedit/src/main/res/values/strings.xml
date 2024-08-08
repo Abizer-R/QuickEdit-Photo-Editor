@@ -2,6 +2,7 @@
     <string name="app_name">QuickEdit</string>
 
     <string name="color">Color</string>
+    <string name="format">Format</string>
     <string name="brush">Brush</string>
     <string name="pan">Pan</string>
     <string name="shape">Shape</string>

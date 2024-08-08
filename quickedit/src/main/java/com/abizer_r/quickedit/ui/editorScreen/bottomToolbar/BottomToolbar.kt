@@ -166,6 +166,11 @@ fun ToolbarItem(
             stringResource(id = R.string.pan)
         )
 
+        is BottomToolbarItem.TextFormat -> Pair(
+            ImageVector.vectorResource(id = R.drawable.outline_custom_typography_24),
+            stringResource(id = R.string.format)
+        )
+
         else -> Pair(
             Icons.Default.AddCircleOutline,
             ""

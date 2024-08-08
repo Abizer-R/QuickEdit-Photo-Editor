@@ -1,4 +1,4 @@
-package com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.toolbarExtension
+package com.abizer_r.quickedit.ui.drawMode.bottomToolbarExtension
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image

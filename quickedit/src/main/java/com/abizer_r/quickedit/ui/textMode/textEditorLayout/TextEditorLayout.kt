@@ -35,7 +35,7 @@ import com.abizer_r.quickedit.ui.textMode.TextModeEvent
 import com.abizer_r.quickedit.ui.textMode.TextModeState
 import com.abizer_r.quickedit.ui.textMode.getSelectedColor
 import com.abizer_r.quickedit.utils.textMode.TextModeUtils
-import com.abizer_r.quickedit.utils.textMode.alignmentOptions.TextAlignOptions
+import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.alignmentOptions.TextAlignOptions
 import kotlinx.coroutines.delay
 
 @Composable

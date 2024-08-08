@@ -7,11 +7,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
+import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.caseOptions.TextCaseType
+import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.styleOptions.TextStyleAttr
 import com.abizer_r.quickedit.ui.transformableViews.TransformableTextBox
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBoxEvents
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBoxState
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableTextBoxState
-import com.abizer_r.quickedit.utils.drawMode.DrawingConstants
 
 object TextModeUtils {
 
@@ -76,7 +77,12 @@ object TextModeUtils {
 
     fun getDefaultBottomToolbarItemsList(): ArrayList<BottomToolbarItem> {
         return arrayListOf(
-            BottomToolbarItem.AddItem
+            BottomToolbarItem.AddItem,
+            BottomToolbarItem.TextFormat(
+                textStyleAttr = TextStyleAttr(),
+                textCaseType = TextCaseType.DEFAULT,
+                alignment = DEFAULT_TEXT_ALIGN
+            )
         )
     }
 

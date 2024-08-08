@@ -218,6 +218,10 @@ class TextModeViewModel @Inject constructor(
                 onEvent(TextModeEvent.ShowTextField(TextModeState.TextFieldState()))
             }
 
+            is BottomToolbarItem.TextFormat -> {
+
+            }
+
             else -> {}
         }
     }
