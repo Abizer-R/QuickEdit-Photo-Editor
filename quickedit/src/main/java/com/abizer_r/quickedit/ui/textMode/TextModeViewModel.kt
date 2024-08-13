@@ -1,15 +1,20 @@
 package com.abizer_r.quickedit.ui.textMode
 
 import android.util.Log
+import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.quickedit.ui.textMode.TextModeEvent.ShowTextEditor
+import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.TextModeToolbarExtensionEvent
+import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.caseOptions.TextCaseType
+import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.styleOptions.TextStyleAttr
 import com.abizer_r.quickedit.ui.textMode.textEditorLayout.TextEditorState
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBoxEvents
+import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBoxState
 import com.abizer_r.quickedit.utils.other.anim.AnimUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.GlobalScope
@@ -33,6 +38,10 @@ class TextModeViewModel @Inject constructor(
 
     var initialTextEditorState: TextEditorState? = null
         private set
+
+    fun getSelectedViewState(): TransformableBoxState? =
+        state.value.transformableViewStateList.find { it.isSelected }
+
 
 
 //    private val _toolbarExtensionVisible = MutableStateFlow(false)
@@ -168,16 +177,12 @@ class TextModeViewModel @Inject constructor(
     fun updateViewSelection(selectedViewId: String? = null) {
         val transformableViewsList = state.value.transformableViewStateList
         transformableViewsList.forEach {
-            val isSelected = it.id == selectedViewId
-            if (isSelected) {
-                Log.i("TEST_editor", "updateViewSelection: selected id = $selectedViewId", )
-            }
-            it.isSelected = isSelected
+            it.isSelected = it.id == selectedViewId
         }
         _state.update {
             it.copy(
                 transformableViewStateList = transformableViewsList,
-                recompositionTrigger = it.recompositionTrigger + 1
+                selectedViewStateUpdateTrigger = it.selectedViewStateUpdateTrigger + 1
             )
         }
     }
@@ -223,5 +228,44 @@ class TextModeViewModel @Inject constructor(
             }
 
         }
+    }
+
+    fun onTextModeToolbarExtensionEvent(event: TextModeToolbarExtensionEvent) {
+        when (event) {
+            is TextModeToolbarExtensionEvent.UpdateTextAlignment -> {
+                updateTransformableText(textAlignment = event.textAlignment)
+            }
+            is TextModeToolbarExtensionEvent.UpdateTextCaseType -> {
+                updateTransformableText(textCaseType = event.textCaseType)
+            }
+            is TextModeToolbarExtensionEvent.UpdateTextStyleAttr -> {
+                updateTransformableText(textStyleAttr = event.textStyleAttr)
+            }
+        }
+    }
+
+    private fun updateTransformableText(
+        textAlignment: TextAlign? = null,
+        textCaseType: TextCaseType? = null,
+        textStyleAttr: TextStyleAttr? = null
+    ) {
+        val selectedViewState = state.value.transformableViewStateList.find { it.isSelected }
+        if (selectedViewState == null || selectedViewState !is TransformableTextBoxState)
+            return
+
+        textAlignment?.let { selectedViewState.textAlign = it }
+        textCaseType?.let { selectedViewState.textCaseType = it }
+        textStyleAttr?.let { selectedViewState.textStyleAttr = it }
+
+        val selectedTool = state.value.selectedTool
+        if (selectedTool is BottomToolbarItem.TextFormat) {
+            selectedTool.textAlign = selectedViewState.textAlign
+            selectedTool.textCaseType = selectedViewState.textCaseType
+            selectedTool.textStyleAttr = selectedViewState.textStyleAttr
+        }
+
+        _state.update { it.copy(
+            selectedViewStateUpdateTrigger = it.selectedViewStateUpdateTrigger + 1
+        ) }
     }
 }

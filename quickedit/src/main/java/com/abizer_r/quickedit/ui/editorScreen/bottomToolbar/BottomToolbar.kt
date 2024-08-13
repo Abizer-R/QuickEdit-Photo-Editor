@@ -299,7 +299,7 @@ fun DrawMode_BottomToolbar() {
 @Composable
 fun TextMode_BottomToolbar() {
     QuickEditTheme {
-        val itemsList = TextModeUtils.getDefaultBottomToolbarItemsList()
+        val itemsList = TextModeUtils.getDefaultBottomToolbarItemsList(null)
         BottomToolBarStatic(
             modifier = Modifier.fillMaxWidth(),
             toolbarItems = ImmutableList(itemsList),

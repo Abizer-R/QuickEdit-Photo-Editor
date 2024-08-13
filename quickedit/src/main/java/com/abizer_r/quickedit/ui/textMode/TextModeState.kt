@@ -12,7 +12,8 @@ data class TextModeState(
     val transformableViewStateList: ArrayList<TransformableBoxState> = arrayListOf(),
     val selectedTool: BottomToolbarItem = BottomToolbarItem.NONE,
     val showBottomToolbarExtension: Boolean = false,
-    val recompositionTrigger: Long = 0
+    val recompositionTrigger: Long = 0,
+    val selectedViewStateUpdateTrigger: Long = 0,   // used separately to trigger recomposition for bottomToolbarExtension
 ) {
 
 }

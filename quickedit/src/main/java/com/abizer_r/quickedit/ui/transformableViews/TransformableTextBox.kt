@@ -11,9 +11,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import com.abizer_r.quickedit.theme.QuickEditTheme
+import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.caseOptions.TextCaseType
+import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.styleOptions.TextDecoration.*
+import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.styleOptions.TextStyleAttr
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBox
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBoxEvents
@@ -42,13 +48,28 @@ fun TransformableTextBox(
         showBorderOnly = showBorderOnly,
         onEvent = onEventLambda
     ) {
+        val text = remember(viewState.textCaseType) {
+            when (viewState.textCaseType) {
+                TextCaseType.UPPER_CASE -> viewState.text.uppercase()
+                TextCaseType.LOWER_CASE -> viewState.text.lowercase()
+                TextCaseType.DEFAULT -> viewState.text
+            }
+        }
+        val textDecoration = when (viewState.textStyleAttr.textDecoration) {
+            None -> TextDecoration.None
+            Underline -> TextDecoration.Underline
+            StrikeThrough -> TextDecoration.LineThrough
+        }
         Text(
-            text = viewState.text,
+            text = text,
             style = TextStyle(
                 color = viewState.textColor,
                 fontSize = viewState.textFont,
-                textAlign = viewState.textAlign
-            )
+                textAlign = viewState.textAlign,
+                fontWeight = if (viewState.textStyleAttr.isBold) FontWeight.Bold else FontWeight.Normal,
+                fontStyle = if (viewState.textStyleAttr.isItalic) FontStyle.Italic else FontStyle.Normal
+            ),
+            textDecoration = textDecoration
         )
     }
 }

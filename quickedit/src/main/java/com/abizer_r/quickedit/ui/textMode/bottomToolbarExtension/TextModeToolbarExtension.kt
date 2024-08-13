@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.theme.ToolBarBackgroundColor
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
+import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.TextModeToolbarExtensionEvent.*
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.caseOptions.TextCaseType
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.alignmentOptions.TextAlignOptions
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.caseOptions.TextCaseOptions
@@ -31,14 +32,16 @@ import com.abizer_r.quickedit.utils.textMode.TextModeUtils
 @Composable
 fun TextModeToolbarExtension(
     modifier: Modifier,
-    bottomToolbarItem: BottomToolbarItem
+    bottomToolbarItem: BottomToolbarItem,
+    onEvent: (TextModeToolbarExtensionEvent) -> Unit
 ) {
 
     when (bottomToolbarItem) {
         is BottomToolbarItem.TextFormat -> {
             TextModeToolbarExtTextFormat(
-                modifier,
-                bottomToolbarItem
+                modifier = modifier,
+                bottomToolbarItem = bottomToolbarItem,
+                onEvent = onEvent
             )
         }
 
@@ -51,6 +54,7 @@ fun TextModeToolbarExtension(
 fun TextModeToolbarExtTextFormat(
     modifier: Modifier = Modifier,
     bottomToolbarItem: BottomToolbarItem.TextFormat,
+    onEvent: (TextModeToolbarExtensionEvent) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -62,7 +66,9 @@ fun TextModeToolbarExtTextFormat(
             textStyleAttr = bottomToolbarItem.textStyleAttr,
             showDividers = true,
             onItemClicked = {
-                // TODO - textmode: handle item click
+                onEvent(
+                    UpdateTextStyleAttr(textStyleAttr = it)
+                )
             }
         )
 
@@ -77,7 +83,9 @@ fun TextModeToolbarExtTextFormat(
                 modifier = Modifier.weight(1f),
                 selectedTextCase = bottomToolbarItem.textCaseType,
                 onItemClicked = {
-                    // TODO - textmode: handle item click
+                    onEvent(
+                        UpdateTextCaseType(textCaseType = it)
+                    )
                 }
             )
 
@@ -85,9 +93,11 @@ fun TextModeToolbarExtTextFormat(
 
             TextAlignOptions(
                 modifier = Modifier.weight(1f),
-                selectedAlignment = bottomToolbarItem.alignment,
-                onItemClicked = { _, _ ->
-                    // TODO - textmode: handle item click
+                selectedAlignment = bottomToolbarItem.textAlign,
+                onItemClicked = { _, textAlign ->
+                    onEvent(
+                        UpdateTextAlignment(textAlignment = textAlign)
+                    )
                 }
             )
         }
@@ -106,8 +116,9 @@ fun PreviewTextModeToolbarExtension() {
             bottomToolbarItem = BottomToolbarItem.TextFormat(
                 textStyleAttr = TextStyleAttr(isBold = true),
                 textCaseType = TextCaseType.DEFAULT,
-                alignment = TextModeUtils.DEFAULT_TEXT_ALIGN
-            )
+                textAlign = TextModeUtils.DEFAULT_TEXT_ALIGN
+            ),
+            onEvent = {}
         )
     }
 }

@@ -79,12 +79,15 @@ fun TextStyleOptions(
             VerticalDivider(Modifier.height(24.dp))
         }
 
+        val isUnderline = textStyleAttr.textDecoration == TextDecoration.Underline
         SelectableToolbarItem(
             imageVector = Icons.Default.FormatUnderlined,
-            isSelected = textStyleAttr.isUnderline,
+            isSelected = isUnderline,
             onClick = {
                 onItemClicked(
-                    textStyleAttr.copy(isUnderline = !textStyleAttr.isUnderline)
+                    textStyleAttr.copy(
+                        textDecoration = if (isUnderline) TextDecoration.None else TextDecoration.Underline
+                    )
                 )
             }
         )
@@ -93,12 +96,15 @@ fun TextStyleOptions(
             VerticalDivider(Modifier.height(24.dp))
         }
 
+        val isStrikeThrough = textStyleAttr.textDecoration == TextDecoration.StrikeThrough
         SelectableToolbarItem(
             imageVector = Icons.Default.FormatStrikethrough,
-            isSelected = textStyleAttr.isStrikeThrough,
+            isSelected = isStrikeThrough,
             onClick = {
                 onItemClicked(
-                    textStyleAttr.copy(isStrikeThrough = !textStyleAttr.isStrikeThrough)
+                    textStyleAttr.copy(
+                        textDecoration = if (isStrikeThrough) TextDecoration.None else TextDecoration.StrikeThrough
+                    )
                 )
             }
         )
@@ -114,7 +120,7 @@ fun Preview_AlignmentOptions() {
         TextStyleOptions(
             textStyleAttr = TextStyleAttr(
                 isBold = true,
-                isUnderline = true
+                textDecoration = TextDecoration.Underline,
             ),
             onItemClicked = {}
         )
@@ -131,7 +137,7 @@ fun Preview_AlignmentOptions_FullWidth() {
             showDividers = true,
             textStyleAttr = TextStyleAttr(
                 isBold = true,
-                isUnderline = true
+                textDecoration = TextDecoration.Underline
             ),
             onItemClicked = {}
         )

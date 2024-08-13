@@ -75,20 +75,28 @@ object TextModeUtils {
             }
     }
 
-    fun getDefaultBottomToolbarItemsList(): ArrayList<BottomToolbarItem> {
-        val textFormatToolItem: BottomToolbarItem.TextFormat = getDefaultTextFormat()
-        return arrayListOf(
-            BottomToolbarItem.AddItem,
-            textFormatToolItem
+    fun getDefaultBottomToolbarItemsList(
+        selectedViewState: TransformableBoxState?
+    ): ArrayList<BottomToolbarItem> {
 
-        )
+        val toolbarItems: ArrayList<BottomToolbarItem> = arrayListOf()
+        toolbarItems.add(BottomToolbarItem.AddItem)
+        if (selectedViewState == null) {
+            return toolbarItems
+        }
+
+        if (selectedViewState is TransformableTextBoxState) {
+            val textFormatToolItem: BottomToolbarItem.TextFormat = getTextFormat(selectedViewState)
+            toolbarItems.add(textFormatToolItem)
+        }
+        return toolbarItems
     }
 
-    fun getDefaultTextFormat(): BottomToolbarItem.TextFormat {
+    private fun getTextFormat(viewState: TransformableTextBoxState): BottomToolbarItem.TextFormat {
         return BottomToolbarItem.TextFormat(
-            textStyleAttr = TextStyleAttr(),
-            textCaseType = TextCaseType.DEFAULT,
-            alignment = DEFAULT_TEXT_ALIGN
+            textStyleAttr = viewState.textStyleAttr,
+            textCaseType = viewState.textCaseType,
+            textAlign = viewState.textAlign
         )
     }
 

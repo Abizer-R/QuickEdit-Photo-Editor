@@ -46,6 +46,8 @@ import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TextModeTopToolbar
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.TextModeToolbarExtension
+import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.caseOptions.TextCaseType
+import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.styleOptions.TextStyleAttr
 import com.abizer_r.quickedit.ui.textMode.textEditorLayout.TextEditorLayout
 import com.abizer_r.quickedit.ui.textMode.textEditorLayout.TextEditorState
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableTextBoxState
@@ -78,12 +80,19 @@ fun TextModeScreen(
     val showTextEditor by viewModel.showTextEditor.collectAsStateWithLifecycle(
         lifecycleOwner = lifeCycleOwner
     )
+//    val selectedViewState by viewModel.selectedViewState.collectAsStateWithLifecycle(
+//        lifecycleOwner = lifeCycleOwner
+//    )
 //    val toolbarExtensionVisible by viewModel.toolbarExtensionVisible.collectAsStateWithLifecycle(
 //        lifecycleOwner = lifeCycleOwner
 //    )
 
-    val bottomToolbarItems = remember {
-        ImmutableList(TextModeUtils.getDefaultBottomToolbarItemsList())
+    // TODO - animate the toolbar changes (hide/show other options)
+    val bottomToolbarItems = remember(state.selectedViewStateUpdateTrigger) {
+        val selectedViewState = viewModel.getSelectedViewState()
+        ImmutableList(TextModeUtils.getDefaultBottomToolbarItemsList(
+            selectedViewState
+        ))
     }
 
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -132,7 +141,7 @@ fun TextModeScreen(
     val onDoneClickedLambda = remember<() -> Unit> {{
         viewModel.handleStateBeforeCaptureScreenshot()
         lifeCycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-            delay(200)  /* Delay to update the selection in ui */
+            delay(400)  /* Delay to update the ToolbarExtensionView Visibility and view-selection in ui */
             screenshotState.capture()
         }
     }}
@@ -322,7 +331,8 @@ fun TextModeScreen(
         ) {
             TextModeToolbarExtension(
                 modifier = Modifier.fillMaxWidth(),
-                bottomToolbarItem = state.selectedTool
+                bottomToolbarItem = state.selectedTool,
+                onEvent = viewModel::onTextModeToolbarExtensionEvent
             )
         }
     }

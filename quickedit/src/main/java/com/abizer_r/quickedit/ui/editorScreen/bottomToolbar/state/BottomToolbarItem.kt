@@ -32,7 +32,7 @@ sealed class BottomToolbarItem {
     class TextFormat(
         var textStyleAttr: TextStyleAttr,
         var textCaseType: TextCaseType,
-        var alignment: TextAlign,
+        var textAlign: TextAlign,
     ) : BottomToolbarItem()
     // ---------- TextModeScreen Items - End
 

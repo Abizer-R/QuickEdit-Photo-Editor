@@ -3,6 +3,10 @@ package com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOpti
 data class TextStyleAttr(
     var isBold: Boolean = false,
     var isItalic: Boolean = false,
-    var isUnderline: Boolean = false,
     var isStrikeThrough: Boolean = false,
+    var textDecoration: TextDecoration = TextDecoration.None
 )
+
+enum class TextDecoration {
+    None, Underline, StrikeThrough
+}
