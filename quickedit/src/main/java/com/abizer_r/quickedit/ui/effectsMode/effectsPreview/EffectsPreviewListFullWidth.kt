@@ -41,6 +41,7 @@ import com.abizer_r.quickedit.theme.ToolBarBackgroundColor
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_EXTRA_LARGE
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_LARGE
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
+import com.abizer_r.quickedit.utils.defaultTextColor
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -112,12 +113,13 @@ fun EffectPreview(
 
         Text(
             modifier = Modifier
+                .fillMaxWidth()
                 .background(Black_alpha_30)
                 .align(Alignment.BottomCenter),
             text = effectItem.label,
-            style = TextStyle(
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = 9.sp,
+            style = MaterialTheme.typography.labelSmall.copy(
+                color = defaultTextColor(),
+                fontSize = 9.sp
             ),
         )
     }

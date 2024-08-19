@@ -19,10 +19,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.caseOptions.TextCaseType
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.styleOptions.TextDecoration.*
-import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.styleOptions.TextStyleAttr
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBox
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBoxEvents
+import com.abizer_r.quickedit.utils.textMode.FontUtils
 
 @Composable
 fun TransformableTextBox(
@@ -62,12 +62,13 @@ fun TransformableTextBox(
         }
         Text(
             text = text,
-            style = TextStyle(
+            style = MaterialTheme.typography.headlineMedium.copy(
                 color = viewState.textColor,
                 fontSize = viewState.textFont,
                 textAlign = viewState.textAlign,
                 fontWeight = if (viewState.textStyleAttr.isBold) FontWeight.Bold else FontWeight.Normal,
-                fontStyle = if (viewState.textStyleAttr.isItalic) FontStyle.Italic else FontStyle.Normal
+                fontStyle = if (viewState.textStyleAttr.isItalic) FontStyle.Italic else FontStyle.Normal,
+                fontFamily = viewState.textFontFamily
             ),
             textDecoration = textDecoration
         )

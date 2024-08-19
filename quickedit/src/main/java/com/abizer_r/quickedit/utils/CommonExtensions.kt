@@ -1,6 +1,5 @@
 package com.abizer_r.quickedit.utils
 
-import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
@@ -14,11 +13,10 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import com.abizer_r.quickedit.R
-import java.util.Locale
 
 val Any.TAG: String
     get() {
@@ -73,3 +71,6 @@ fun Context.getOpenAppSettingsIntent(): Intent {
         Uri.fromParts("package", packageName, null)
     )
 }
+
+@Composable
+fun defaultTextColor() = MaterialTheme.colorScheme.onBackground

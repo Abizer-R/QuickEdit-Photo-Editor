@@ -27,7 +27,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -35,7 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.theme.ToolBarBackgroundColor
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_LARGE
-import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
+import com.abizer_r.quickedit.utils.defaultTextColor
 import com.abizer_r.quickedit.utils.editorScreen.CropModeUtils
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -87,7 +86,6 @@ fun CropperOptionView(
 ) {
 
     val borderColor = if (isSelected) selectedBorderColor else Color.Transparent
-    val textSize = 9
     Column(
         modifier = modifier
             .wrapContentSize()
@@ -138,9 +136,9 @@ fun CropperOptionView(
         Text(
             modifier = Modifier.padding(top = 4.dp),
             text = cropperOption.label,
-            style = TextStyle(
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = textSize.sp,
+            style = MaterialTheme.typography.labelSmall.copy(
+                color = defaultTextColor(),
+                fontSize = 9.sp,
             ),
         )
     }

@@ -38,7 +38,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.abizer_r.quickedit.R
 import com.abizer_r.quickedit.theme.QuickEditTheme
@@ -46,6 +45,7 @@ import com.abizer_r.quickedit.theme.ToolBarBackgroundColor
 import com.abizer_r.quickedit.utils.ImmutableList
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
+import com.abizer_r.quickedit.utils.defaultTextColor
 import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
 import com.abizer_r.quickedit.utils.editorScreen.EditorScreenUtils
 import com.abizer_r.quickedit.utils.textMode.TextModeUtils
@@ -96,7 +96,7 @@ fun ToolbarItem(
     isSelected: Boolean,
     onEvent: (BottomToolbarEvent) -> Unit
 ) {
-    val labelFontSize = MaterialTheme.typography.bodySmall.fontSize
+    val labelTextStyle = MaterialTheme.typography.bodySmall.copy(color = defaultTextColor())
 
     val commonPaddingModifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
 
@@ -106,7 +106,7 @@ fun ToolbarItem(
             selectedColor = selectedColor,
             showColorPickerIcon = showColorPickerIcon,
             colorItem = toolbarItem,
-            labelFontSize = labelFontSize,
+            labelTextStyle = labelTextStyle,
             onEvent = onEvent
         )
         return
@@ -202,10 +202,7 @@ fun ToolbarItem(
 
         if (labelText.isNotBlank()) {
             Text(
-                style = TextStyle(
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = labelFontSize,
-                ),
+                style = labelTextStyle,
                 text = labelText
             )
         }
@@ -218,7 +215,7 @@ fun ColorToolbarItem(
     selectedColor: Color,
     showColorPickerIcon: Boolean,
     colorItem: BottomToolbarItem.ColorItem,
-    labelFontSize: TextUnit,
+    labelTextStyle: TextStyle,
     onEvent: (BottomToolbarEvent) -> Unit
 ) {
     Column(
@@ -257,10 +254,7 @@ fun ColorToolbarItem(
         Spacer(modifier = Modifier.size(4.dp))
 
         Text(
-            style = TextStyle(
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = labelFontSize
-            ),
+            style = labelTextStyle,
             text = stringResource(id = R.string.color)
         )
     }

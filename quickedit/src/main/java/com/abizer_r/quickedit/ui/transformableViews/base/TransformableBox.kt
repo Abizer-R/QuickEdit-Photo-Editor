@@ -77,37 +77,6 @@ fun TransformableBox(
             showBorderOnly = showBorderOnly,
             onEvent = onEvent
         )
-//        val btnCloseAlpha = if (showBorderOnly) 1f else 0f
-//        val btnCloseBackgroundColor = if (showBorderOnly) Color.Black else Color.Transparent
-//        val btnCloseOffset = (4.dp * viewState.scale).coerceIn(4.dp, 10.dp)
-//        Log.e("TEST_CLOSE", "TransformableBox: scale = ${viewState.scale}, btnCloseOffset = $btnCloseOffset", )
-//        Image(
-//            modifier = Modifier
-//                .constrainAs(btnClose) {
-//                    top.linkTo(parent.top)
-//                    start.linkTo(parent.start)
-//                }
-//                .offset(
-//                    x = btnCloseOffset,
-//                    y = btnCloseOffset
-//                )
-//                .size(28.dp)
-//                .scale(1 / viewState.scale) /* to keep the size of button constant */
-//                .clip(CircleShape)
-//                .background(btnCloseBackgroundColor)
-//                .alpha(btnCloseAlpha)
-//                .clickable {
-//                    onEvent(
-//                        TransformableBoxEvents.OnCloseClicked(viewState.id)
-//                    )
-//                },
-//            imageVector = Icons.Default.Cancel,
-//            contentScale = ContentScale.FillBounds,
-//            contentDescription = null,
-//            colorFilter = ColorFilter.tint(
-//                color = Color.White
-//            )
-//        )
 
 
         var innerBoxModifier = Modifier.constrainAs(contentBox) {
@@ -130,8 +99,8 @@ fun TransformableBox(
             )
         }
 
-        val innerBoxPaddingHorizontal = (16.dp / viewState.scale).coerceIn(4.dp, 20.dp)
-        val innerBoxPaddingVertical = (6.dp / viewState.scale).coerceIn(2.dp, 6.dp)
+        val innerBoxPaddingHorizontal = (8.dp / viewState.scale)
+        val innerBoxPaddingVertical = (4.dp / viewState.scale)
         Box(
             modifier = innerBoxModifier
                 .detectGestures(viewState, onEvent)

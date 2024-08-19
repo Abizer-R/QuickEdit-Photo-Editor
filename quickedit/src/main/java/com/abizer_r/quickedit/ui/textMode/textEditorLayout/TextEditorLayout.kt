@@ -85,7 +85,11 @@ fun TextEditorLayout(
         viewModel.updateInitialState(initialState = initialState)
     }
 
-    val defaultTextFont = MaterialTheme.typography.headlineMedium.fontSize
+    val customTextStyle = MaterialTheme.typography.headlineMedium.copy(
+        color = editorState.selectedColor,
+        textAlign = editorState.textAlign,
+        fontSize = editorState.textFont
+    )
     val focusRequesterForTextField = remember { FocusRequester() }
 
     val topToolbarHeight =  TOOLBAR_HEIGHT_SMALL
@@ -148,11 +152,7 @@ fun TextEditorLayout(
             colors = TextModeUtils.getColorsForTextField(
                 cursorColor = editorState.selectedColor
             ),
-            textStyle = TextStyle(
-                color = editorState.selectedColor,
-                textAlign = editorState.textAlign,
-                fontSize = defaultTextFont
-            ),
+            textStyle = customTextStyle,
         )
 
         // PlaceHolder Text
@@ -173,9 +173,7 @@ fun TextEditorLayout(
         ) {
             Text(
                 text = stringResource(id = R.string.enter_your_text),
-                textAlign = editorState.textAlign,
-                color = editorState.selectedColor,
-                fontSize = defaultTextFont
+                style = customTextStyle,
             )
         }
 

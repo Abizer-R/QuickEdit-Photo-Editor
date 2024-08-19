@@ -25,6 +25,7 @@ import com.abizer_r.quickedit.R
 import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.theme.ToolBarBackgroundColor
 import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
+import com.abizer_r.quickedit.utils.defaultTextColor
 import com.abizer_r.quickedit.utils.drawMode.DrawingConstants
 
 /**
@@ -119,7 +120,9 @@ fun RadioButtonRow(
             Text(
                 text = mShape.name,
                 modifier = Modifier.padding(end = 8.dp),
-                style = TextStyle(color = MaterialTheme.colorScheme.onBackground)
+                style = MaterialTheme.typography.labelLarge.copy(
+                    color = defaultTextColor()
+                )
             )
         }
     }
