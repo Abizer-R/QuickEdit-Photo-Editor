@@ -16,10 +16,6 @@ object FontUtils {
         Font(R.font.edu_vicwant_bold, FontWeight.Bold),
     )
 
-    val gaMaamliFontFamily = FontFamily(
-        Font(R.font.ga_maamli_regular, FontWeight.Bold),
-    )
-
     val greyQoFontFamily = FontFamily(
         Font(R.font.grey_qo_regular, FontWeight.Normal),
     )
@@ -81,7 +77,6 @@ object FontUtils {
         )
 
         fontSet.add(eduVicwantFontFamily.getFontItem())
-        fontSet.add(gaMaamliFontFamily.getFontItem())   // stroke/underline doesn't work
         fontSet.add(greyQoFontFamily.getFontItem())
         fontSet.add(moderusticFontFamily.getFontItem())
         fontSet.add(newAmsterdamFontFamily.getFontItem())   // bold doesn't work
@@ -99,7 +94,6 @@ object FontUtils {
     private fun getLabel(fontFamily: FontFamily): String {
         return when (fontFamily) {
             eduVicwantFontFamily -> "EduVicwant"
-            gaMaamliFontFamily -> "gaMaamli"
             greyQoFontFamily -> "greyQo"
             moderusticFontFamily -> "moderustic"
             newAmsterdamFontFamily -> "newAmsterdam"
