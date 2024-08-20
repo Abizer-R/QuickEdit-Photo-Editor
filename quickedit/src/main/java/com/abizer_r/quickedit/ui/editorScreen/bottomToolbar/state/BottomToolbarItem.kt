@@ -1,6 +1,7 @@
 package com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.caseOptions.TextCaseType
@@ -34,6 +35,7 @@ sealed class BottomToolbarItem {
         var textCaseType: TextCaseType,
         var textAlign: TextAlign,
     ) : BottomToolbarItem()
+    class TextFontFamily(var textFontFamily: FontFamily) : BottomToolbarItem()
     // ---------- TextModeScreen Items - End
 
 

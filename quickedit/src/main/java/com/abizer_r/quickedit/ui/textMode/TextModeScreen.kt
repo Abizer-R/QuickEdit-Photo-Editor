@@ -1,6 +1,7 @@
 package com.abizer_r.quickedit.ui.textMode
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -44,6 +45,7 @@ import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.BottomToolBarStatic
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
+import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TextModeTopToolbar
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.TextModeToolbarExtension
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.caseOptions.TextCaseType
@@ -80,6 +82,16 @@ fun TextModeScreen(
     val showTextEditor by viewModel.showTextEditor.collectAsStateWithLifecycle(
         lifecycleOwner = lifeCycleOwner
     )
+    // TODO - text: animate the toolbar changes (hide/show other options)
+    val bottomToolbarItems by viewModel.bottomToolbarItems.collectAsStateWithLifecycle(
+        lifecycleOwner = lifeCycleOwner
+    )
+    val selectedTool: BottomToolbarItem = remember(state.showBottomToolbarExtension, state.selectedTool) {
+        if (state.showBottomToolbarExtension)
+            state.selectedTool
+        else
+            BottomToolbarItem.NONE
+    }
 //    val selectedViewState by viewModel.selectedViewState.collectAsStateWithLifecycle(
 //        lifecycleOwner = lifeCycleOwner
 //    )
@@ -87,13 +99,6 @@ fun TextModeScreen(
 //        lifecycleOwner = lifeCycleOwner
 //    )
 
-    // TODO - animate the toolbar changes (hide/show other options)
-    val bottomToolbarItems = remember(state.selectedViewStateUpdateTrigger) {
-        val selectedViewState = viewModel.getSelectedViewState()
-        ImmutableList(TextModeUtils.getDefaultBottomToolbarItemsList(
-            selectedViewState
-        ))
-    }
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -309,7 +314,7 @@ fun TextModeScreen(
                 modifier = Modifier.fillMaxWidth(),
                 toolbarItems = bottomToolbarItems,
                 toolbarHeight = bottomToolbarHeight,
-                selectedItem = state.selectedTool,
+                selectedItem = selectedTool,
                 onEvent = onBottomToolbarEventLambda
             )
         }

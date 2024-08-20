@@ -1,6 +1,7 @@
 package com.abizer_r.quickedit.ui.textMode
 
 import android.util.Log
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -15,7 +16,9 @@ import com.abizer_r.quickedit.ui.textMode.textEditorLayout.TextEditorState
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBoxEvents
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBoxState
+import com.abizer_r.quickedit.utils.ImmutableList
 import com.abizer_r.quickedit.utils.other.anim.AnimUtils
+import com.abizer_r.quickedit.utils.textMode.TextModeUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -38,6 +41,11 @@ class TextModeViewModel @Inject constructor(
 
     var initialTextEditorState: TextEditorState? = null
         private set
+
+    private val _bottomToolbarItems = MutableStateFlow<ImmutableList<BottomToolbarItem>>(
+        ImmutableList(TextModeUtils.getBottomToolbarItemsList(null))
+    )
+    val bottomToolbarItems: StateFlow<ImmutableList<BottomToolbarItem>> = _bottomToolbarItems
 
     fun getSelectedViewState(): TransformableBoxState? =
         state.value.transformableViewStateList.find { it.isSelected }
@@ -179,10 +187,16 @@ class TextModeViewModel @Inject constructor(
         transformableViewsList.forEach {
             it.isSelected = it.id == selectedViewId
         }
+        val newToolbarItems = TextModeUtils.getBottomToolbarItemsList(
+            selectedViewState = getSelectedViewState(),
+            selectedItem = state.value.selectedTool
+        )
+        _bottomToolbarItems.update { ImmutableList(newToolbarItems) }
         _state.update {
             it.copy(
+                showBottomToolbarExtension = getSelectedViewState() != null,
                 transformableViewStateList = transformableViewsList,
-                selectedViewStateUpdateTrigger = it.selectedViewStateUpdateTrigger + 1
+                recompositionTrigger = it.recompositionTrigger + 1
             )
         }
     }
@@ -206,7 +220,7 @@ class TextModeViewModel @Inject constructor(
 
             // Clicked on already selected item
             state.value.selectedTool -> {
-                if (selectedItem != BottomToolbarItem.PanItem) {
+                if (selectedItem != BottomToolbarItem.AddItem) {
                     _state.update {
                         it.copy(showBottomToolbarExtension = it.showBottomToolbarExtension.not())
                     }
@@ -220,11 +234,10 @@ class TextModeViewModel @Inject constructor(
                     _state.update { it.copy(showBottomToolbarExtension = false) }
                     delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION.toLong())
                 }
-                _state.update { it.copy(selectedTool = selectedItem) }
-                if (selectedItem != BottomToolbarItem.PanItem) {
-                    // open toolbarExtension for new item
-                    _state.update { it.copy(showBottomToolbarExtension = true) }
-                }
+                _state.update { it.copy(
+                    selectedTool = selectedItem,
+                    showBottomToolbarExtension = true
+                ) }
             }
 
         }
@@ -241,13 +254,17 @@ class TextModeViewModel @Inject constructor(
             is TextModeToolbarExtensionEvent.UpdateTextStyleAttr -> {
                 updateTransformableText(textStyleAttr = event.textStyleAttr)
             }
+            is TextModeToolbarExtensionEvent.UpdateTextFontFamily -> {
+                updateTransformableText(textFontFamily = event.fontFamily)
+            }
         }
     }
 
     private fun updateTransformableText(
         textAlignment: TextAlign? = null,
         textCaseType: TextCaseType? = null,
-        textStyleAttr: TextStyleAttr? = null
+        textStyleAttr: TextStyleAttr? = null,
+        textFontFamily: FontFamily? = null,
     ) {
         val selectedViewState = state.value.transformableViewStateList.find { it.isSelected }
         if (selectedViewState == null || selectedViewState !is TransformableTextBoxState)
@@ -256,12 +273,23 @@ class TextModeViewModel @Inject constructor(
         textAlignment?.let { selectedViewState.textAlign = it }
         textCaseType?.let { selectedViewState.textCaseType = it }
         textStyleAttr?.let { selectedViewState.textStyleAttr = it }
+        textFontFamily?.let { selectedViewState.textFontFamily = it }
 
-        val selectedTool = state.value.selectedTool
-        if (selectedTool is BottomToolbarItem.TextFormat) {
-            selectedTool.textAlign = selectedViewState.textAlign
-            selectedTool.textCaseType = selectedViewState.textCaseType
-            selectedTool.textStyleAttr = selectedViewState.textStyleAttr
+        state.value.selectedTool.apply {
+            when(this) {
+                is BottomToolbarItem.TextFormat -> {
+                    this.textAlign = selectedViewState.textAlign
+                    this.textCaseType = selectedViewState.textCaseType
+                    this.textStyleAttr = selectedViewState.textStyleAttr
+                }
+
+                is BottomToolbarItem.TextFontFamily -> {
+                    this.textFontFamily = selectedViewState.textFontFamily
+                }
+
+                else -> {}
+            }
+
         }
 
         _state.update { it.copy(

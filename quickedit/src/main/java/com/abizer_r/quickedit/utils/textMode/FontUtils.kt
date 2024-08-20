@@ -5,6 +5,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import com.abizer_r.quickedit.R
+import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.fontFamilyOptions.FontItem
 
 object FontUtils {
 
@@ -73,4 +74,47 @@ object FontUtils {
     )
 
     val DefaultFontFamily = poppinsFontFamily
+
+    fun getFontItems(): List<FontItem> {
+        val fontSet = arrayListOf(
+            DefaultFontFamily.getFontItem()
+        )
+
+        fontSet.add(eduVicwantFontFamily.getFontItem())
+        fontSet.add(gaMaamliFontFamily.getFontItem())   // stroke/underline doesn't work
+        fontSet.add(greyQoFontFamily.getFontItem())
+        fontSet.add(moderusticFontFamily.getFontItem())
+        fontSet.add(newAmsterdamFontFamily.getFontItem())   // bold doesn't work
+        fontSet.add(oswaldFontFamily.getFontItem())
+        fontSet.add(matemasieFontFamily.getFontItem())      // bold doesn't work
+        fontSet.add(playwrightFontFamily.getFontItem())
+        fontSet.add(poppinsFontFamily.getFontItem())
+        fontSet.add(robotoFontFamily.getFontItem())
+        fontSet.add(tekoFontFamily.getFontItem())
+
+
+        return fontSet.distinct()
+    }
+
+    private fun getLabel(fontFamily: FontFamily): String {
+        return when (fontFamily) {
+            eduVicwantFontFamily -> "EduVicwant"
+            gaMaamliFontFamily -> "gaMaamli"
+            greyQoFontFamily -> "greyQo"
+            moderusticFontFamily -> "moderustic"
+            newAmsterdamFontFamily -> "newAmsterdam"
+            oswaldFontFamily -> "oswald"
+            matemasieFontFamily -> "matemasie"
+            playwrightFontFamily -> "playwright"
+            poppinsFontFamily -> "poppins"
+            robotoFontFamily -> "roboto"
+            tekoFontFamily -> "teko"
+            else -> "unknown font"
+        }
+    }
+
+    private fun FontFamily.getFontItem() = FontItem(
+        fontFamily = this,
+        label = getLabel(this)
+    )
 }

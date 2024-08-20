@@ -18,12 +18,14 @@ import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.theme.ToolBarBackgroundColor
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.TextModeToolbarExtensionEvent.*
+import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.fontFamilyOptions.FontFamilyOptions
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.caseOptions.TextCaseType
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.alignmentOptions.TextAlignOptions
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.caseOptions.TextCaseOptions
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.styleOptions.TextStyleOptions
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.styleOptions.TextStyleAttr
 import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
+import com.abizer_r.quickedit.utils.textMode.FontUtils
 import com.abizer_r.quickedit.utils.textMode.TextModeUtils
 
 /**
@@ -45,10 +47,35 @@ fun TextModeToolbarExtension(
             )
         }
 
+        is BottomToolbarItem.TextFontFamily -> {
+            TextModeToolbarExtFont(
+                modifier = modifier,
+                bottomToolbarItem = bottomToolbarItem,
+                onEvent = onEvent
+            )
+        }
+
         else -> {}
     }
 
 }
+
+@Composable
+fun TextModeToolbarExtFont(
+    modifier: Modifier = Modifier,
+    bottomToolbarItem: BottomToolbarItem.TextFontFamily,
+    onEvent: (TextModeToolbarExtensionEvent) -> Unit
+) {
+
+    FontFamilyOptions(
+        modifier = modifier,
+        selectedFontFamily = bottomToolbarItem.textFontFamily,
+        onItemClicked = {
+            onEvent(UpdateTextFontFamily(it))
+        }
+    )
+}
+
 
 @Composable
 fun TextModeToolbarExtTextFormat(
@@ -117,6 +144,21 @@ fun PreviewTextModeToolbarExtension() {
                 textStyleAttr = TextStyleAttr(isBold = true),
                 textCaseType = TextCaseType.DEFAULT,
                 textAlign = TextModeUtils.DEFAULT_TEXT_ALIGN
+            ),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun PreviewToolbarExtFontFamily() {
+    QuickEditTheme {
+        val bottomTools = DrawModeUtils.getDefaultBottomToolbarItemsList()
+        TextModeToolbarExtension(
+            modifier = Modifier.fillMaxWidth(),
+            bottomToolbarItem = BottomToolbarItem.TextFontFamily(
+                textFontFamily = FontUtils.DefaultFontFamily
             ),
             onEvent = {}
         )

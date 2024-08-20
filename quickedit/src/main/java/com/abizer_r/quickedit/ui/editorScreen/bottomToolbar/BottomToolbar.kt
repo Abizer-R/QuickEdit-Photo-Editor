@@ -39,16 +39,19 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.abizer_r.quickedit.R
 import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.theme.ToolBarBackgroundColor
 import com.abizer_r.quickedit.utils.ImmutableList
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
+import com.abizer_r.quickedit.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.quickedit.utils.defaultTextColor
 import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
 import com.abizer_r.quickedit.utils.editorScreen.EditorScreenUtils
 import com.abizer_r.quickedit.utils.textMode.TextModeUtils
+import java.util.UUID
 
 val TOOLBAR_HEIGHT_SMALL = 48.dp
 val TOOLBAR_HEIGHT_MEDIUM = 64.dp
@@ -169,6 +172,11 @@ fun ToolbarItem(
         is BottomToolbarItem.TextFormat -> Pair(
             ImageVector.vectorResource(id = R.drawable.outline_custom_typography_24),
             stringResource(id = R.string.format)
+        )
+
+        is BottomToolbarItem.TextFontFamily -> Pair(
+            ImageVector.vectorResource(id = R.drawable.outline_serif_24),
+            stringResource(id = R.string.font)
         )
 
         else -> Pair(
@@ -293,7 +301,14 @@ fun DrawMode_BottomToolbar() {
 @Composable
 fun TextMode_BottomToolbar() {
     QuickEditTheme {
-        val itemsList = TextModeUtils.getDefaultBottomToolbarItemsList(null)
+        val itemsList = TextModeUtils.getBottomToolbarItemsList(
+            selectedViewState = TransformableTextBoxState(
+                id = UUID.randomUUID().toString(),
+                text = "hello",
+                textColor = Color.White,
+                textFont = 8.sp,
+            )
+        )
         BottomToolBarStatic(
             modifier = Modifier.fillMaxWidth(),
             toolbarItems = ImmutableList(itemsList),

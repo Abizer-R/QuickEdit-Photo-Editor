@@ -7,8 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
-import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.caseOptions.TextCaseType
-import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.styleOptions.TextStyleAttr
 import com.abizer_r.quickedit.ui.transformableViews.TransformableTextBox
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBoxEvents
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBoxState
@@ -75,20 +73,27 @@ object TextModeUtils {
             }
     }
 
-    fun getDefaultBottomToolbarItemsList(
-        selectedViewState: TransformableBoxState?
+    fun getBottomToolbarItemsList(
+        selectedViewState: TransformableBoxState?,
+        selectedItem: BottomToolbarItem? = null
     ): ArrayList<BottomToolbarItem> {
 
         val toolbarItems: ArrayList<BottomToolbarItem> = arrayListOf()
         toolbarItems.add(BottomToolbarItem.AddItem)
-        if (selectedViewState == null) {
+        if (selectedViewState == null || selectedViewState !is TransformableTextBoxState) {
             return toolbarItems
         }
 
-        if (selectedViewState is TransformableTextBoxState) {
-            val textFormatToolItem: BottomToolbarItem.TextFormat = getTextFormat(selectedViewState)
-            toolbarItems.add(textFormatToolItem)
-        }
+        val textFormatToolItem: BottomToolbarItem.TextFormat =
+            if (selectedItem is BottomToolbarItem.TextFormat)
+                selectedItem else getTextFormat(selectedViewState)
+        toolbarItems.add(textFormatToolItem)
+
+        val textFontFamilyToolItem: BottomToolbarItem.TextFontFamily =
+            if (selectedItem is BottomToolbarItem.TextFontFamily)
+                selectedItem else getTextFontFamily(selectedViewState)
+        toolbarItems.add(textFontFamilyToolItem)
+
         return toolbarItems
     }
 
@@ -97,6 +102,12 @@ object TextModeUtils {
             textStyleAttr = viewState.textStyleAttr,
             textCaseType = viewState.textCaseType,
             textAlign = viewState.textAlign
+        )
+    }
+
+    private fun getTextFontFamily(viewState: TransformableTextBoxState): BottomToolbarItem.TextFontFamily {
+        return BottomToolbarItem.TextFontFamily(
+            textFontFamily = viewState.textFontFamily
         )
     }
 
