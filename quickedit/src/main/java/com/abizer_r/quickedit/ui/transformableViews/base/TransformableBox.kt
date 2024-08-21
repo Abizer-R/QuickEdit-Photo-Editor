@@ -270,29 +270,18 @@ fun Modifier.detectGestures(
                             "\nrotation: $rotationChange"
                 )
 
-                val dragAmount = pan * viewState.scale
-                val rotatedDragAmount = DrawModeUtils.rotateOffset(dragAmount, viewState.rotation)
-                onEvent(
-                    TransformableBoxEvents.OnDrag(
-                        id = viewState.id,
-                        dragAmount = rotatedDragAmount  // multiply with scale to get the actual drag amount (see commit message)
+                if (viewState.isSelected) {
+                    val dragAmount = pan * viewState.scale
+                    val rotatedDragAmount = DrawModeUtils.rotateOffset(dragAmount, viewState.rotation)
+                    onEvent(
+                        TransformableBoxEvents.UpdateTransformation(
+                            id = viewState.id,
+                            dragAmount = rotatedDragAmount,
+                            zoomAmount = zoom,
+                            rotationChange = rotationChange
+                        )
                     )
-                )
-
-                onEvent(
-                    TransformableBoxEvents.OnZoom(
-                        id = viewState.id,
-                        zoomAmount = zoom
-                    )
-
-                )
-
-                onEvent(
-                    TransformableBoxEvents.OnRotate(
-                        id = viewState.id,
-                        rotationChange = rotationChange
-                    )
-                )
+                }
 
             }
         }

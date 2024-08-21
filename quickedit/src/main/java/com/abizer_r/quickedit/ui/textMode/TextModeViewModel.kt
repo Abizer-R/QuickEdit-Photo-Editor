@@ -146,15 +146,9 @@ class TextModeViewModel @Inject constructor(
         val stateList = state.value.transformableViewStateList
         val viewItem = stateList.find { it.id == mEvent.id } ?: return
         when(mEvent) {
-            is TransformableBoxEvents.OnDrag -> {
+            is TransformableBoxEvents.UpdateTransformation -> {
                 viewItem.positionOffset += mEvent.dragAmount
-            }
-
-            is TransformableBoxEvents.OnZoom -> {
                 viewItem.scale = (viewItem.scale * mEvent.zoomAmount).coerceIn(0.5f, 5f)
-            }
-
-            is TransformableBoxEvents.OnRotate -> {
                 viewItem.rotation += mEvent.rotationChange
             }
 

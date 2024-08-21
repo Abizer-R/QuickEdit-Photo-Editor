@@ -1,8 +1,10 @@
 package com.abizer_r.quickedit.utils.textMode
 
+import android.util.Log
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
@@ -38,14 +40,17 @@ object TextModeUtils {
         onTransformableBoxEvent: (event: TransformableBoxEvents) -> Unit
     ) {
         transformableViewsList.forEach { mViewState ->
-            when (mViewState) {
-                is TransformableTextBoxState -> {
-                    TransformableTextBox(
-                        modifier = centerAlignModifier,
-                        viewState = mViewState,
-                        onEvent = onTransformableBoxEvent
-                    )
+            key(mViewState.id) {
+                when (mViewState) {
+                    is TransformableTextBoxState -> {
+                        TransformableTextBox(
+                            modifier = centerAlignModifier,
+                            viewState = mViewState,
+                            onEvent = onTransformableBoxEvent
+                        )
+                    }
                 }
+
             }
         }
     }
@@ -60,14 +65,16 @@ object TextModeUtils {
         transformableViewsList
             .filter { it.isSelected }
             .forEach { mViewState ->
-                when (mViewState) {
-                    is TransformableTextBoxState -> {
-                        TransformableTextBox(
-                            modifier = centerAlignModifier,
-                            viewState = mViewState,
-                            showBorderOnly = true,
-                            onEvent = onTransformableBoxEvent
-                        )
+                key(mViewState.id) {
+                    when (mViewState) {
+                        is TransformableTextBoxState -> {
+                            TransformableTextBox(
+                                modifier = centerAlignModifier,
+                                viewState = mViewState,
+                                showBorderOnly = true,
+                                onEvent = onTransformableBoxEvent
+                            )
+                        }
                     }
                 }
             }
