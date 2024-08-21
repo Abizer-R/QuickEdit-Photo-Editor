@@ -19,6 +19,7 @@ import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBoxState
 import com.abizer_r.quickedit.utils.ImmutableList
 import com.abizer_r.quickedit.utils.other.anim.AnimUtils
 import com.abizer_r.quickedit.utils.textMode.TextModeUtils
+import com.abizer_r.quickedit.utils.textMode.TextModeUtils.isTextModeItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -47,8 +48,11 @@ class TextModeViewModel @Inject constructor(
     )
     val bottomToolbarItems: StateFlow<ImmutableList<BottomToolbarItem>> = _bottomToolbarItems
 
-    fun getSelectedViewState(): TransformableBoxState? =
-        state.value.transformableViewStateList.find { it.isSelected }
+    var selectedViewState: TransformableBoxState? = null
+        private set
+
+//    fun getSelectedViewState(): TransformableBoxState? =
+//        state.value.transformableViewStateList.find { it.isSelected }
 
 
 
@@ -176,22 +180,44 @@ class TextModeViewModel @Inject constructor(
         onEvent(TextModeEvent.UpdateTransformableViewsList(stateList))
     }
 
-    fun updateViewSelection(selectedViewId: String? = null) {
-        val transformableViewsList = state.value.transformableViewStateList
-        transformableViewsList.forEach {
-            it.isSelected = it.id == selectedViewId
+    fun updateViewSelection(
+        selectedViewId: String? = null
+    ) = viewModelScope.launch{
+        val prevSelectedView = selectedViewState
+        selectedViewState?.isSelected = false
+
+        val newViewState = state.value.transformableViewStateList.find { it.id == selectedViewId }
+        newViewState?.isSelected = true
+        selectedViewState = newViewState
+
+//        val transformableViewsList = state.value.transformableViewStateList
+//        transformableViewsList.forEach {
+//            it.isSelected = it.id == selectedViewId
+//        }
+
+
+        val isNewItemSelected = prevSelectedView != newViewState
+        var prevSelectedToolbarItem: BottomToolbarItem = BottomToolbarItem.NONE
+        if (isNewItemSelected) {
+           prevSelectedToolbarItem = state.value.selectedTool
+            // the selected toolbar item must be updated before getting new toolbarItem-list
+            updateSelectedToolbarItem(BottomToolbarItem.NONE)
         }
+
         val newToolbarItems = TextModeUtils.getBottomToolbarItemsList(
-            selectedViewState = getSelectedViewState(),
+            selectedViewState = selectedViewState,
             selectedItem = state.value.selectedTool
         )
         _bottomToolbarItems.update { ImmutableList(newToolbarItems) }
-        _state.update {
-            it.copy(
-                showBottomToolbarExtension = getSelectedViewState() != null,
-                transformableViewStateList = transformableViewsList,
-                recompositionTrigger = it.recompositionTrigger + 1
-            )
+
+        if (isNewItemSelected) {
+            val newSelectedTool = TextModeUtils.getNewSelectedToolItem(newToolbarItems, prevSelectedToolbarItem)
+            updateSelectedToolbarItem(newSelectedTool)
+
+        } else {
+            _state.update {
+                it.copy( showBottomToolbarExtension = selectedViewState != null )
+            }
         }
     }
 
@@ -222,19 +248,21 @@ class TextModeViewModel @Inject constructor(
             }
 
             // clicked on another item
-            else -> {
-                if (state.value.showBottomToolbarExtension) {
-                    // Collapse toolbarExtension and change current item after DELAY
-                    _state.update { it.copy(showBottomToolbarExtension = false) }
-                    delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION.toLong())
-                }
-                _state.update { it.copy(
-                    selectedTool = selectedItem,
-                    showBottomToolbarExtension = true
-                ) }
-            }
+            else -> updateSelectedToolbarItem(selectedItem)
 
         }
+    }
+
+    private suspend fun updateSelectedToolbarItem(selectedItem: BottomToolbarItem) {
+        if (state.value.showBottomToolbarExtension) {
+            // Collapse toolbarExtension and change current item after DELAY
+            _state.update { it.copy(showBottomToolbarExtension = false) }
+            delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION.toLong())
+        }
+        _state.update { it.copy(
+            selectedTool = selectedItem,
+            showBottomToolbarExtension = isTextModeItem(selectedItem)
+        ) }
     }
 
     fun onTextModeToolbarExtensionEvent(event: TextModeToolbarExtensionEvent) {

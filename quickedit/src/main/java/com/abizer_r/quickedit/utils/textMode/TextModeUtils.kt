@@ -125,4 +125,20 @@ object TextModeUtils {
         TextAlign.Center,
         TextAlign.End
     )
+
+    fun isTextModeItem(toolbarItem: BottomToolbarItem): Boolean {
+        // check if the toolbarItem is one of the types that is added in getBottomToolbarItemsList()
+        return toolbarItem is BottomToolbarItem.AddItem ||
+                toolbarItem is BottomToolbarItem.TextFormat ||
+                toolbarItem is BottomToolbarItem.TextFontFamily
+    }
+
+    fun getNewSelectedToolItem(toolbarItems: ArrayList<BottomToolbarItem>, prevSelectedTool: BottomToolbarItem): BottomToolbarItem {
+        val newSelectedTool = when (prevSelectedTool) {
+            is BottomToolbarItem.TextFormat -> toolbarItems.find { it is BottomToolbarItem.TextFormat }
+            is BottomToolbarItem.TextFontFamily -> toolbarItems.find { it is BottomToolbarItem.TextFontFamily }
+            else -> BottomToolbarItem.NONE
+        }
+        return newSelectedTool ?: BottomToolbarItem.NONE
+    }
 }
