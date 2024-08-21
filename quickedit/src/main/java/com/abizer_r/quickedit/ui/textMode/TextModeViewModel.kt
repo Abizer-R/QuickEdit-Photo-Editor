@@ -167,7 +167,8 @@ class TextModeViewModel @Inject constructor(
                         textStateId = mEvent.id,
                         text = mEvent.textViewState.text,
                         textAlign = mEvent.textViewState.textAlign,
-                        selectedColor = mEvent.textViewState.textColor
+                        selectedColor = mEvent.textViewState.textColor,
+                        textFont = mEvent.textViewState.textFont
                     )
                     onEvent(ShowTextEditor(textEditorState = textEditorState))
                 }

@@ -40,6 +40,7 @@ import com.abizer_r.quickedit.utils.textMode.colorList.ColorListFullWidth
 import com.abizer_r.quickedit.utils.ImmutableList
 import com.abizer_r.quickedit.utils.textMode.TextModeUtils
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.alignmentOptions.TextAlignOptions
+import com.abizer_r.quickedit.utils.textMode.TextModeUtils.getDefaultEditorTextStyle
 import kotlinx.coroutines.delay
 import java.util.UUID
 
@@ -77,15 +78,19 @@ fun TextEditorLayout(
         lifecycleOwner = lifeCycleOwner
     )
 
+    val defaultTextFont = getDefaultEditorTextStyle().fontSize
     LaunchedEffect(key1 = Unit) {
         // updating the initialState is necessary even if "initialEditorState" argument is null
         // This is because the "hiltViewModel" is scoped to navigation destination and will keep holding the previous editorState
-        val initialState = initialEditorState ?: TextEditorState(UUID.randomUUID().toString())
+        val initialState = initialEditorState ?: TextEditorState(
+            textStateId = UUID.randomUUID().toString(),
+            textFont = defaultTextFont
+        )
         Log.d("TEST_editor", "TextEditorLayout: id = ${initialState.textStateId}", )
         viewModel.updateInitialState(initialState = initialState)
     }
 
-    val customTextStyle = MaterialTheme.typography.headlineMedium.copy(
+    val customTextStyle = getDefaultEditorTextStyle().copy(
         color = editorState.selectedColor,
         textAlign = editorState.textAlign,
         fontSize = editorState.textFont
@@ -219,7 +224,7 @@ fun Preview_TextEditorLayout() {
             modifier = Modifier.fillMaxSize(),
             initialEditorState = TextEditorState(
                 textStateId = UUID.randomUUID().toString(),
-                textFont = MaterialTheme.typography.headlineMedium.fontSize // defaultTextFont in "TextModeScreen"
+                textFont = getDefaultEditorTextStyle().fontSize // defaultTextFont in "TextModeScreen"
             ),
             onDoneClicked = {},
             onClosedClicked = {}

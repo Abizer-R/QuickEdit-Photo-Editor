@@ -1,5 +1,6 @@
 package com.abizer_r.quickedit.ui.textMode.textEditorLayout
 
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,7 +18,10 @@ class TextEditorViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _editorState = MutableStateFlow(
-        TextEditorState(textStateId = UUID.randomUUID().toString())
+        TextEditorState(
+            textStateId = UUID.randomUUID().toString(),
+            textFont = 0.sp
+        )
     )
     val editorState: StateFlow<TextEditorState> = _editorState
 

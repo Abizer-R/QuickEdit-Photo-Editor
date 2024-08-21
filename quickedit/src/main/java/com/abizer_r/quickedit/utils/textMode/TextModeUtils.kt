@@ -1,12 +1,14 @@
 package com.abizer_r.quickedit.utils.textMode
 
 import android.util.Log
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.quickedit.ui.transformableViews.TransformableTextBox
@@ -141,4 +143,7 @@ object TextModeUtils {
         }
         return newSelectedTool ?: BottomToolbarItem.NONE
     }
+
+    @Composable
+    fun getDefaultEditorTextStyle(): TextStyle = MaterialTheme.typography.headlineMedium
 }

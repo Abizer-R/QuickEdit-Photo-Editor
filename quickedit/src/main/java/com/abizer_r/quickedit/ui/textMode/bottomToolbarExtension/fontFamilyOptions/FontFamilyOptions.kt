@@ -114,7 +114,7 @@ fun SelectableFontItem(
             .clickable { onClick() }
         ,
         text = fontItem.label,
-        style = MaterialTheme.typography.bodyMedium.copy(
+        style = MaterialTheme.typography.bodyLarge.copy(
             color = defaultTextColor(),
             fontFamily = fontItem.fontFamily,
         )

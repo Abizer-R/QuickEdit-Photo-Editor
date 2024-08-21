@@ -45,6 +45,7 @@ import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.ui.transformableViews.TransformableTextBox
 import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
 import com.abizer_r.quickedit.utils.drawMode.toPx
+import com.abizer_r.quickedit.utils.textMode.TextModeUtils.getDefaultEditorTextStyle
 
 @Composable
 fun TransformableBox(
@@ -342,7 +343,7 @@ fun PreviewTextItem_NO_BORDER() {
                     scale = 1f,
                     rotation = 0f,
                     textColor = MaterialTheme.colorScheme.onBackground,
-                    textFont = MaterialTheme.typography.headlineMedium.fontSize // defaultTextFont in "TextModeScreen"
+                    textFont = getDefaultEditorTextStyle().fontSize // defaultTextFont in "TextModeScreen"
                 ),
                 onEvent = {},
             )
@@ -367,7 +368,7 @@ fun PreviewTextItem_WITH_BORDER() {
                 scale = 1f,
                 rotation = 0f,
                 textColor = MaterialTheme.colorScheme.onBackground,
-                textFont = MaterialTheme.typography.headlineMedium.fontSize // defaultTextFont in "TextModeScreen"
+                textFont = getDefaultEditorTextStyle().fontSize // defaultTextFont in "TextModeScreen"
             )
             TransformableTextBox(
                 viewState = viewState,

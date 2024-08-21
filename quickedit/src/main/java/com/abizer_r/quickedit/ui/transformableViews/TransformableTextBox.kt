@@ -23,6 +23,7 @@ import com.abizer_r.quickedit.ui.transformableViews.base.TransformableTextBoxSta
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBox
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBoxEvents
 import com.abizer_r.quickedit.utils.textMode.FontUtils
+import com.abizer_r.quickedit.utils.textMode.TextModeUtils.getDefaultEditorTextStyle
 
 @Composable
 fun TransformableTextBox(
@@ -93,7 +94,7 @@ fun PreviewItem() {
                     scale = 1f,
                     rotation = 0f,
                     textColor = MaterialTheme.colorScheme.onBackground,
-                    textFont = MaterialTheme.typography.headlineMedium.fontSize // defaultTextFont in "TextModeScreen"
+                    textFont = getDefaultEditorTextStyle().fontSize // defaultTextFont in "TextModeScreen"
                 ),
                 onEvent = {},
             )
