@@ -150,6 +150,11 @@ class TextModeViewModel @Inject constructor(
         val stateList = state.value.transformableViewStateList
         val viewItem = stateList.find { it.id == mEvent.id } ?: return
         when(mEvent) {
+
+            is TransformableBoxEvents.UpdateBoxBorder -> {
+                viewItem.innerBoxSize = mEvent.innerBoxSize
+            }
+
             is TransformableBoxEvents.UpdateTransformation -> {
                 viewItem.positionOffset += mEvent.dragAmount
                 viewItem.scale = (viewItem.scale * mEvent.zoomAmount).coerceIn(0.5f, 5f)
@@ -262,7 +267,8 @@ class TextModeViewModel @Inject constructor(
         }
         _state.update { it.copy(
             selectedTool = selectedItem,
-            showBottomToolbarExtension = isTextModeItem(selectedItem)
+            showBottomToolbarExtension = isTextModeItem(selectedItem),
+            recompositionTrigger = it.recompositionTrigger + 1  // to trigger recomposition of transformable boxes
         ) }
     }
 

@@ -1,7 +1,7 @@
 package com.abizer_r.quickedit.ui.transformableViews.base
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -17,6 +17,7 @@ abstract class TransformableBoxState {
     abstract var scale: Float
     abstract var rotation: Float
     abstract var isSelected: Boolean
+    abstract var innerBoxSize: Size
 }
 
 data class TransformableTextBoxState(
@@ -25,6 +26,7 @@ data class TransformableTextBoxState(
     override var scale: Float = 1f,
     override var rotation: Float = 0f,
     override var isSelected: Boolean = true,
+    override var innerBoxSize: Size = Size.Zero,
     var text: String,
     var textColor: Color,
     val textFont: TextUnit,
