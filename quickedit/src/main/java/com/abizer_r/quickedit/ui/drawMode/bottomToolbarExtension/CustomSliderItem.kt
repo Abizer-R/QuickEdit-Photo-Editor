@@ -51,7 +51,7 @@ fun CustomSliderItem(
 
     val interactionSource = remember { MutableInteractionSource() }
 
-    var sliderValueLocal by remember { mutableFloatStateOf(sliderValue) }
+    var sliderValueLocal by remember(sliderValue) { mutableFloatStateOf(sliderValue) }
 
     val onValueChangeLambda = remember<(Float) -> Unit> {{
         sliderValueLocal = it
