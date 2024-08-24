@@ -3,11 +3,13 @@ package com.abizer_r.quickedit.utils.textMode.blurBackground
 import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
@@ -51,10 +53,10 @@ fun BlurBitmapBackground(
         Image(
             modifier = Modifier
                 .fillMaxSize()
-                .pointerInteropFilter {
-                    onBgClicked()
-//                        viewModel.updateViewSelection(null)
-                    true
+                .pointerInput(Unit) {
+                    detectTapGestures {
+                        onBgClicked()
+                    }
                 },
             bitmap = imageBitmap,
             contentScale = contentScale,
