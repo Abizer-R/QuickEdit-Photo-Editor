@@ -1,5 +1,5 @@
 # QuickEdit - Photo Editor
-QuickEdit is a user-friendly photo editor for Android, built using Jetpack Compose. It offers essential photo editing tools with a clean and smooth interface.
+QuickEdit is a user-friendly photo editor for Android, built using **Jetpack Compose**. It offers essential photo editing tools with a clean and smooth interface.
 
 ## Latest Release
 
