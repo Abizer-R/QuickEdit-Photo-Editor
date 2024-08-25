@@ -25,3 +25,21 @@ QuickEdit makes use of the following libraries to provide its features:
 - **[Cloudy](https://github.com/skydoves/cloudy)**: A library by Skydoves for blurring a composable.
 - **[Image Cropper](https://github.com/CanHub/Android-Image-Cropper)**: A cropping library by Canhub that allows users to crop images seamlessly.
 - **[Compose-Screenshot](https://github.com/SmartToolFactory/Compose-Screenshot)**: A library by SmartToolFactory for capturing screenshots of composables in Jetpack Compose.
+
+
+# License
+```xml
+Designed and developed by 2024 Abizer-R (Abizer Rampurawala)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
