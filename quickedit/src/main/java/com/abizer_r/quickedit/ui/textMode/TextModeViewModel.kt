@@ -1,13 +1,25 @@
 package com.abizer_r.quickedit.ui.textMode
 
 import android.util.Log
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
+import com.abizer_r.quickedit.ui.textMode.TextModeEvent.ShowTextEditor
+import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.TextModeToolbarExtensionEvent
+import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.caseOptions.TextCaseType
+import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.styleOptions.TextStyleAttr
+import com.abizer_r.quickedit.ui.textMode.textEditorLayout.TextEditorState
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableTextBoxState
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBoxEvents
+import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBoxState
+import com.abizer_r.quickedit.utils.ImmutableList
+import com.abizer_r.quickedit.utils.other.anim.AnimUtils
+import com.abizer_r.quickedit.utils.textMode.TextModeUtils
+import com.abizer_r.quickedit.utils.textMode.TextModeUtils.isTextModeItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -25,12 +37,37 @@ class TextModeViewModel @Inject constructor(
     private val _state = MutableStateFlow(TextModeState())
     val state: StateFlow<TextModeState> = _state
 
-    private val _showTextField = MutableStateFlow(false)
-    val showTextField: StateFlow<Boolean> = _showTextField
+    private val _showTextEditor = MutableStateFlow(false)
+    val showTextEditor: StateFlow<Boolean> = _showTextEditor
 
-    fun updateShowTextField(value: Boolean) {
-        _showTextField.value = value
+    var initialTextEditorState: TextEditorState? = null
+        private set
+
+    private val _bottomToolbarItems = MutableStateFlow<ImmutableList<BottomToolbarItem>>(
+        ImmutableList(TextModeUtils.getBottomToolbarItemsList(null))
+    )
+    val bottomToolbarItems: StateFlow<ImmutableList<BottomToolbarItem>> = _bottomToolbarItems
+
+    var selectedViewState: TransformableBoxState? = null
+        private set
+
+//    fun getSelectedViewState(): TransformableBoxState? =
+//        state.value.transformableViewStateList.find { it.isSelected }
+
+
+
+//    private val _toolbarExtensionVisible = MutableStateFlow(false)
+//    val toolbarExtensionVisible: StateFlow<Boolean> = _toolbarExtensionVisible
+
+    private fun updateShowTextEditor(isVisible: Boolean, textEditorState: TextEditorState? = null) {
+        // set the initial EditorState for TextEditorLayout
+        initialTextEditorState = textEditorState
+        _showTextEditor.value = isVisible
     }
+
+//    fun updateToolbarExtensionVisibility(isVisible: Boolean) {
+//        _toolbarExtensionVisible.value = isVisible
+//    }
 
     init {
 //        debugTrackViewListSize()
@@ -50,61 +87,30 @@ class TextModeViewModel @Inject constructor(
     fun handleStateBeforeCaptureScreenshot() {
         shouldGoToNextScreen = true
         updateViewSelection(null)
+        _state.update {
+            it.copy(showBottomToolbarExtension = false)
+        }
     }
 
-    fun onEvent(event: TextModeEvent) {
+    fun onEvent(event: TextModeEvent) = viewModelScope.launch {
         when (event) {
 
-            is TextModeEvent.ShowTextField -> viewModelScope.launch {
+            is TextModeEvent.UpdateToolbarExtensionVisibility -> {
+                _state.update { it.copy(showBottomToolbarExtension = event.isVisible) }
+            }
+
+            is ShowTextEditor -> {
                 Log.e("TEST_BLUR", "PlaceHolder Text: ", )
-
-                updateShowTextField(true)
-                _state.update { it.copy(
-                    textFieldState = event.textFieldState.copy(
-                        shouldRequestFocus = true
-                    )
-                ) }
+                if (state.value.showBottomToolbarExtension) {
+                    // Collapse toolbarExtension and then show text field
+                    _state.update { it.copy(showBottomToolbarExtension = false) }
+                    delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION.toLong())
+                }
+                updateShowTextEditor(true, event.textEditorState)
             }
 
-            is TextModeEvent.SelectTextColor -> {
-                _state.update { it.copy(
-                    textFieldState = it.textFieldState.copy(
-                        selectedColorIndex = event.index
-                    )
-                ) }
-            }
-
-            is TextModeEvent.SelectTextAlign -> {
-                _state.update { it.copy(
-                    textFieldState = it.textFieldState.copy(
-                        textAlign = event.textAlign
-                    )
-                )}
-            }
-
-            is TextModeEvent.UpdateTextFont -> {
-                _state.update { it.copy(
-                    textFieldState = it.textFieldState.copy(
-                        textFont = event.textFont
-                    )
-                )}
-            }
-
-            is TextModeEvent.HideTextField -> viewModelScope.launch {
-                updateShowTextField(false)
-                _state.update { it.copy(
-                    textFieldState = it.textFieldState.copy(
-                        shouldRequestFocus = false
-                    )
-                ) }
-            }
-
-            is TextModeEvent.UpdateTextFieldValue -> {
-                _state.update { it.copy(
-                    textFieldState = it.textFieldState.copy(
-                        text = event.textInput
-                    )
-                ) }
+            is TextModeEvent.HideTextEditor -> {
+                updateShowTextEditor(false)
             }
 
             is TextModeEvent.UpdateTransformableViewsList -> {
@@ -127,12 +133,14 @@ class TextModeViewModel @Inject constructor(
                     }
                 } else {
                     val newList = state.value.transformableViewStateList.also { list ->
+                        Log.e("TEST_editor", "AddTransformableTextBox: id = ${event.textBoxState.id}", )
                         list.add(event.textBoxState)
                     }
                     _state.update {it.copy(transformableViewStateList = newList) }
                 }
 
                 updateViewSelection(selectedViewId = event.textBoxState.id)
+                updateShowTextEditor(false)
             }
 
         }
@@ -142,15 +150,14 @@ class TextModeViewModel @Inject constructor(
         val stateList = state.value.transformableViewStateList
         val viewItem = stateList.find { it.id == mEvent.id } ?: return
         when(mEvent) {
-            is TransformableBoxEvents.OnDrag -> {
+
+            is TransformableBoxEvents.UpdateBoxBorder -> {
+                viewItem.innerBoxSize = mEvent.innerBoxSize
+            }
+
+            is TransformableBoxEvents.UpdateTransformation -> {
                 viewItem.positionOffset += mEvent.dragAmount
-            }
-
-            is TransformableBoxEvents.OnZoom -> {
                 viewItem.scale = (viewItem.scale * mEvent.zoomAmount).coerceIn(0.5f, 5f)
-            }
-
-            is TransformableBoxEvents.OnRotate -> {
                 viewItem.rotation += mEvent.rotationChange
             }
 
@@ -159,22 +166,16 @@ class TextModeViewModel @Inject constructor(
             }
 
             is TransformableBoxEvents.OnTapped -> {
-                // Main objective is to select the view when tapped
-                // it is already done above, so doing nothing here
+                Log.e("TEST_editor", "OnTapped: id = ${viewItem.id}, selected = ${viewItem.isSelected}", )
                 if (viewItem.isSelected && mEvent.textViewState != null) {
-                    val currTextFieldState = state.value.textFieldState
-                    onEvent(
-                        TextModeEvent.ShowTextField(
-                            textFieldState = currTextFieldState.copy(
-                                textStateId = mEvent.id,
-                                text = mEvent.textViewState.text,
-                                textAlign = mEvent.textViewState.textAlign,
-                                selectedColorIndex = currTextFieldState.getIndexFromColor(
-                                    mEvent.textViewState.textColor
-                                )
-                            )
-                        )
+                    val textEditorState = TextEditorState(
+                        textStateId = mEvent.id,
+                        text = mEvent.textViewState.text,
+                        textAlign = mEvent.textViewState.textAlign,
+                        selectedColor = mEvent.textViewState.textColor,
+                        textFont = mEvent.textViewState.textFont
                     )
+                    onEvent(ShowTextEditor(textEditorState = textEditorState))
                 }
             }
         }
@@ -185,19 +186,44 @@ class TextModeViewModel @Inject constructor(
         onEvent(TextModeEvent.UpdateTransformableViewsList(stateList))
     }
 
-    fun updateViewSelection(selectedViewId: String? = null) {
-        val transformableViewsList = state.value.transformableViewStateList
-        transformableViewsList.forEach {
-            val isSelected = if (selectedViewId != null) {
-                it.id == selectedViewId
-            } else false
-            it.isSelected = isSelected
+    fun updateViewSelection(
+        selectedViewId: String? = null
+    ) = viewModelScope.launch{
+        val prevSelectedView = selectedViewState
+        selectedViewState?.isSelected = false
+
+        val newViewState = state.value.transformableViewStateList.find { it.id == selectedViewId }
+        newViewState?.isSelected = true
+        selectedViewState = newViewState
+
+//        val transformableViewsList = state.value.transformableViewStateList
+//        transformableViewsList.forEach {
+//            it.isSelected = it.id == selectedViewId
+//        }
+
+
+        val isNewItemSelected = prevSelectedView != newViewState
+        var prevSelectedToolbarItem: BottomToolbarItem = BottomToolbarItem.NONE
+        if (isNewItemSelected) {
+           prevSelectedToolbarItem = state.value.selectedTool
+            // the selected toolbar item must be updated before getting new toolbarItem-list
+            updateSelectedToolbarItem(BottomToolbarItem.NONE)
         }
-        _state.update {
-            it.copy(
-                transformableViewStateList = transformableViewsList,
-                recompositionTrigger = it.recompositionTrigger + 1
-            )
+
+        val newToolbarItems = TextModeUtils.getBottomToolbarItemsList(
+            selectedViewState = selectedViewState,
+            selectedItem = state.value.selectedTool
+        )
+        _bottomToolbarItems.update { ImmutableList(newToolbarItems) }
+
+        if (isNewItemSelected) {
+            val newSelectedTool = TextModeUtils.getNewSelectedToolItem(newToolbarItems, prevSelectedToolbarItem)
+            updateSelectedToolbarItem(newSelectedTool)
+
+        } else {
+            _state.update {
+                it.copy( showBottomToolbarExtension = selectedViewState != null )
+            }
         }
     }
 
@@ -212,13 +238,91 @@ class TextModeViewModel @Inject constructor(
         }
     }
 
-    private fun onBottomToolbarItemClicked(selectedItem: BottomToolbarItem) {
+    private fun onBottomToolbarItemClicked(selectedItem: BottomToolbarItem) = viewModelScope.launch {
         when (selectedItem) {
             is BottomToolbarItem.AddItem -> {
-                onEvent(TextModeEvent.ShowTextField(TextModeState.TextFieldState()))
+                onEvent(ShowTextEditor())
             }
 
-            else -> {}
+            // Clicked on already selected item
+            state.value.selectedTool -> {
+                if (selectedItem != BottomToolbarItem.AddItem) {
+                    _state.update {
+                        it.copy(showBottomToolbarExtension = it.showBottomToolbarExtension.not())
+                    }
+                }
+            }
+
+            // clicked on another item
+            else -> updateSelectedToolbarItem(selectedItem)
+
         }
+    }
+
+    private suspend fun updateSelectedToolbarItem(selectedItem: BottomToolbarItem) {
+        if (state.value.showBottomToolbarExtension) {
+            // Collapse toolbarExtension and change current item after DELAY
+            _state.update { it.copy(showBottomToolbarExtension = false) }
+            delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION.toLong())
+        }
+        _state.update { it.copy(
+            selectedTool = selectedItem,
+            showBottomToolbarExtension = isTextModeItem(selectedItem),
+            recompositionTrigger = it.recompositionTrigger + 1  // to trigger recomposition of transformable boxes
+        ) }
+    }
+
+    fun onTextModeToolbarExtensionEvent(event: TextModeToolbarExtensionEvent) {
+        when (event) {
+            is TextModeToolbarExtensionEvent.UpdateTextAlignment -> {
+                updateTransformableText(textAlignment = event.textAlignment)
+            }
+            is TextModeToolbarExtensionEvent.UpdateTextCaseType -> {
+                updateTransformableText(textCaseType = event.textCaseType)
+            }
+            is TextModeToolbarExtensionEvent.UpdateTextStyleAttr -> {
+                updateTransformableText(textStyleAttr = event.textStyleAttr)
+            }
+            is TextModeToolbarExtensionEvent.UpdateTextFontFamily -> {
+                updateTransformableText(textFontFamily = event.fontFamily)
+            }
+        }
+    }
+
+    private fun updateTransformableText(
+        textAlignment: TextAlign? = null,
+        textCaseType: TextCaseType? = null,
+        textStyleAttr: TextStyleAttr? = null,
+        textFontFamily: FontFamily? = null,
+    ) {
+        val selectedViewState = state.value.transformableViewStateList.find { it.isSelected }
+        if (selectedViewState == null || selectedViewState !is TransformableTextBoxState)
+            return
+
+        textAlignment?.let { selectedViewState.textAlign = it }
+        textCaseType?.let { selectedViewState.textCaseType = it }
+        textStyleAttr?.let { selectedViewState.textStyleAttr = it }
+        textFontFamily?.let { selectedViewState.textFontFamily = it }
+
+        state.value.selectedTool.apply {
+            when(this) {
+                is BottomToolbarItem.TextFormat -> {
+                    this.textAlign = selectedViewState.textAlign
+                    this.textCaseType = selectedViewState.textCaseType
+                    this.textStyleAttr = selectedViewState.textStyleAttr
+                }
+
+                is BottomToolbarItem.TextFontFamily -> {
+                    this.textFontFamily = selectedViewState.textFontFamily
+                }
+
+                else -> {}
+            }
+
+        }
+
+        _state.update { it.copy(
+            selectedViewStateUpdateTrigger = it.selectedViewStateUpdateTrigger + 1
+        ) }
     }
 }

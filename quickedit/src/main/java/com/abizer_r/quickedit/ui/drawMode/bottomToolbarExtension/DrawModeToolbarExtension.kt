@@ -1,3 +1,5 @@
+package com.abizer_r.quickedit.ui.drawMode.bottomToolbarExtension
+
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -23,11 +25,15 @@ import com.abizer_r.quickedit.R
 import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.theme.ToolBarBackgroundColor
 import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
-import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.toolbarExtension.CustomSliderItem
+import com.abizer_r.quickedit.utils.defaultTextColor
 import com.abizer_r.quickedit.utils.drawMode.DrawingConstants
 
+/**
+ * Contains additional option for drawMode tools
+ * such as width, opacity and shapeType
+ */
 @Composable
-fun ToolbarExtensionView(
+fun DrawModeToolbarExtension(
     modifier: Modifier,
     showSeparationAtBottom: Boolean = true,
     width: Float? = null,
@@ -114,7 +120,9 @@ fun RadioButtonRow(
             Text(
                 text = mShape.name,
                 modifier = Modifier.padding(end = 8.dp),
-                style = TextStyle(color = MaterialTheme.colorScheme.onBackground)
+                style = MaterialTheme.typography.labelLarge.copy(
+                    color = defaultTextColor()
+                )
             )
         }
     }
@@ -134,7 +142,7 @@ fun PreviewRadioRow() {
 @Composable
 fun PreviewToolbarExtension() {
     QuickEditTheme {
-        ToolbarExtensionView(
+        DrawModeToolbarExtension(
             modifier = Modifier.fillMaxWidth(),
             width = 12f,
             onWidthChange = {},

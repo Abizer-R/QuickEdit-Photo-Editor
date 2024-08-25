@@ -1,4 +1,4 @@
-package com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.toolbarExtension
+package com.abizer_r.quickedit.ui.drawMode.bottomToolbarExtension
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -23,13 +23,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.abizer_r.quickedit.theme.QuickEditTheme
+import com.abizer_r.quickedit.utils.defaultTextColor
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -45,9 +45,13 @@ fun CustomSliderItem(
     onValueChange: (Float) -> Unit,
 ) {
 
+    val labelTextStyle = MaterialTheme.typography.labelMedium.copy(
+        color = defaultTextColor()
+    )
+
     val interactionSource = remember { MutableInteractionSource() }
 
-    var sliderValueLocal by remember { mutableFloatStateOf(sliderValue) }
+    var sliderValueLocal by remember(sliderValue) { mutableFloatStateOf(sliderValue) }
 
     val onValueChangeLambda = remember<(Float) -> Unit> {{
         sliderValueLocal = it
@@ -70,10 +74,7 @@ fun CustomSliderItem(
                 .padding(start = 8.dp),
             text = sliderLabel,
             textAlign = TextAlign.Start,
-            style = TextStyle(
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = MaterialTheme.typography.labelMedium.fontSize
-            )
+            style = labelTextStyle
         )
         Text(
             modifier = Modifier
@@ -85,10 +86,7 @@ fun CustomSliderItem(
                 .padding(end = 8.dp),
             text = sliderValueLocal.roundToInt().toString(),
             textAlign = TextAlign.End,
-            style = TextStyle(
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = MaterialTheme.typography.labelMedium.fontSize
-            )
+            style = labelTextStyle
         )
 
         Image(

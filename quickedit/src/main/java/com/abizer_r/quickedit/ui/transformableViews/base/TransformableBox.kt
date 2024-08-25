@@ -27,12 +27,15 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,11 +43,14 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.ui.transformableViews.TransformableTextBox
 import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
+import com.abizer_r.quickedit.utils.drawMode.pxToDp
 import com.abizer_r.quickedit.utils.drawMode.toPx
+import com.abizer_r.quickedit.utils.textMode.TextModeUtils.getDefaultEditorTextStyle
 
 @Composable
 fun TransformableBox(
@@ -77,37 +83,6 @@ fun TransformableBox(
             showBorderOnly = showBorderOnly,
             onEvent = onEvent
         )
-//        val btnCloseAlpha = if (showBorderOnly) 1f else 0f
-//        val btnCloseBackgroundColor = if (showBorderOnly) Color.Black else Color.Transparent
-//        val btnCloseOffset = (4.dp * viewState.scale).coerceIn(4.dp, 10.dp)
-//        Log.e("TEST_CLOSE", "TransformableBox: scale = ${viewState.scale}, btnCloseOffset = $btnCloseOffset", )
-//        Image(
-//            modifier = Modifier
-//                .constrainAs(btnClose) {
-//                    top.linkTo(parent.top)
-//                    start.linkTo(parent.start)
-//                }
-//                .offset(
-//                    x = btnCloseOffset,
-//                    y = btnCloseOffset
-//                )
-//                .size(28.dp)
-//                .scale(1 / viewState.scale) /* to keep the size of button constant */
-//                .clip(CircleShape)
-//                .background(btnCloseBackgroundColor)
-//                .alpha(btnCloseAlpha)
-//                .clickable {
-//                    onEvent(
-//                        TransformableBoxEvents.OnCloseClicked(viewState.id)
-//                    )
-//                },
-//            imageVector = Icons.Default.Cancel,
-//            contentScale = ContentScale.FillBounds,
-//            contentDescription = null,
-//            colorFilter = ColorFilter.tint(
-//                color = Color.White
-//            )
-//        )
 
 
         var innerBoxModifier = Modifier.constrainAs(contentBox) {
@@ -130,8 +105,25 @@ fun TransformableBox(
             )
         }
 
-        val innerBoxPaddingHorizontal = (16.dp / viewState.scale).coerceIn(4.dp, 20.dp)
-        val innerBoxPaddingVertical = (6.dp / viewState.scale).coerceIn(2.dp, 6.dp)
+        // We need size of the box which has actual content
+        if (showBorderOnly.not()) {
+            innerBoxModifier = innerBoxModifier.onGloballyPositioned {
+                val innerBoxSize = it.size.toSize()
+                // Update the box size only if required
+                // Without below condition, it'll cause a continuous recomposition in loop
+                if (viewState.innerBoxSize != innerBoxSize) {
+                    onEvent(
+                        TransformableBoxEvents.UpdateBoxBorder(
+                            id = viewState.id,
+                            innerBoxSize = innerBoxSize,
+                        )
+                    )
+                }
+            }
+        }
+
+        val innerBoxPaddingHorizontal = (8.dp / viewState.scale)
+        val innerBoxPaddingVertical = (4.dp / viewState.scale)
         Box(
             modifier = innerBoxModifier
                 .detectGestures(viewState, onEvent)
@@ -140,9 +132,13 @@ fun TransformableBox(
                     horizontal = innerBoxPaddingHorizontal,
                     vertical = innerBoxPaddingVertical
                 )
-                .alpha(if (showBorderOnly) 0f else 1f)
         ) {
-            content()
+            // If this box is for purpose of border only, then make an empty box
+            if (showBorderOnly) {
+                EmptyBoxWithSize(viewState.innerBoxSize)
+            } else {
+                content()
+            }
         }
 
 //        ScaleButton(
@@ -156,6 +152,26 @@ fun TransformableBox(
 //            onEvent = onEvent
 //        )
     }
+}
+
+/**
+ * This empty box helps us to maintain a consistent size of content and border regardless
+ * of the size of their parent.
+ * ---------- explanation below ----------
+ * we draw the content in inner box and the border in outer box in the TextModeScreen
+ * and this causes the inner item to have less width and outer item(border only) to be wider
+ * which results in inner item (text) to be of 2 lines but outer item (border only) to be of 1 line height
+ */
+@Composable
+fun EmptyBoxWithSize(boxSize: Size) {
+    Box(
+        modifier = Modifier
+            .size(
+                width = boxSize.width.pxToDp(),
+                height = boxSize.height.pxToDp(),
+            )
+            .background(Color.Transparent)
+    ) {}
 }
 
 @Composable
@@ -301,29 +317,18 @@ fun Modifier.detectGestures(
                             "\nrotation: $rotationChange"
                 )
 
-                val dragAmount = pan * viewState.scale
-                val rotatedDragAmount = DrawModeUtils.rotateOffset(dragAmount, viewState.rotation)
-                onEvent(
-                    TransformableBoxEvents.OnDrag(
-                        id = viewState.id,
-                        dragAmount = rotatedDragAmount  // multiply with scale to get the actual drag amount (see commit message)
+                if (viewState.isSelected) {
+                    val dragAmount = pan * viewState.scale
+                    val rotatedDragAmount = DrawModeUtils.rotateOffset(dragAmount, viewState.rotation)
+                    onEvent(
+                        TransformableBoxEvents.UpdateTransformation(
+                            id = viewState.id,
+                            dragAmount = rotatedDragAmount,
+                            zoomAmount = zoom,
+                            rotationChange = rotationChange
+                        )
                     )
-                )
-
-                onEvent(
-                    TransformableBoxEvents.OnZoom(
-                        id = viewState.id,
-                        zoomAmount = zoom
-                    )
-
-                )
-
-                onEvent(
-                    TransformableBoxEvents.OnRotate(
-                        id = viewState.id,
-                        rotationChange = rotationChange
-                    )
-                )
+                }
 
             }
         }
@@ -384,7 +389,7 @@ fun PreviewTextItem_NO_BORDER() {
                     scale = 1f,
                     rotation = 0f,
                     textColor = MaterialTheme.colorScheme.onBackground,
-                    textFont = MaterialTheme.typography.headlineMedium.fontSize // defaultTextFont in "TextModeScreen"
+                    textFont = getDefaultEditorTextStyle().fontSize // defaultTextFont in "TextModeScreen"
                 ),
                 onEvent = {},
             )
@@ -409,7 +414,7 @@ fun PreviewTextItem_WITH_BORDER() {
                 scale = 1f,
                 rotation = 0f,
                 textColor = MaterialTheme.colorScheme.onBackground,
-                textFont = MaterialTheme.typography.headlineMedium.fontSize // defaultTextFont in "TextModeScreen"
+                textFont = getDefaultEditorTextStyle().fontSize // defaultTextFont in "TextModeScreen"
             )
             TransformableTextBox(
                 viewState = viewState,

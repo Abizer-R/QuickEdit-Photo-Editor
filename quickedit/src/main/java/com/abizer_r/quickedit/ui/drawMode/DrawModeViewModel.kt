@@ -114,7 +114,7 @@ class DrawModeViewModel @Inject constructor(
         }
     }
 
-    private fun onBottomToolbarItemClicked(selectedItem: BottomToolbarItem) {
+    private fun onBottomToolbarItemClicked(selectedItem: BottomToolbarItem) = viewModelScope.launch {
         when (selectedItem) {
             is BottomToolbarItem.ColorItem -> {
                 _state.update {
@@ -133,17 +133,15 @@ class DrawModeViewModel @Inject constructor(
 
             // clicked on another item
             else -> {
-                viewModelScope.launch {
-                    if (state.value.showBottomToolbarExtension) {
-                        // Collapse toolbarExtension and change current item after DELAY
-                        _state.update { it.copy(showBottomToolbarExtension = false) }
-                        delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION.toLong())
-                    }
-                    _state.update { it.copy(selectedTool = selectedItem) }
-                    if (selectedItem != BottomToolbarItem.PanItem) {
-                        // open toolbarExtension for new item
-                        _state.update { it.copy(showBottomToolbarExtension = true) }
-                    }
+                if (state.value.showBottomToolbarExtension) {
+                    // Collapse toolbarExtension and change current item after DELAY
+                    _state.update { it.copy(showBottomToolbarExtension = false) }
+                    delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION.toLong())
+                }
+                _state.update { it.copy(selectedTool = selectedItem) }
+                if (selectedItem != BottomToolbarItem.PanItem) {
+                    // open toolbarExtension for new item
+                    _state.update { it.copy(showBottomToolbarExtension = true) }
                 }
             }
         }

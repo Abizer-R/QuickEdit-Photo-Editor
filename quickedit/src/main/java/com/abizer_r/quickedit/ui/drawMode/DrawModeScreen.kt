@@ -1,6 +1,6 @@
 package com.abizer_r.quickedit.ui.drawMode
 
-import ToolbarExtensionView
+import com.abizer_r.quickedit.ui.drawMode.bottomToolbarExtension.DrawModeToolbarExtension
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.activity.compose.BackHandler
@@ -359,7 +359,7 @@ fun DrawModeScreen(
             exit = AnimUtils.toolbarExtensionCollapseAnim()
 
         ) {
-            ToolbarExtensionView(
+            DrawModeToolbarExtension(
                 modifier = Modifier.fillMaxWidth(),
                 showSeparationAtBottom = true,
                 width = state.selectedTool.getWidthOrNull(),

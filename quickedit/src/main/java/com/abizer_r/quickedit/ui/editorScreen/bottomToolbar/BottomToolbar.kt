@@ -38,17 +38,20 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.abizer_r.quickedit.R
 import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.theme.ToolBarBackgroundColor
 import com.abizer_r.quickedit.utils.ImmutableList
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
+import com.abizer_r.quickedit.ui.transformableViews.base.TransformableTextBoxState
+import com.abizer_r.quickedit.utils.defaultTextColor
 import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
 import com.abizer_r.quickedit.utils.editorScreen.EditorScreenUtils
 import com.abizer_r.quickedit.utils.textMode.TextModeUtils
+import java.util.UUID
 
 val TOOLBAR_HEIGHT_SMALL = 48.dp
 val TOOLBAR_HEIGHT_MEDIUM = 64.dp
@@ -96,7 +99,7 @@ fun ToolbarItem(
     isSelected: Boolean,
     onEvent: (BottomToolbarEvent) -> Unit
 ) {
-    val labelFontSize = MaterialTheme.typography.bodySmall.fontSize
+    val labelTextStyle = MaterialTheme.typography.bodySmall.copy(color = defaultTextColor())
 
     val commonPaddingModifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
 
@@ -106,7 +109,7 @@ fun ToolbarItem(
             selectedColor = selectedColor,
             showColorPickerIcon = showColorPickerIcon,
             colorItem = toolbarItem,
-            labelFontSize = labelFontSize,
+            labelTextStyle = labelTextStyle,
             onEvent = onEvent
         )
         return
@@ -166,6 +169,16 @@ fun ToolbarItem(
             stringResource(id = R.string.pan)
         )
 
+        is BottomToolbarItem.TextFormat -> Pair(
+            ImageVector.vectorResource(id = R.drawable.outline_custom_typography_24),
+            stringResource(id = R.string.format)
+        )
+
+        is BottomToolbarItem.TextFontFamily -> Pair(
+            ImageVector.vectorResource(id = R.drawable.outline_serif_24),
+            stringResource(id = R.string.font)
+        )
+
         else -> Pair(
             Icons.Default.AddCircleOutline,
             ""
@@ -197,10 +210,7 @@ fun ToolbarItem(
 
         if (labelText.isNotBlank()) {
             Text(
-                style = TextStyle(
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = labelFontSize,
-                ),
+                style = labelTextStyle,
                 text = labelText
             )
         }
@@ -213,7 +223,7 @@ fun ColorToolbarItem(
     selectedColor: Color,
     showColorPickerIcon: Boolean,
     colorItem: BottomToolbarItem.ColorItem,
-    labelFontSize: TextUnit,
+    labelTextStyle: TextStyle,
     onEvent: (BottomToolbarEvent) -> Unit
 ) {
     Column(
@@ -252,10 +262,7 @@ fun ColorToolbarItem(
         Spacer(modifier = Modifier.size(4.dp))
 
         Text(
-            style = TextStyle(
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = labelFontSize
-            ),
+            style = labelTextStyle,
             text = stringResource(id = R.string.color)
         )
     }
@@ -294,7 +301,14 @@ fun DrawMode_BottomToolbar() {
 @Composable
 fun TextMode_BottomToolbar() {
     QuickEditTheme {
-        val itemsList = TextModeUtils.getDefaultBottomToolbarItemsList()
+        val itemsList = TextModeUtils.getBottomToolbarItemsList(
+            selectedViewState = TransformableTextBoxState(
+                id = UUID.randomUUID().toString(),
+                text = "hello",
+                textColor = Color.White,
+                textFont = 8.sp,
+            )
+        )
         BottomToolBarStatic(
             modifier = Modifier.fillMaxWidth(),
             toolbarItems = ImmutableList(itemsList),
