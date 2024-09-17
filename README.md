@@ -8,12 +8,19 @@ QuickEdit is a user-friendly photo editor for Android, built using **Jetpack Com
 [Download QuickEdit v1.0.0](https://github.com/Abizer-R/QuickEdit-Photo-Editor/releases/tag/v1.0.0) - The latest version of QuickEdit, packed with all the features you need to edit your photos.
 
 
-|                                                   |                                                   |                                                   |                                                   |
-|:-------------------------------------------------:|:-------------------------------------------------:|:-------------------------------------------------:|:-------------------------------------------------:|
-|![1](https://github.com/user-attachments/assets/78217ce9-4771-4db0-9dae-345214eb28f1)|![2](https://github.com/user-attachments/assets/c26f4c38-b0cf-47c5-bd91-aa09df16deea) | ![4](https://github.com/user-attachments/assets/7d1b651e-78ca-43a8-af37-4da9b17a2a93) | ![6](https://github.com/user-attachments/assets/ae3c30e6-2999-4f53-ac44-f673bfe60e3f) 
-|![3](https://github.com/user-attachments/assets/eda2aa88-ab50-4fb9-a081-9104c3ccdd85)| ![7](https://github.com/user-attachments/assets/5cd3f808-90f4-451f-b4d4-9518acb747d2) | ![8](https://github.com/user-attachments/assets/ebd2db8c-43b9-4271-81b9-9800e6277b98) | ![9](https://github.com/user-attachments/assets/0d863b8f-b69a-4b3d-a29d-f6b0fc57a8be)
+<div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start;">
+  <img src="https://github.com/user-attachments/assets/78217ce9-4771-4db0-9dae-345214eb28f1" alt="1" width="200" />
+  <img src="https://github.com/user-attachments/assets/8c0214c4-f067-4bed-bac0-73bfd80fc01b" alt="2" width="200" />
+  <img src="https://github.com/user-attachments/assets/3619584a-f672-424f-8040-baf9a563f278" alt="3" width="200" />
+  <img src="https://github.com/user-attachments/assets/c26f4c38-b0cf-47c5-bd91-aa09df16deea" alt="4" width="200" />
+</div>
 
-
+<div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start;">
+  <img src="https://github.com/user-attachments/assets/eda2aa88-ab50-4fb9-a081-9104c3ccdd85" alt="5" width="200" />
+  <img src="https://github.com/user-attachments/assets/5cd3f808-90f4-451f-b4d4-9518acb747d2" alt="6" width="200" />
+  <img src="https://github.com/user-attachments/assets/ebd2db8c-43b9-4271-81b9-9800e6277b98" alt="7" width="200" />
+  <img src="https://github.com/user-attachments/assets/0d863b8f-b69a-4b3d-a29d-f6b0fc57a8be" alt="8" width="200" />
+</div>
 
 ## Features
 
