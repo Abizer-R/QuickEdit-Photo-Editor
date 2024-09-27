@@ -1,11 +1,16 @@
-# QuickEdit - Photo Editor
+# <img src="https://github.com/user-attachments/assets/8ed6acde-46c9-43e0-a68c-905bec182234" align="center" width="60" height="60"> QuickEdit - Photo Editor
 QuickEdit is a user-friendly photo editor for Android, built using **Jetpack Compose**. It offers essential photo editing tools with a clean and smooth interface.
 
 ## Latest Release
 
-[![Release v1.0.0](https://img.shields.io/github/v/release/Abizer-R/QuickEdit-Photo-Editor)](https://github.com/Abizer-R/QuickEdit-Photo-Editor/releases/tag/v1.0.0)
+[![Release v0.1.0](https://img.shields.io/github/v/release/Abizer-R/QuickEdit-Photo-Editor)](https://github.com/Abizer-R/QuickEdit-Photo-Editor/releases/tag/v1.0.0)
 
 [Download QuickEdit v1.0.0](https://github.com/Abizer-R/QuickEdit-Photo-Editor/releases/tag/v1.0.0) - The latest version of QuickEdit, packed with all the features you need to edit your photos.
+
+
+## [Click Here To Watch Demo Video](https://drive.google.com/file/d/18IipYR_jbUQVFL8U1jNEJd_KTm_Y9ije/view?usp=sharing)
+
+
 
 
 <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start;">
@@ -16,7 +21,7 @@ QuickEdit is a user-friendly photo editor for Android, built using **Jetpack Com
 </div>
 
 <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start;">
-  <img src="https://github.com/user-attachments/assets/eda2aa88-ab50-4fb9-a081-9104c3ccdd85" alt="5" width="200" />
+  <img src="https://github.com/user-attachments/assets/91ee2ad6-f4de-4bda-af93-e9b7232d1c00" alt="5" width="200" />
   <img src="https://github.com/user-attachments/assets/5cd3f808-90f4-451f-b4d4-9518acb747d2" alt="6" width="200" />
   <img src="https://github.com/user-attachments/assets/ebd2db8c-43b9-4271-81b9-9800e6277b98" alt="7" width="200" />
   <img src="https://github.com/user-attachments/assets/0d863b8f-b69a-4b3d-a29d-f6b0fc57a8be" alt="8" width="200" />
