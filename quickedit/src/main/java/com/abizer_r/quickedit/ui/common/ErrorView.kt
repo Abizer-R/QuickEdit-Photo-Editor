@@ -15,7 +15,7 @@ import com.abizer_r.quickedit.utils.defaultTextColor
 fun ErrorView(
     modifier: Modifier,
     errorText: String = stringResource(R.string.something_went_wrong),
-    errorFontStyle: TextStyle = MaterialTheme.typography.displayMedium
+    errorFontStyle: TextStyle = MaterialTheme.typography.bodyLarge
 ) {
 
     Box(modifier = modifier) {
