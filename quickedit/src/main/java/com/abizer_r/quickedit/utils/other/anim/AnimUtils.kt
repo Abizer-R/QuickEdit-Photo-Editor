@@ -30,8 +30,8 @@ object AnimUtils {
     const val TOOLBAR_EXPAND_ANIM_DURATION = 400
     const val TOOLBAR_COLLAPSE_ANIM_DURATION = 250
 
-    const val TOOLBAR_EXPAND_ANIM_DURATION_FAST = 200
-    const val TOOLBAR_COLLAPSE_ANIM_DURATION_FAST = 200
+    const val TOOLBAR_EXPAND_ANIM_DURATION_FAST = 250
+    const val TOOLBAR_COLLAPSE_ANIM_DURATION_FAST = 250
 
     fun fadeInThenFadeOut(
         fadeInMillis: Int = 200,
