@@ -9,6 +9,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
+import com.abizer_r.quickedit.R
 import java.io.File
 import java.io.FileInputStream
 
@@ -65,7 +66,8 @@ object FileUtils {
             copyFileToUri(context.contentResolver, file, uri)
             onSuccess()
         } else {
-            onFailure(null)
+            onFailure(context.getString(R.string.fail_to_insert_uri_in_content_resolver))
+            return
         }
     }
 
@@ -89,6 +91,7 @@ object FileUtils {
             copyFile(file, externalStorageDir)
         } catch (e: Exception) {
             onFailure(e.message)
+            return
         }
 
         // Make the file visible in the gallery
@@ -103,7 +106,8 @@ object FileUtils {
             copyFileToUri(context.contentResolver, file, uri)
             onSuccess()
         } else {
-            onFailure(null)
+            onFailure(context.getString(R.string.fail_to_insert_uri_in_content_resolver))
+            return
         }
     }
 

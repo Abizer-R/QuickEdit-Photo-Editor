@@ -59,7 +59,7 @@ fun MainScreen(
                 isGranted = perms[permission] == true
             )
         }
-        if (perms.values.all { true }) {
+        if (perms.values.all { granted -> granted }) {
             viewModel.permissionsGranted.value = true
         }
     }
