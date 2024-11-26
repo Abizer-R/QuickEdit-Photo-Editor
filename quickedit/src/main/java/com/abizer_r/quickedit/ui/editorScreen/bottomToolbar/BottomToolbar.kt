@@ -166,7 +166,7 @@ fun ToolbarItem(
 
         is BottomToolbarItem.PanItem -> Pair(
             Icons.Outlined.PanTool,
-            stringResource(id = R.string.pan)
+            stringResource(id = R.string.zoom)
         )
 
         is BottomToolbarItem.TextFormat -> Pair(
