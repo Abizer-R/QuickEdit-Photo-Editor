@@ -7,6 +7,7 @@
     <string name="font">Font</string>
     <string name="brush">Brush</string>
     <string name="pan">Pan</string>
+    <string name="zoom">Zoom</string>
     <string name="shape">Shape</string>
     <string name="eraser">Eraser</string>
     <string name="crop">Crop</string>
