@@ -117,6 +117,15 @@ fun CropperOptionView(
                         color = MaterialTheme.colorScheme.onBackground
                     )
                 )
+            } else if (cropperOption.aspectRatioX == -2f) {
+                Image(
+                    modifier = Modifier.fillMaxSize(),
+                    imageVector = ImageVector.vectorResource(id = com.abizer_r.quickedit.R.drawable.ic_crop),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                )
             } else {
                 val ratio = cropperOption.aspectRatioX / cropperOption.aspectRatioY
                 Box(

@@ -13,6 +13,11 @@ object CropModeUtils {
                 label = "free"
             ),
             CropperOption(
+                aspectRatioX = -2f,
+                aspectRatioY = -2f,
+                label = "custom"
+            ),
+            CropperOption(
                 aspectRatioX = 1f,
                 aspectRatioY = 1f,
                 label = "square"
