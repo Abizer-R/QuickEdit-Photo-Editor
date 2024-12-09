@@ -36,4 +36,12 @@
     <string name="perm_item_storage">- Storage\n</string>
     <string name="app_not_found">App not found</string>
     <string name="fail_to_insert_uri_in_content_resolver">Couldn\'t insert uri in content resolver</string>
+    <string name="enter_aspect_ratio">Enter Aspect Ratio</string>
+    <string name="x">X</string>
+    <string name="y">Y</string>
+    <string name="select">Select</string>
+    <string name="not_a_valid_number">Not a valid number</string>
+    <string name="fields_cannot_be_empty">Fields cannot be empty</string>
+    <string name="ratio_lesser_than_minimum">Ratio is lesser than minimum allowed</string>
+    <string name="ratio_greater_than_minimum">Ratio is greater than maximum allowed</string>
 </resources>

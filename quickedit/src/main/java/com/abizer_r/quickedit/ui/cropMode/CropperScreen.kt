@@ -3,7 +3,9 @@ package com.abizer_r.quickedit.ui.cropMode
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.view.ViewGroup
+import android.view.WindowManager
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -33,6 +36,7 @@ import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.utils.defaultErrorToast
 import com.abizer_r.quickedit.ui.common.AnimatedToolbarContainer
 import com.abizer_r.quickedit.ui.common.bottomToolbarModifier
+import com.abizer_r.quickedit.ui.common.crop.AspectRatioDialog
 import com.abizer_r.quickedit.ui.common.topToolbarModifier
 import com.abizer_r.quickedit.ui.cropMode.cropperOptions.CropperOption
 import com.abizer_r.quickedit.ui.cropMode.cropperOptions.CropperOptionsFullWidth
@@ -40,8 +44,10 @@ import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_LARGE
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TextModeTopToolbar
 import com.abizer_r.quickedit.utils.editorScreen.CropModeUtils
+import com.abizer_r.quickedit.utils.getActivity
 import com.abizer_r.quickedit.utils.other.anim.AnimUtils
 import com.abizer_r.quickedit.utils.other.bitmap.ImmutableBitmap
+import com.abizer_r.quickedit.utils.toast
 import com.canhub.cropper.CropImageOptions
 import com.canhub.cropper.CropImageView
 import com.canhub.cropper.CropImageView.OnCropImageCompleteListener
@@ -57,6 +63,7 @@ fun CropperScreen(
 ) {
 
     val context = LocalContext.current
+    val activity = LocalContext.current.getActivity()
     val lifeCycleOwner = LocalLifecycleOwner.current
 
     val colorOnBackground = MaterialTheme.colorScheme.onBackground
@@ -71,7 +78,22 @@ fun CropperScreen(
         toolbarVisible = true
     }
 
+    // Save the previous state
+    val previousSoftInputMode = remember {
+        activity?.window?.attributes?.softInputMode ?: WindowManager.LayoutParams.SOFT_INPUT_ADJUST_UNSPECIFIED
+    }
+
+    // Set the desired windowSoftInputMode
+    DisposableEffect(Unit) {
+        activity?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
+        onDispose {
+            // Restore the previous windowSoftInputMode
+            activity?.window?.setSoftInputMode(previousSoftInputMode)
+        }
+    }
+
     var shouldCrop by remember { mutableStateOf(false) }
+    var showCropRatioDialog by remember { mutableStateOf(false) }
     val cropperOptionsList = remember { CropModeUtils.getCropperOptionsList() }
     var selectedCropOption by remember { mutableIntStateOf(0) }
     var cropImageOptions by remember {
@@ -120,6 +142,9 @@ fun CropperScreen(
                     aspectRatioX = 1,
                     aspectRatioY = 1
                 )
+            }
+            -2f -> {
+                showCropRatioDialog = true
             }
             else -> {
                 cropImageOptions = cropImageOptions.copy(
@@ -192,6 +217,23 @@ fun CropperScreen(
                 cropperOptionList = cropperOptionsList,
                 selectedIndex = selectedCropOption,
                 onItemClicked = onCropOptionItemClicked
+            )
+        }
+
+        AnimatedVisibility(
+            visible = showCropRatioDialog,
+        ) {
+            AspectRatioDialog(
+                onDismiss = { showCropRatioDialog = false },
+                onSetRatio = { x, y ->
+                    context.toast("x = $x, y = $x. r = ${x.toFloat() / y.toFloat()}")
+                    cropImageOptions = cropImageOptions.copy(
+                        fixAspectRatio = true,
+                        aspectRatioX = x,
+                        aspectRatioY = y
+                    )
+                    showCropRatioDialog = false
+                }
             )
         }
     }
