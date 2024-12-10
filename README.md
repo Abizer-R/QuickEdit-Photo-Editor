@@ -5,7 +5,8 @@ QuickEdit is a user-friendly photo editor for Android, built using **Jetpack Com
 
 [![Release v1.1.0](https://img.shields.io/github/v/release/Abizer-R/QuickEdit-Photo-Editor)](https://github.com/Abizer-R/QuickEdit-Photo-Editor/releases/tag/v1.1.0-4)
 
-[Download QuickEdit v1.1.0](https://github.com/Abizer-R/QuickEdit-Photo-Editor/releases/download/v1.1.0-4/app-release.apk) - The latest version of QuickEdit, packed with all the features you need to edit your photos.
+- [Download from the Google Play Store](https://play.google.com/store/apps/details?id=com.abizer_r.quickedit) 
+- [Download Apk (v1.1.0)](https://github.com/Abizer-R/QuickEdit-Photo-Editor/releases/download/v1.1.0-4/app-release.apk) 
 
 
 ## [Click Here To Watch Demo Video](https://drive.google.com/file/d/18IipYR_jbUQVFL8U1jNEJd_KTm_Y9ije/view?usp=sharing)
