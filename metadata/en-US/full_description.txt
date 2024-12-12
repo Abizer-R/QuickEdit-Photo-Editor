@@ -1,0 +1,7 @@
+QuickEdit is a user-friendly photo editor for Android, built using Jetpack Compose. It offers essential photo editing tools with a clean and smooth interface.
+
+Features
+* Basic Editing Tools: Crop, Draw, and Apply filters to your photos.
+* Filters: Apply filter effects using GPUImage.
+* Add Text: Add text with option to customize fonts and format (bold, italic and more).
+* Smooth Animations: Enjoy a seamless experience thanks to Jetpack Compose.
