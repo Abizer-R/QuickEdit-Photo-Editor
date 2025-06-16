@@ -1,13 +1,16 @@
 package com.abizer_r.quickedit.ui.navigation
 
 import android.graphics.Bitmap
+import android.net.Uri
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideIn
 import androidx.compose.animation.slideOut
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -29,14 +32,18 @@ import com.abizer_r.quickedit.utils.other.anim.enterTransition
 import com.abizer_r.quickedit.utils.other.anim.exitTransition
 import com.abizer_r.quickedit.utils.other.anim.popEnterTransition
 import com.abizer_r.quickedit.utils.other.anim.popExitTransition
+import com.abizer_r.quickedit.utils.other.bitmap.BitmapUtils
 import com.abizer_r.quickedit.utils.other.bitmap.ImmutableBitmap
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @Composable
-fun QuickEditNavigation() {
-    val lifeCycleOwner = LocalLifecycleOwner.current
-    val lifecycleScope = lifeCycleOwner.lifecycleScope
+fun QuickEditNavigation(
+    initialImageUri: Uri? = null
+) {
 
     val sharedEditorViewModel = hiltViewModel<SharedEditorViewModel>()
     val navController = rememberNavController()
@@ -103,7 +110,10 @@ fun QuickEditNavigation() {
             popEnterTransition = { popEnterTransition() },
             popExitTransition = { popExitTransition() }
         ) {
-            MainScreen(onImageSelected = onImageSelected)
+            MainScreen(
+                initialImageUri = initialImageUri,
+                onImageSelected = onImageSelected
+            )
         }
 
         composable(

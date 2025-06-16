@@ -39,7 +39,8 @@ import java.io.File
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
-    onImageSelected: (Bitmap) -> Unit
+    onImageSelected: (Bitmap) -> Unit,
+    initialImageUri: Uri? = null,
 ) {
     val context = LocalContext.current
     val activity = context.getActivity()
@@ -94,9 +95,19 @@ fun MainScreen(
         }
     }
 
+    LaunchedEffect(initialImageUri) {
+        initialImageUri?.let { imgUri ->
+            lifecycleScope.launch(Dispatchers.Default) {
+                BitmapUtils.getScaledBitmap(context, imgUri).onEach {
+                    scaledBitmapStatus = it
+                }.collect()
+            }
+        }
+    }
+
     LaunchedEffect(key1 = imageUri) {
         imageUri?.let { imgUri ->
-            lifecycleScope.launch(Dispatchers.IO) {
+            lifecycleScope.launch(Dispatchers.Default) {
                 BitmapUtils.getScaledBitmap(context, imgUri).onEach {
                     scaledBitmapStatus = it
                 }.collect()
