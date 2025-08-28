@@ -61,7 +61,7 @@ fun CropperOptionsFullWidth(
             val cropperOption = cropperOptionList[index]
             CropperOptionView(
                 modifier = Modifier
-                    .animateItemPlacement()
+                    .animateItem()
                     .padding(horizontal = 4.dp),
                 cropperOption = cropperOption,
                 isSelected = index == selectedIndex,

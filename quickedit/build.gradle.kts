@@ -1,13 +1,14 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.dagger.hilt)
 }
 
 android {
     namespace = "com.abizer_r.quickedit"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 24
@@ -35,9 +36,9 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.10"
-    }
+
+    // remove composeOptions.kotlinCompilerExtensionVersion when on Kotlin 2.x
+//    composeOptions { kotlinCompilerExtensionVersion = "1.5.10" }
 }
 
 dependencies {

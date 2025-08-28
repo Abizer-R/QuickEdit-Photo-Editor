@@ -16,7 +16,7 @@ class MainScreenViewModel @Inject constructor(
     val visiblePermissionDialogQueue = mutableStateListOf<String>()
 
     fun dismissDialog() {
-        visiblePermissionDialogQueue.removeLast()
+        visiblePermissionDialogQueue.removeAt(visiblePermissionDialogQueue.size - 1)
     }
 
     fun onPermissionResult(
