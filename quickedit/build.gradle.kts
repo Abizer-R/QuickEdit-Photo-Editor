@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.abizer_r.quickedit"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 24
