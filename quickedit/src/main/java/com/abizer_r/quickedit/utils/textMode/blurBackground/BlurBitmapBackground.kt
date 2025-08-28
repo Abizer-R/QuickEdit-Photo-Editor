@@ -16,7 +16,7 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.abizer_r.quickedit.R
 import com.abizer_r.quickedit.theme.QuickEditTheme
-import com.skydoves.cloudy.Cloudy
+import com.skydoves.cloudy.cloudy
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -36,19 +36,15 @@ fun BlurBitmapBackground(
      */
     if (shouldBlur) {
         Log.e("TEST_BLUR", "BlurBitmapBackground: ", )
-        Cloudy(
-            modifier = modifier,
-            radius = blurRadius
-        ) {
-            Image(
-                modifier = Modifier.fillMaxSize(),
-                bitmap = imageBitmap,
-                contentScale = contentScale,
-                contentDescription = null,
-                alpha = 0.5f
-            )
-        }
-
+        Image(
+            modifier = modifier.fillMaxSize().cloudy(
+                radius = blurRadius
+            ),
+            bitmap = imageBitmap,
+            contentScale = contentScale,
+            contentDescription = null,
+            alpha = 0.5f
+        )
     } else {
         Image(
             modifier = Modifier
