@@ -67,7 +67,7 @@ fun EffectsPreviewListFullWidth(
             val effectItem = effectsList[index]
             EffectPreview(
                 modifier = Modifier
-                    .animateItemPlacement()
+                    .animateItem()
                     .padding(horizontal = 4.dp),
                 effectItem = effectItem,
                 isSelected = index == selectedIndex,
