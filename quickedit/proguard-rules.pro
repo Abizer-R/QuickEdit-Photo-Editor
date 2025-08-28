@@ -19,3 +19,14 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Hilt / Dagger
+-keep class dagger.hilt.** { *; }
+-keep class * extends dagger.hilt.internal.GeneratedComponent { *; }
+-keep class * extends androidx.lifecycle.ViewModel { *; }  # keep ViewModel names if used in DI
+
+# Okio/OkHttp/Moshi (if you add later)
+-dontwarn javax.annotation.**
+
+# GPUImage (avoid stripping)
+-keep class jp.co.cyberagent.android.gpuimage.** { *; }

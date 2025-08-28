@@ -1,20 +1,21 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.dagger.hilt)
 }
 
 android {
     namespace = "com.abizer_r.quickedit"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.abizer_r.quickedit"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 4
-        versionName = "1.1.0"
+        targetSdk = 35
+        versionCode = 5
+        versionName = "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -42,9 +43,9 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.3"
-    }
+
+    // remove composeOptions.kotlinCompilerExtensionVersion when on Kotlin 2.x
+//    composeOptions { kotlinCompilerExtensionVersion = "1.5.10" }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
