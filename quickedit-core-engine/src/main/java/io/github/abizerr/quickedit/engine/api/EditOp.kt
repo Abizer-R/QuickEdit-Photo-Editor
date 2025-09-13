@@ -8,4 +8,8 @@ sealed interface EditOp {
   data class DrawPath(val points: List<Pair<Float, Float>>, val width: Float) : EditOp
   data object Undo : EditOp
   data object Redo : EditOp
+  /**
+   * FUTURE: Add ops additively; avoid changing existing ones:
+   * example: Transform, Blend, Perspective, InsertImage, InsertSticker, Select, ClearSelection, etc.
+   */
 }

@@ -34,4 +34,10 @@ internal class HistoryManager(maxUndo: Int) {
   fun canRedo() = future.isNotEmpty()
   fun undoCount() = past.size
   fun redoCount() = future.size
+
+  /**
+   * FUTURE: Add cap management strategy:
+   * - Drop oldest diffs
+   * - Merge consecutive strokes (from draw tool) into one snapshot
+   */
 }
