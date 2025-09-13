@@ -18,3 +18,4 @@ rootProject.name = "QuickEdit"
 include(":app-sample")
 include(":quickedit")
 include(":quickedit-core-engine")
+include(":quickedit-ui")
