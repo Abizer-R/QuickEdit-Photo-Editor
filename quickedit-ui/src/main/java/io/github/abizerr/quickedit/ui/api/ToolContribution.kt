@@ -1,6 +1,8 @@
 package io.github.abizerr.quickedit.ui.api
 
 import androidx.compose.runtime.Composable
+import io.github.abizerr.quickedit.engine.api.EditOp
+import io.github.abizerr.quickedit.engine.api.EditSnapshot
 
 interface ToolContribution {
     val id: String
@@ -17,7 +19,7 @@ interface ToolContribution {
 }
 
 interface ToolController {
-    fun emit(op: Any) // placeholder; will be EditOp in future
+    fun emit(op: EditOp) // placeholder; will be EditOp in future
     fun undo()
     fun redo()
     /**
@@ -26,4 +28,6 @@ interface ToolController {
      */
 }
 
-class QuickEditState internal constructor()
+class QuickEditState internal constructor(
+    val snapshot: EditSnapshot
+)
