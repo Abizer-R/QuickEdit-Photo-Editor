@@ -12,6 +12,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.abizer_r.quickedit.theme.QuickEditTheme
+import io.github.abizerr.quickedit.engine.api.EditImage
+import io.github.abizerr.quickedit.engine.api.SaveFormat
 import io.github.abizerr.quickedit.ui.api.QuickEditConfig
 import io.github.abizerr.quickedit.ui.api.QuickEditEditor
 import io.github.abizerr.quickedit.ui.api.ToolContribution
@@ -40,16 +42,14 @@ fun QuickEditApp(
 //                QuickEditNavigation(initialImageUri)
 
 
-                // Temporary: pass through the Uri as a lightweight handle.
-                // :quickedit-ui currently accepts 'image: Any?'.
-                // In future, this becomes a real EditImage (engine.api) + proper mapping.
-                val placeholderImage: Any? = initialImageUri
+                val editImage: EditImage? = initialImageUri?.let { EditImage.FromUri(it) }
 
                 QuickEditEditor(
-                    image = placeholderImage,
+                    image = editImage,
                     config = QuickEditConfig(
                         tools = emptyList<ToolContribution>(), // TODO (revamp): We'll inject real tools in future
-                        maxUndo = 20
+                        maxUndo = 20,
+                        defaultFormat = SaveFormat.Jpeg(90)
                     ),
 //                    state = QuickEditState(),
                     onSave = {
