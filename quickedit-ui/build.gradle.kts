@@ -37,7 +37,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":quickedit-core-engine"))
+    api(project(":quickedit-core-engine"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
