@@ -1,5 +1,7 @@
 package io.github.abizerr.quickedit.engine.api
 
+import android.graphics.Bitmap
+
 
 /** A lightweight reference to the image the editor works on. */
 sealed interface EditImage {
@@ -35,7 +37,10 @@ data class EditedImage(
 data class Size(val width: Int, val height: Int)
 
 /** Render output placeholder (Phase 5 will hold a Bitmap or ImageBitmap). */
-data class RenderResult(val ok: Boolean)
+data class RenderResult(
+    val ok: Boolean,
+    val preview: Bitmap
+)
 /**
  * FUTURE: Add preview payloads without chaning the signature of render() in EditEngine interface:
  * example: bitmap, downscaleFactor, etc.
