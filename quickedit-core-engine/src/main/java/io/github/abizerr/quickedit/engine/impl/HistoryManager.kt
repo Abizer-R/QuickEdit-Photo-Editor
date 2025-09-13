@@ -3,41 +3,43 @@ package io.github.abizerr.quickedit.engine.impl
 import io.github.abizerr.quickedit.engine.api.EditSnapshot
 
 internal class HistoryManager(maxUndo: Int) {
-  private val cap = maxUndo.coerceAtLeast(0)
-  private val past = ArrayDeque<EditSnapshot>()
-  private var present: EditSnapshot? = null
-  private val future = ArrayDeque<EditSnapshot>()
+    private val cap = maxUndo.coerceAtLeast(0)
+    private val past = ArrayDeque<EditSnapshot>()
+    private var present: EditSnapshot? = null
+    private val future = ArrayDeque<EditSnapshot>()
 
-  fun setInitial(snapshot: EditSnapshot) { present = snapshot; past.clear(); future.clear() }
+    fun setInitial(snapshot: EditSnapshot) {
+        present = snapshot; past.clear(); future.clear()
+    }
 
-  fun push(next: EditSnapshot) {
-    present?.let { past.addLast(it); if (past.size > cap) past.removeFirst() }
-    present = next; future.clear()
-  }
+    fun push(next: EditSnapshot) {
+        present?.let { past.addLast(it); if (past.size > cap) past.removeFirst() }
+        present = next; future.clear()
+    }
 
-  fun undo(): EditSnapshot? {
-    val prev = past.removeLastOrNull() ?: return null
-    present?.let { future.addLast(it) }
-    present = prev
-    return present
-  }
+    fun undo(): EditSnapshot? {
+        val prev = past.removeLastOrNull() ?: return null
+        present?.let { future.addLast(it) }
+        present = prev
+        return present
+    }
 
-  fun redo(): EditSnapshot? {
-    val next = future.removeLastOrNull() ?: return null
-    present?.let { past.addLast(it); if (past.size > cap) past.removeFirst() }
-    present = next
-    return present
-  }
+    fun redo(): EditSnapshot? {
+        val next = future.removeLastOrNull() ?: return null
+        present?.let { past.addLast(it); if (past.size > cap) past.removeFirst() }
+        present = next
+        return present
+    }
 
-  fun current(): EditSnapshot? = present
-  fun canUndo() = past.isNotEmpty()
-  fun canRedo() = future.isNotEmpty()
-  fun undoCount() = past.size
-  fun redoCount() = future.size
+    fun current(): EditSnapshot? = present
+    fun canUndo() = past.isNotEmpty()
+    fun canRedo() = future.isNotEmpty()
+    fun undoCount() = past.size
+    fun redoCount() = future.size
 
-  /**
-   * FUTURE: Add cap management strategy:
-   * - Drop oldest diffs
-   * - Merge consecutive strokes (from draw tool) into one snapshot
-   */
+    /**
+     * FUTURE: Add cap management strategy:
+     * - Drop oldest diffs
+     * - Merge consecutive strokes (from draw tool) into one snapshot
+     */
 }

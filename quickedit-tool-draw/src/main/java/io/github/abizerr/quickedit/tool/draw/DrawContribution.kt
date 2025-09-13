@@ -10,16 +10,16 @@ import io.github.abizerr.quickedit.ui.api.ToolContribution
 import io.github.abizerr.quickedit.ui.api.ToolController
 
 class DrawContribution : ToolContribution {
-  override val id: String = "draw"
+    override val id: String = "draw"
 
-  @Composable
-  override fun ToolbarIcon(selected: Boolean, onClick: () -> Unit) {
-    // Placeholder icon
-    Icon(imageVector = Icons.Outlined.Brush, contentDescription = "Draw")
-  }
+    @Composable
+    override fun ToolbarIcon(selected: Boolean, onClick: () -> Unit) {
+        // Placeholder icon
+        Icon(imageVector = Icons.Outlined.Brush, contentDescription = "Draw")
+    }
 
-  @Composable
-  override fun Panel(state: QuickEditState, controller: ToolController) {
-    Text("Draw tool placeholder")
-  }
+    @Composable
+    override fun Panel(state: QuickEditState, controller: ToolController) {
+        Text("Draw tool placeholder")
+    }
 }

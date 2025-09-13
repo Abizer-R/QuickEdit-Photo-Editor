@@ -10,16 +10,16 @@ import io.github.abizerr.quickedit.ui.api.ToolContribution
 import io.github.abizerr.quickedit.ui.api.ToolController
 
 class TextContribution : ToolContribution {
-  override val id: String = "text"
+    override val id: String = "text"
 
-  @Composable
-  override fun ToolbarIcon(selected: Boolean, onClick: () -> Unit) {
-    // Placeholder icon
-    Icon(imageVector = Icons.Default.TextFields, contentDescription = "Text")
-  }
+    @Composable
+    override fun ToolbarIcon(selected: Boolean, onClick: () -> Unit) {
+        // Placeholder icon
+        Icon(imageVector = Icons.Default.TextFields, contentDescription = "Text")
+    }
 
-  @Composable
-  override fun Panel(state: QuickEditState, controller: ToolController) {
-    Text("Text tool placeholder")
-  }
+    @Composable
+    override fun Panel(state: QuickEditState, controller: ToolController) {
+        Text("Text tool placeholder")
+    }
 }

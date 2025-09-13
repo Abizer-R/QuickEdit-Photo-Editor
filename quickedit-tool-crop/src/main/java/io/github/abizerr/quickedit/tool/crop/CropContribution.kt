@@ -10,16 +10,16 @@ import io.github.abizerr.quickedit.ui.api.ToolContribution
 import io.github.abizerr.quickedit.ui.api.ToolController
 
 class CropContribution : ToolContribution {
-  override val id: String = "crop"
+    override val id: String = "crop"
 
-  @Composable
-  override fun ToolbarIcon(selected: Boolean, onClick: () -> Unit) {
-    // Placeholder icon
-    Icon(imageVector = Icons.Outlined.Crop, contentDescription = "Crop")
-  }
+    @Composable
+    override fun ToolbarIcon(selected: Boolean, onClick: () -> Unit) {
+        // Placeholder icon
+        Icon(imageVector = Icons.Outlined.Crop, contentDescription = "Crop")
+    }
 
-  @Composable
-  override fun Panel(state: QuickEditState, controller: ToolController) {
-    Text("Crop tool placeholder")
-  }
+    @Composable
+    override fun Panel(state: QuickEditState, controller: ToolController) {
+        Text("Crop tool placeholder")
+    }
 }
