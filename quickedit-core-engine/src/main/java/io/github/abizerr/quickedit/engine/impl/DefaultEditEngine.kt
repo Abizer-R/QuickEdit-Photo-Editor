@@ -42,6 +42,10 @@ class DefaultEditEngine(
         val next = when (op) {
             is EditOp.Undo -> historyManager.undo() ?: current
             is EditOp.Redo -> historyManager.redo() ?: current
+            is EditOp.ImageCropped -> current.copy(
+                image = EditImage.FromBitmap(op.croppedBitmap),
+                rev = current.rev + 1
+            )
             else -> current.copy(rev = current.rev + 1) // TODO (revamp): placeholder; real ops later
         }
         if (op !is EditOp.Undo && op !is EditOp.Redo) historyManager.push(next)

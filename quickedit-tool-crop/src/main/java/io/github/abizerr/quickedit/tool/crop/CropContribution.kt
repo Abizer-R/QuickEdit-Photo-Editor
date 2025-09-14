@@ -1,5 +1,6 @@
 package io.github.abizerr.quickedit.tool.crop
 
+import android.graphics.Bitmap
 import android.graphics.Rect
 import android.view.ViewGroup
 import androidx.compose.foundation.background
@@ -34,8 +35,10 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.lifecycleScope
 import com.canhub.cropper.CropImageOptions
 import com.canhub.cropper.CropImageView
+import com.canhub.cropper.CropImageView.OnCropImageCompleteListener
 import io.github.abizerr.quickedit.engine.api.EditImage
 import io.github.abizerr.quickedit.engine.api.EditOp
 import io.github.abizerr.quickedit.ui.api.QuickEditState
@@ -44,8 +47,10 @@ import io.github.abizerr.quickedit.ui.api.ToolController
 import io.github.abizerr.quickedit.ui.common.AnimatedToolbarContainer
 import io.github.abizerr.quickedit.ui.common.TOOLBAR_HEIGHT_MEDIUM
 import io.github.abizerr.quickedit.ui.common.TOOLBAR_HEIGHT_SMALL
+import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils
 import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -82,14 +87,22 @@ class CropContribution : ToolContribution {
         var cropView: CropImageView? by remember { mutableStateOf(null) }
         var options by remember { mutableStateOf(CropImageOptions()) }
 
-        suspend fun cropAndExit() {
-            val r: Rect? = cropView?.cropRect
-            if (r != null) {
-                controller.emit(EditOp.Crop(r.left, r.top, r.right, r.bottom))
+
+        fun handleCropResult(croppedBitmap: Bitmap) {
+            scope.launch {
+                controller.emit(EditOp.ImageCropped(croppedBitmap))
+                toolbarVisible = false
+                delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST.toLong())
+                onExit()
             }
-            toolbarVisible = false
-            delay(TOOLBAR_COLLAPSE_ANIM_DURATION_FAST.toLong())
-            onExit()
+        }
+
+        val cropCompleteListener = remember {
+            OnCropImageCompleteListener { view, result ->
+                result.bitmap?.let {
+                    handleCropResult(it)
+                } // TODO Show Error toast using "?:"
+            }
         }
 
         Box(Modifier.fillMaxSize()) {
@@ -110,7 +123,7 @@ class CropContribution : ToolContribution {
                     }
                 },
                 onDone = {
-                    scope.launch { cropAndExit() }
+                    cropView?.croppedImageAsync()
                 }
             )
 
@@ -168,6 +181,7 @@ class CropContribution : ToolContribution {
                                 is EditImage.FromUri -> setImageUriAsync(img.uri)
                             }
                             setImageCropOptions(options)
+                            setOnCropImageCompleteListener(cropCompleteListener)
                         }
 
                         container.addView(mCropView)
