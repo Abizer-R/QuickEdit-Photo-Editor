@@ -48,9 +48,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.abizer_r.quickedit.utils.ImmutableList
 import com.abizer_r.quickedit.utils.defaultErrorToast
-import com.abizer_r.quickedit.ui.common.AnimatedToolbarContainer
-import com.abizer_r.quickedit.ui.common.bottomToolbarModifier
-import com.abizer_r.quickedit.ui.common.topToolbarModifier
+import io.github.abizerr.quickedit.ui.common.AnimatedToolbarContainer
+import io.github.abizerr.quickedit.ui.common.bottomToolbarModifier
+import io.github.abizerr.quickedit.ui.common.topToolbarModifier
 import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
 import com.abizer_r.quickedit.ui.drawMode.stateHandling.DrawModeEvent
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.BottomToolBarStatic
@@ -64,7 +64,7 @@ import com.abizer_r.quickedit.utils.drawMode.getOpacityOrNull
 import com.abizer_r.quickedit.utils.drawMode.getShapeTypeOrNull
 import com.abizer_r.quickedit.utils.drawMode.getWidthOrNull
 import com.abizer_r.quickedit.utils.drawMode.toPx
-import com.abizer_r.quickedit.utils.other.anim.AnimUtils
+import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils
 import com.abizer_r.quickedit.utils.other.bitmap.ImmutableBitmap
 import com.smarttoolfactory.screenshot.ImageResult
 import com.smarttoolfactory.screenshot.ScreenshotBox

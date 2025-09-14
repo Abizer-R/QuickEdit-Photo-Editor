@@ -1,26 +1,18 @@
-package com.abizer_r.quickedit.utils.other.anim
+package io.github.abizerr.quickedit.ui.utils.anim
 
-import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.animation.slideIn
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOut
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.IntOffset
-import androidx.navigation.NavBackStackEntry
 
 object AnimUtils {
 

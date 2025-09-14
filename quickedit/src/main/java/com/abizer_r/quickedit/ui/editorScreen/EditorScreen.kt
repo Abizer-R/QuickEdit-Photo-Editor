@@ -33,9 +33,9 @@ import androidx.lifecycle.lifecycleScope
 import com.abizer_r.quickedit.R
 import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.utils.ImmutableList
-import com.abizer_r.quickedit.ui.common.AnimatedToolbarContainer
-import com.abizer_r.quickedit.ui.common.bottomToolbarModifier
-import com.abizer_r.quickedit.ui.common.topToolbarModifier
+import io.github.abizerr.quickedit.ui.common.AnimatedToolbarContainer
+import io.github.abizerr.quickedit.ui.common.bottomToolbarModifier
+import io.github.abizerr.quickedit.ui.common.topToolbarModifier
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.BottomToolBarStatic
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
@@ -45,7 +45,7 @@ import com.abizer_r.quickedit.ui.editorScreen.topToolbar.EditorTopToolBar
 import com.abizer_r.quickedit.utils.AppUtils
 import com.abizer_r.quickedit.utils.FileUtils
 import com.abizer_r.quickedit.utils.editorScreen.EditorScreenUtils
-import com.abizer_r.quickedit.utils.other.anim.AnimUtils
+import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils
 import com.abizer_r.quickedit.utils.other.bitmap.BitmapUtils
 import com.abizer_r.quickedit.utils.toast
 import kotlinx.coroutines.Dispatchers

@@ -1,7 +1,6 @@
 package com.abizer_r.quickedit.ui.textMode
 
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -34,12 +33,11 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import com.abizer_r.quickedit.utils.ImmutableList
 import com.abizer_r.quickedit.utils.textMode.blurBackground.BlurBitmapBackground
 import com.abizer_r.quickedit.utils.defaultErrorToast
-import com.abizer_r.quickedit.ui.common.AnimatedToolbarContainer
-import com.abizer_r.quickedit.ui.common.bottomToolbarModifier
-import com.abizer_r.quickedit.ui.common.topToolbarModifier
+import io.github.abizerr.quickedit.ui.common.AnimatedToolbarContainer
+import io.github.abizerr.quickedit.ui.common.bottomToolbarModifier
+import io.github.abizerr.quickedit.ui.common.topToolbarModifier
 import com.abizer_r.quickedit.ui.textMode.TextModeEvent.*
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.BottomToolBarStatic
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
@@ -48,14 +46,11 @@ import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarE
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TextModeTopToolbar
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.TextModeToolbarExtension
-import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.caseOptions.TextCaseType
-import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.styleOptions.TextStyleAttr
 import com.abizer_r.quickedit.ui.textMode.textEditorLayout.TextEditorLayout
 import com.abizer_r.quickedit.ui.textMode.textEditorLayout.TextEditorState
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableTextBoxState
-import com.abizer_r.quickedit.utils.other.anim.AnimUtils
+import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils
 import com.abizer_r.quickedit.utils.other.bitmap.ImmutableBitmap
-import com.abizer_r.quickedit.utils.textMode.TextModeUtils
 import com.abizer_r.quickedit.utils.textMode.TextModeUtils.BorderForSelectedViews
 import com.abizer_r.quickedit.utils.textMode.TextModeUtils.DrawAllTransformableViews
 import com.smarttoolfactory.screenshot.ImageResult

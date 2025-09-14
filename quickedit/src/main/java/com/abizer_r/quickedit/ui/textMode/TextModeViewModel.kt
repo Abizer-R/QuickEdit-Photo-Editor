@@ -17,7 +17,7 @@ import com.abizer_r.quickedit.ui.transformableViews.base.TransformableTextBoxSta
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBoxEvents
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableBoxState
 import com.abizer_r.quickedit.utils.ImmutableList
-import com.abizer_r.quickedit.utils.other.anim.AnimUtils
+import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils
 import com.abizer_r.quickedit.utils.textMode.TextModeUtils
 import com.abizer_r.quickedit.utils.textMode.TextModeUtils.isTextModeItem
 import dagger.hilt.android.lifecycle.HiltViewModel

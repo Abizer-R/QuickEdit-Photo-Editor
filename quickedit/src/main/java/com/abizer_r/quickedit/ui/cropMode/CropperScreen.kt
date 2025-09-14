@@ -34,10 +34,10 @@ import androidx.lifecycle.lifecycleScope
 import com.abizer_r.quickedit.R
 import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.utils.defaultErrorToast
-import com.abizer_r.quickedit.ui.common.AnimatedToolbarContainer
-import com.abizer_r.quickedit.ui.common.bottomToolbarModifier
+import io.github.abizerr.quickedit.ui.common.AnimatedToolbarContainer
+import io.github.abizerr.quickedit.ui.common.bottomToolbarModifier
 import com.abizer_r.quickedit.ui.common.crop.AspectRatioDialog
-import com.abizer_r.quickedit.ui.common.topToolbarModifier
+import io.github.abizerr.quickedit.ui.common.topToolbarModifier
 import com.abizer_r.quickedit.ui.cropMode.cropperOptions.CropperOption
 import com.abizer_r.quickedit.ui.cropMode.cropperOptions.CropperOptionsFullWidth
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_LARGE
@@ -45,7 +45,7 @@ import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.topToolbar.TextModeTopToolbar
 import com.abizer_r.quickedit.utils.editorScreen.CropModeUtils
 import com.abizer_r.quickedit.utils.getActivity
-import com.abizer_r.quickedit.utils.other.anim.AnimUtils
+import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils
 import com.abizer_r.quickedit.utils.other.bitmap.ImmutableBitmap
 import com.abizer_r.quickedit.utils.toast
 import com.canhub.cropper.CropImageOptions
