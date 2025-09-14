@@ -36,8 +36,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.abizer_r.quickedit.R
-import com.abizer_r.quickedit.theme.QuickEditTheme
-import com.abizer_r.quickedit.theme.ToolBarBackgroundColor
+import io.github.abizerr.quickedit.ui.theme.QuickEditTheme
+import io.github.abizerr.quickedit.ui.theme.ToolBarBackgroundColor
 import io.github.abizerr.quickedit.ui.utils.defaultErrorToast
 import io.github.abizerr.quickedit.ui.common.AnimatedToolbarContainer
 import com.abizer_r.quickedit.ui.common.LoadingView

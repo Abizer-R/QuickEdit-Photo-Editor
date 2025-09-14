@@ -1,4 +1,4 @@
-package com.abizer_r.quickedit.theme
+package io.github.abizerr.quickedit.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

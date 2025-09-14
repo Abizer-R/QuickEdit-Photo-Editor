@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.res.imageResource
 import com.abizer_r.quickedit.R
-import com.abizer_r.quickedit.theme.QuickEditTheme
+import io.github.abizerr.quickedit.ui.theme.QuickEditTheme
 import io.github.abizerr.quickedit.engine.api.EditImage
 import io.github.abizerr.quickedit.engine.api.SaveFormat
 import io.github.abizerr.quickedit.tool.crop.CropContribution
@@ -25,7 +25,6 @@ import io.github.abizerr.quickedit.tool.effects.EffectsContribution
 import io.github.abizerr.quickedit.tool.text.TextContribution
 import io.github.abizerr.quickedit.ui.api.QuickEditConfig
 import io.github.abizerr.quickedit.ui.api.QuickEditEditor
-import io.github.abizerr.quickedit.ui.api.ToolContribution
 
 /**
  * Legacy entry kept for binary/source compatibility.

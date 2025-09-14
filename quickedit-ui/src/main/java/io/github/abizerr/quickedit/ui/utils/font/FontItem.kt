@@ -1,4 +1,4 @@
-package com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.fontFamilyOptions
+package io.github.abizerr.quickedit.ui.utils.font
 
 import androidx.compose.ui.text.font.FontFamily
 

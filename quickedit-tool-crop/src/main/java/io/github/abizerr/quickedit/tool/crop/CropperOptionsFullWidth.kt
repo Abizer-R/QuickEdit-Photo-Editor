@@ -35,7 +35,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.abizerr.quickedit.tool.crop.model.CropperOption
+import io.github.abizerr.quickedit.tool.crop.utils.CropModeUtils
 import io.github.abizerr.quickedit.ui.common.TOOLBAR_HEIGHT_LARGE
+import io.github.abizerr.quickedit.ui.theme.QuickEditTheme
+import io.github.abizerr.quickedit.ui.theme.ToolBarBackgroundColor
 import io.github.abizerr.quickedit.ui.utils.defaultTextColor
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -158,51 +161,51 @@ fun CropperOptionView(
 }
 
 
-//@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-//@Composable
-//fun Selected_EffectPreviewItem() {
-//    QuickEditTheme {
-//        CropperOptionView(
-//            modifier = Modifier.padding(8.dp),
-//            cropperOption = CropperOption(
-//                aspectRatioX = 1f,
-//                aspectRatioY = 1f,
-//                label = "Square"
-//            ),
-//            isSelected = true,
-//            onClick = {}
-//        )
-//    }
-//}
-//
-//@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-//@Composable
-//fun Unselected_EffectPreviewItem() {
-//    QuickEditTheme {
-//        CropperOptionView(
-//            modifier = Modifier.padding(8.dp),
-//            cropperOption = CropperOption(
-//                aspectRatioX = 1f,
-//                aspectRatioY = 1f,
-//                label = "1:1"
-//            ),
-//            isSelected = false,
-//            onClick = {}
-//        )
-//    }
-//}
-//
-//
-//@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-//@Composable
-//fun Preview_EffectsPreviewList() {
-//    QuickEditTheme {
-//        CropperOptionsFullWidth(
-//            modifier = background(ToolBarBackgroundColor)
-//                .padding(vertical = 12.dp),
-//            cropperOptionList = CropModeUtils.getCropperOptionsList(),
-//            selectedIndex = 0,
-//            onItemClicked = {_, _ ->}
-//        )
-//    }
-//}
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun Selected_EffectPreviewItem() {
+    QuickEditTheme {
+        CropperOptionView(
+            modifier = Modifier.padding(8.dp),
+            cropperOption = CropperOption(
+                aspectRatioX = 1f,
+                aspectRatioY = 1f,
+                label = "Square"
+            ),
+            isSelected = true,
+            onClick = {}
+        )
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun Unselected_EffectPreviewItem() {
+    QuickEditTheme {
+        CropperOptionView(
+            modifier = Modifier.padding(8.dp),
+            cropperOption = CropperOption(
+                aspectRatioX = 1f,
+                aspectRatioY = 1f,
+                label = "1:1"
+            ),
+            isSelected = false,
+            onClick = {}
+        )
+    }
+}
+
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun Preview_EffectsPreviewList() {
+    QuickEditTheme {
+        CropperOptionsFullWidth(
+            modifier = Modifier.background(ToolBarBackgroundColor)
+                .padding(vertical = 12.dp),
+            cropperOptionList = CropModeUtils.getCropperOptionsList(),
+            selectedIndex = 0,
+            onItemClicked = {_, _ ->}
+        )
+    }
+}

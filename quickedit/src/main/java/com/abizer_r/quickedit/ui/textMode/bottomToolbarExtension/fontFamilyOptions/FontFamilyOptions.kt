@@ -21,10 +21,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.abizer_r.quickedit.theme.QuickEditTheme
-import com.abizer_r.quickedit.theme.ToolBarBackgroundColor
+import io.github.abizerr.quickedit.ui.theme.QuickEditTheme
+import io.github.abizerr.quickedit.ui.theme.ToolBarBackgroundColor
+import io.github.abizerr.quickedit.ui.utils.font.FontItem
 import io.github.abizerr.quickedit.ui.utils.defaultTextColor
-import com.abizer_r.quickedit.utils.textMode.FontUtils
+import io.github.abizerr.quickedit.ui.utils.font.FontUtils
 
 @Composable
 fun FontFamilyOptions(
