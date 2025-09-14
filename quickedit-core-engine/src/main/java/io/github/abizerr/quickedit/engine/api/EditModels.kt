@@ -39,7 +39,7 @@ data class Size(val width: Int, val height: Int)
 /** Render output placeholder (Phase 5 will hold a Bitmap or ImageBitmap). */
 data class RenderResult(
     val ok: Boolean,
-    val preview: Bitmap
+    val preview: Bitmap?
 )
 /**
  * FUTURE: Add preview payloads without chaning the signature of render() in EditEngine interface:

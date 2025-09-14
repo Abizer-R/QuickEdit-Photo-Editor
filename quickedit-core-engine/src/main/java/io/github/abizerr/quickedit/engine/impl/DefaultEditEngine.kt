@@ -1,13 +1,25 @@
 package io.github.abizerr.quickedit.engine.impl
 
+import android.content.ContentResolver
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
+import android.os.Build
 import io.github.abizerr.quickedit.engine.api.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import androidx.core.graphics.scale
+import java.io.ByteArrayOutputStream
 
 /**
- * Minimal, synchronous engine to keep Phase 4 buildable.
- * Phase 5 will add real bitmap ops, curves, crop, etc.
+ * Minimal but real engine:
+ * - Decodes source (Uri/Bitmap)
+ * - Renders a scaled preview Bitmap
+ * - Saves to bytes (PNG/JPEG/WebP)
  */
-public class DefaultEditEngine(
-    private val maxUndo: Int = 20
+class DefaultEditEngine(
+    private val maxUndo: Int = 20,
+    private val resolver: ContentResolver? = null
 ) : EditEngine {
 
     private val historyManager = HistoryManager(maxUndo)
@@ -37,17 +49,78 @@ public class DefaultEditEngine(
     }
 
     override suspend fun render(snapshot: EditSnapshot, size: Size): RenderResult {
-        // TODO Phase 5: produce a preview bitmap
-        return RenderResult(ok = true)
+        val bitmap = withContext(Dispatchers.Default) {
+            val baseBitmap = decode(snapshot.image) ?: return@withContext null
+            scaleToFit(baseBitmap, size.width, size.height)
+        } ?: return RenderResult(ok = false, preview = null)
+
+        return RenderResult(ok = true, preview = bitmap)
     }
 
-    override suspend fun save(snapshot: EditSnapshot, format: SaveFormat): Result<EditedImage> {
-        // TODO: Phase 5: encode bitmap; for now, return a dummy EditedImage
-        val mime = when (format) {
-            is SaveFormat.Png -> "image/png"
-            is SaveFormat.Jpeg -> "image/jpeg"
-            is SaveFormat.WebP -> if (format.lossless) "image/webp" else "image/webp"
+    override suspend fun save(snapshot: EditSnapshot, format: SaveFormat): Result<EditedImage> = withContext(Dispatchers.IO) {
+        val baseBitmap = decode(snapshot.image)
+            ?: return@withContext Result.failure(IllegalStateException("Decode failed"))
+
+        val (compressFormat, quality, mime) = when (format) {
+            is SaveFormat.Png -> Triple(Bitmap.CompressFormat.PNG, 100, "image/png")
+            is SaveFormat.Jpeg -> Triple(Bitmap.CompressFormat.JPEG, format.quality.coerceIn(0, 100), "image/jpeg")
+            is SaveFormat.WebP -> {
+                val q = format.quality.coerceIn(0, 100)
+                val mimeType = "image/webp"
+                val compress = if (Build.VERSION.SDK_INT >= 30) {
+                    if (format.lossless) Bitmap.CompressFormat.WEBP_LOSSLESS else Bitmap.CompressFormat.WEBP_LOSSY
+                } else {
+                    Bitmap.CompressFormat.WEBP
+                }
+                Triple(compress, q, mimeType)
+            }
         }
-        return Result.success(EditedImage(mimeType = mime, bytes = null))
+
+        val outputStream = ByteArrayOutputStream()
+        baseBitmap.compress(compressFormat, quality, outputStream)
+        Result.success(EditedImage(
+            mimeType = mime,
+            bytes = outputStream.toByteArray()
+        ))
+    }
+
+    private fun decode(image: EditImage): Bitmap? {
+        return when (image) {
+            is EditImage.FromBitmap -> image.bitmap
+            is EditImage.FromUri -> {
+                decodeBitmapFromUri(image)
+            }
+        }
+    }
+
+    private fun decodeBitmapFromUri(
+        image: EditImage.FromUri
+    ): Bitmap? = try {
+        val contentResolver = resolver ?: return null
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            // ImageDecoder handles EXIF orientation, wide color, scaling hints
+            val src = ImageDecoder.createSource(contentResolver, image.uri)
+            ImageDecoder.decodeBitmap(src)
+        } else {
+            // BitmapFactory.decodeStream doesn't auto-rotate based on EXIF
+            // But, it is the only safe option we have below API-P
+            contentResolver.openInputStream(image.uri)?.use { inputStream ->
+                BitmapFactory.decodeStream(inputStream)
+            }
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+
+    private fun scaleToFit(src: Bitmap, targetW: Int, targetH: Int): Bitmap {
+        if (targetW <= 0 || targetH <= 0)   return src
+        val wScale = targetW.toFloat() / src.width
+        val hScale = targetH.toFloat() / src.height
+        val scale = minOf(wScale, hScale)
+        val w = (src.width * scale).toInt().coerceAtLeast(1)
+        val h = (src.height * scale).toInt().coerceAtLeast(1)
+        return src.scale(w, h)
     }
 }
