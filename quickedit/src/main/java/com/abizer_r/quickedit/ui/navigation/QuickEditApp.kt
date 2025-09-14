@@ -12,6 +12,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.res.imageResource
+import com.abizer_r.quickedit.R
 import com.abizer_r.quickedit.theme.QuickEditTheme
 import io.github.abizerr.quickedit.engine.api.EditImage
 import io.github.abizerr.quickedit.engine.api.SaveFormat
@@ -47,7 +51,11 @@ fun QuickEditApp(
 //                QuickEditNavigation(initialImageUri)
 
 
-                val editImage: EditImage? = initialImageUri?.let { EditImage.FromUri(it) }
+                val editImage: EditImage? = initialImageUri?.let {
+                    EditImage.FromUri(it)
+                } ?: EditImage.FromBitmap(
+                    ImageBitmap.imageResource(id = R.drawable.placeholder_image_4).asAndroidBitmap()
+                )
 
                 val tools = remember {
                     listOf(
