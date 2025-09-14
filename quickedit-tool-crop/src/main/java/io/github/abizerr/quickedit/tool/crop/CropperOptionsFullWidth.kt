@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -55,8 +56,10 @@ fun CropperOptionsFullWidth(
         modifier = modifier
             .fillMaxWidth()
             .height(toolbarHeight)
+            .background(ToolBarBackgroundColor)
             .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
         items(
             count = cropperOptionList.size,
@@ -97,7 +100,7 @@ fun CropperOptionView(
             .background(color = borderColor)
             .padding(selectedBorderWidth)
             .clip(clipShape)
-            .background(MaterialTheme.colorScheme.background)
+            .background(ToolBarBackgroundColor)
             .padding(4.dp)
             .clickable {
                 onClick(cropperOption)

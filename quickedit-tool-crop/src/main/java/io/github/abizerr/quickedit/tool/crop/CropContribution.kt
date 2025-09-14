@@ -1,9 +1,11 @@
 package io.github.abizerr.quickedit.tool.crop
 
 import android.graphics.Bitmap
-import android.graphics.Rect
 import android.view.ViewGroup
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -11,7 +13,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Crop
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -19,38 +24,36 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.imageResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.lifecycleScope
 import com.canhub.cropper.CropImageOptions
 import com.canhub.cropper.CropImageView
 import com.canhub.cropper.CropImageView.OnCropImageCompleteListener
 import io.github.abizerr.quickedit.engine.api.EditImage
 import io.github.abizerr.quickedit.engine.api.EditOp
+import io.github.abizerr.quickedit.tool.crop.model.CropperOption
+import io.github.abizerr.quickedit.tool.crop.utils.CropModeUtils
 import io.github.abizerr.quickedit.ui.api.QuickEditState
 import io.github.abizerr.quickedit.ui.api.ToolContribution
 import io.github.abizerr.quickedit.ui.api.ToolController
 import io.github.abizerr.quickedit.ui.common.AnimatedToolbarContainer
+import io.github.abizerr.quickedit.ui.common.TOOLBAR_HEIGHT_LARGE
 import io.github.abizerr.quickedit.ui.common.TOOLBAR_HEIGHT_MEDIUM
 import io.github.abizerr.quickedit.ui.common.TOOLBAR_HEIGHT_SMALL
+import io.github.abizerr.quickedit.ui.theme.ToolBarBackgroundColor
 import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils
 import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import io.github.abizerr.quickedit.ui.utils.toast
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -80,12 +83,17 @@ class CropContribution : ToolContribution {
         controller: ToolController,
         onExit: () -> Unit
     ) {
+        val context = LocalContext.current
 
         var toolbarVisible by remember { mutableStateOf(true) }
         val scope = rememberCoroutineScope()
 
         var cropView: CropImageView? by remember { mutableStateOf(null) }
-        var options by remember { mutableStateOf(CropImageOptions()) }
+        var cropImageOptions by remember { mutableStateOf(CropImageOptions()) }
+
+        val cropperOptionsList = remember { CropModeUtils.getCropperOptionsList() }
+        var selectedCropOptionIndex by remember { mutableIntStateOf(0) }
+        var showCropRatioDialog by remember { mutableStateOf(false) }
 
 
         fun handleCropResult(croppedBitmap: Bitmap) {
@@ -107,7 +115,7 @@ class CropContribution : ToolContribution {
 
         Box(Modifier.fillMaxSize()) {
             val topToolbarHeight = TOOLBAR_HEIGHT_SMALL
-            val bottomToolbarHeight = TOOLBAR_HEIGHT_MEDIUM
+            val bottomToolbarHeight = TOOLBAR_HEIGHT_LARGE
 
             TopToolbar(
                 modifier = Modifier
@@ -133,18 +141,27 @@ class CropContribution : ToolContribution {
                     .fillMaxWidth(),
                 visible = toolbarVisible,
                 height = bottomToolbarHeight,
-                updateCropOptions = { ratioOption ->
-                    options = when (ratioOption) {
-                        CropRatioOptions.Free -> {
-                            options.copy(fixAspectRatio = false, aspectRatioX = 1, aspectRatioY = 1)
+                cropperOptionsList = cropperOptionsList,
+                selectedCropOptionIndex = selectedCropOptionIndex,
+                onCropOptionItemClicked = { position, cropOption ->
+                    selectedCropOptionIndex = position
+                    when (cropOption.aspectRatioX) {
+                        -1f -> {
+                            cropImageOptions = cropImageOptions.copy(
+                                fixAspectRatio = false,
+                                aspectRatioX = 1,
+                                aspectRatioY = 1
+                            )
                         }
-
-                        CropRatioOptions.Ratio1x1 -> {
-                            options.copy(fixAspectRatio = true, aspectRatioX = 1, aspectRatioY = 1)
+                        -2f -> {
+                            showCropRatioDialog = true
                         }
-
-                        CropRatioOptions.Ratio16x9 -> {
-                            options.copy(fixAspectRatio = true, aspectRatioX = 16, aspectRatioY = 9)
+                        else -> {
+                            cropImageOptions = cropImageOptions.copy(
+                                fixAspectRatio = true,
+                                aspectRatioX = cropOption.aspectRatioX.toInt(),
+                                aspectRatioY = cropOption.aspectRatioY.toInt()
+                            )
                         }
                     }
                 }
@@ -180,7 +197,7 @@ class CropContribution : ToolContribution {
                                 is EditImage.FromBitmap -> setImageBitmap(img.bitmap)
                                 is EditImage.FromUri -> setImageUriAsync(img.uri)
                             }
-                            setImageCropOptions(options)
+                            setImageCropOptions(cropImageOptions)
                             setOnCropImageCompleteListener(cropCompleteListener)
                         }
 
@@ -190,7 +207,25 @@ class CropContribution : ToolContribution {
                     },
                     update = { container ->
                         val mCropView = cropView ?: return@AndroidView
-                        mCropView.setImageCropOptions(options)
+                        mCropView.setImageCropOptions(cropImageOptions)
+                    }
+                )
+            }
+
+            AnimatedVisibility(
+                visible = showCropRatioDialog,
+            ) {
+                AspectRatioDialog(
+                    onDismiss = { showCropRatioDialog = false },
+                    onSetRatio = { x, y ->
+                        context.toast("x = $x, y = $x. r = ${x.toFloat() / y.toFloat()}")
+                        selectedCropOptionIndex = cropperOptionsList.indexOfFirst { it.aspectRatioX == -2f }
+                        cropImageOptions = cropImageOptions.copy(
+                            fixAspectRatio = true,
+                            aspectRatioX = x,
+                            aspectRatioY = y
+                        )
+                        showCropRatioDialog = false
                     }
                 )
             }
@@ -215,27 +250,44 @@ class CropContribution : ToolContribution {
                     Modifier
                         .height(height)
                         .fillMaxSize()
+                        .background(ToolBarBackgroundColor)
                         .padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    TextButton(
-                        onClick = onClose
-                    ) { Text("Close") }
+                    Image(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .size(32.dp)
+                            .clickable {
+                                onClose()
+                            },
+                        contentDescription = "Close",
+                        imageVector = Icons.Default.Close,
+                        colorFilter = ColorFilter.tint(
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    )
                     Text(
                         text = "Crop",
                         style = MaterialTheme.typography.titleMedium
                     )
-                    TextButton(
-                        onClick = onDone
-                    ) { Text("Done") }
+                    Image(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .size(32.dp)
+                            .clickable {
+                                onDone()
+                            },
+                        contentDescription = null,
+                        imageVector = Icons.Default.Check,
+                        colorFilter = ColorFilter.tint(
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    )
                 }
             }
         }
-    }
-
-    enum class CropRatioOptions {
-        Free, Ratio1x1, Ratio16x9
     }
 
     @Composable
@@ -243,33 +295,22 @@ class CropContribution : ToolContribution {
         modifier: Modifier,
         visible: Boolean,
         height: Dp,
-        updateCropOptions: (CropRatioOptions) -> Unit,
+        cropperOptionsList: List<CropperOption>,
+        selectedCropOptionIndex: Int,
+        onCropOptionItemClicked: (pos: Int, option: CropperOption) -> Unit,
     ) {
         AnimatedToolbarContainer(
             toolbarVisible = visible,
             modifier = modifier
         ) {
             Surface(tonalElevation = 3.dp) {
-                Row(
-                    Modifier
-                        .height(height)
-                        .fillMaxSize()
-                        .padding(horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    TextButton(onClick = {
-                        updateCropOptions(CropRatioOptions.Free)
-
-                    }) { Text("Free") }
-                    TextButton(onClick = {
-                        updateCropOptions(CropRatioOptions.Ratio1x1)
-
-                    }) { Text("1:1") }
-                    TextButton(onClick = {
-                        updateCropOptions(CropRatioOptions.Ratio16x9)
-                    }) { Text("16:9") }
-                }
+                CropperOptionsFullWidth(
+                    modifier = Modifier,
+                    toolbarHeight = height,
+                    cropperOptionList = cropperOptionsList,
+                    selectedIndex = selectedCropOptionIndex,
+                    onItemClicked = onCropOptionItemClicked
+                )
             }
         }
     }
