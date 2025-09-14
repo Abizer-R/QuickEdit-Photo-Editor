@@ -1,6 +1,5 @@
-package com.abizer_r.quickedit.ui.cropMode.cropperOptions
+package io.github.abizerr.quickedit.tool.crop.model
 
-import android.graphics.Bitmap
 import java.util.UUID
 
 data class CropperOption(

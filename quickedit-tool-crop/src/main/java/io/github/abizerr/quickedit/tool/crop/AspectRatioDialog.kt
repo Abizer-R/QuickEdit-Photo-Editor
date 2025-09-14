@@ -1,4 +1,4 @@
-package com.abizer_r.quickedit.ui.common.crop
+package io.github.abizerr.quickedit.tool.crop
 
 import android.content.res.Configuration
 import androidx.annotation.StringRes
@@ -33,11 +33,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.abizer_r.quickedit.R
-import com.abizer_r.quickedit.theme.DarkPanel
-import com.abizer_r.quickedit.theme.QuickEditTheme
-import com.abizer_r.quickedit.utils.defaultTextColor
-import com.abizer_r.quickedit.utils.toast
+import io.github.abizerr.quickedit.ui.utils.defaultTextColor
+import io.github.abizerr.quickedit.ui.utils.errorToast
 
 const val MIN_RATIO = 0.15f
 const val MAX_RATIO = 5.0f
@@ -70,7 +67,8 @@ fun AspectRatioDialog(
 
         Box(
             modifier = Modifier.background(
-                color = DarkPanel,
+//                color = DarkPanel,
+                color = MaterialTheme.colorScheme.surface,
                 shape = RoundedCornerShape(10.dp)
             )
         ) {
@@ -127,7 +125,7 @@ fun AspectRatioDialog(
                         if (validation.isValid) {
                             onSetRatio(aspectX.toInt(), aspectY.toInt())
                         } else {
-                            context.toast(context.getString(validation.errorResId ?: R.string.something_went_wrong))
+                            context.errorToast(validation.errorResId)
                         }
                     }
                 ) {
@@ -207,13 +205,13 @@ private fun RatioInputField(
     )
 }
 
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-fun PreviewAspectRatioDialog() {
-    QuickEditTheme {
-        AspectRatioDialog(
-            onDismiss = {},
-            onSetRatio = { _, _ -> }
-        )
-    }
-}
+//@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+//@Composable
+//fun PreviewAspectRatioDialog() {
+//    QuickEditTheme {
+//        AspectRatioDialog(
+//            onDismiss = {},
+//            onSetRatio = { _, _ -> }
+//        )
+//    }
+//}

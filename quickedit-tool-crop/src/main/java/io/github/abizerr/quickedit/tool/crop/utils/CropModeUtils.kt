@@ -1,6 +1,6 @@
-package com.abizer_r.quickedit.utils.editorScreen
+package io.github.abizerr.quickedit.tool.crop.utils
 
-import com.abizer_r.quickedit.ui.cropMode.cropperOptions.CropperOption
+import io.github.abizerr.quickedit.tool.crop.model.CropperOption
 
 object CropModeUtils {
 
