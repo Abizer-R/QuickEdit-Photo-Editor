@@ -1,6 +1,5 @@
 package io.github.abizerr.quickedit.tool.effects
 
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -11,13 +10,15 @@ import io.github.abizerr.quickedit.ui.api.ToolController
 
 class EffectsContribution : ToolContribution {
     override val id: String = "effects"
+    override val label: String = "Effects"
 
     @Composable
     override fun ToolbarIcon(selected: Boolean, onClick: () -> Unit) {
-        // Placeholder icon
-        Icon(
+        IconWithLabel(
+            selected = selected,
             imageVector = ImageVector.vectorResource(id = R.drawable.ic_effects),
-            contentDescription = "Effects"
+            labelText = label,
+            onClick = onClick
         )
     }
 
