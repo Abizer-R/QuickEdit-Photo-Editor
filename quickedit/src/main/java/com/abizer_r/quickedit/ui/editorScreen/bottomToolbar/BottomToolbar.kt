@@ -47,7 +47,7 @@ import com.abizer_r.quickedit.utils.ImmutableList
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.quickedit.ui.transformableViews.base.TransformableTextBoxState
-import com.abizer_r.quickedit.utils.defaultTextColor
+import io.github.abizerr.quickedit.ui.utils.defaultTextColor
 import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
 import com.abizer_r.quickedit.utils.editorScreen.EditorScreenUtils
 import com.abizer_r.quickedit.utils.textMode.TextModeUtils

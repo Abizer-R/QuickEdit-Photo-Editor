@@ -1,4 +1,4 @@
-package com.abizer_r.quickedit.utils
+package io.github.abizerr.quickedit.ui.utils
 
 import android.content.Context
 import android.content.ContextWrapper
@@ -8,15 +8,10 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import com.abizer_r.quickedit.R
+import io.github.abizerr.quickedit.ui.R
 
 val Any.TAG: String
     get() {
@@ -24,17 +19,17 @@ val Any.TAG: String
         return if (tag.length <= 23) tag else tag.substring(0, 23)
     }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
-@Composable
-fun SharedTransitionPreviewExtension(
-    content: @Composable SharedTransitionScope.(AnimatedVisibilityScope) -> Unit
-) {
-    SharedTransitionLayout {
-        AnimatedVisibility(visible = true) {
-            content(this)
-        }
-    }
-}
+//@OptIn(ExperimentalSharedTransitionApi::class)
+//@Composable
+//fun SharedTransitionPreviewExtension(
+//    content: @Composable SharedTransitionScope.(AnimatedVisibilityScope) -> Unit
+//) {
+//    SharedTransitionLayout {
+//        AnimatedVisibility(visible = true) {
+//            content(this)
+//        }
+//    }
+//}
 
 fun Context.toast(message: String) {
     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
@@ -53,6 +48,11 @@ fun toast(message: String) {
 @Composable
 fun toast(@StringRes stringRes: Int) {
     LocalContext.current.toast(stringRes)
+}
+
+fun Context.errorToast(@StringRes resId: Int? = null) {
+    if (resId == null)  defaultErrorToast()
+    else toast(resId)
 }
 
 fun Context.defaultErrorToast() {

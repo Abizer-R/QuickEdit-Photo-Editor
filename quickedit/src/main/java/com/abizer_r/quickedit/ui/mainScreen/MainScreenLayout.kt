@@ -26,7 +26,7 @@ import com.abizer_r.quickedit.ui.common.AppIconWithName
 import com.abizer_r.quickedit.ui.common.ErrorView
 import com.abizer_r.quickedit.ui.common.PermissionDeniedView
 import com.abizer_r.quickedit.utils.PermissionUtils.PermissionTypes
-import com.abizer_r.quickedit.utils.getOpenAppSettingsIntent
+import io.github.abizerr.quickedit.ui.utils.getOpenAppSettingsIntent
 import com.abizer_r.quickedit.utils.other.bitmap.BitmapStatus
 
 @Composable

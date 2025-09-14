@@ -47,7 +47,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.abizer_r.quickedit.utils.ImmutableList
-import com.abizer_r.quickedit.utils.defaultErrorToast
+import io.github.abizerr.quickedit.ui.utils.defaultErrorToast
 import io.github.abizerr.quickedit.ui.common.AnimatedToolbarContainer
 import io.github.abizerr.quickedit.ui.common.bottomToolbarModifier
 import io.github.abizerr.quickedit.ui.common.topToolbarModifier

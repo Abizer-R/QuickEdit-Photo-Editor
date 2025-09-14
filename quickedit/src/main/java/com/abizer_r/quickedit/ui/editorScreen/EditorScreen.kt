@@ -47,7 +47,7 @@ import com.abizer_r.quickedit.utils.FileUtils
 import com.abizer_r.quickedit.utils.editorScreen.EditorScreenUtils
 import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils
 import com.abizer_r.quickedit.utils.other.bitmap.BitmapUtils
-import com.abizer_r.quickedit.utils.toast
+import io.github.abizerr.quickedit.ui.utils.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

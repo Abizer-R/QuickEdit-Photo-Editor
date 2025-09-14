@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import com.abizer_r.quickedit.R
-import com.abizer_r.quickedit.utils.defaultTextColor
+import io.github.abizerr.quickedit.ui.utils.defaultTextColor
 
 @Composable
 fun ErrorView(

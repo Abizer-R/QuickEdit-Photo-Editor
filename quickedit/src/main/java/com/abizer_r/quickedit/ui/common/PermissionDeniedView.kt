@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.abizer_r.quickedit.R
-import com.abizer_r.quickedit.utils.defaultTextColor
+import io.github.abizerr.quickedit.ui.utils.defaultTextColor
 import com.abizer_r.quickedit.utils.PermissionUtils
 import com.abizer_r.quickedit.utils.PermissionUtils.PermissionTypes
 
