@@ -2,13 +2,26 @@ package io.github.abizerr.quickedit.ui.api
 
 import android.content.ContentResolver
 import android.graphics.Bitmap
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -19,12 +32,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import io.github.abizerr.quickedit.engine.api.EditEngine
 import io.github.abizerr.quickedit.engine.api.EditImage
 import io.github.abizerr.quickedit.engine.api.EditOp
@@ -34,7 +48,6 @@ import io.github.abizerr.quickedit.engine.api.SaveFormat
 import io.github.abizerr.quickedit.engine.api.Size
 import io.github.abizerr.quickedit.engine.impl.DefaultEditEngine
 import kotlinx.coroutines.launch
-import kotlin.math.max
 
 data class QuickEditConfig(
     val tools: List<ToolContribution> = emptyList(),
@@ -91,11 +104,30 @@ fun QuickEditEditor(
         }
     }
 
+    var selectedToolId: String? by remember(config.tools) {
+        mutableStateOf(config.tools.firstOrNull()?.id)
+    }
+    val selectedTool: ToolContribution? = remember(selectedToolId, config.tools) {
+        config.tools.firstOrNull { it.id == selectedToolId }
+
+    }
+
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("QuickEdit") },
                 actions = {
+                    TextButton(
+                        enabled = engine.history.canUndo,
+                        onClick = { controller.undo() }
+                    ) { Text("Undo") }
+
+                    TextButton(
+                        enabled = engine.history.canRedo,
+                        onClick = { controller.redo() }
+                    ) { Text("Redo") }
+
                     TextButton(
                         enabled = snapshot != null,
                         onClick = {
@@ -109,23 +141,75 @@ fun QuickEditEditor(
                     }
                 }
             )
-        }
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier.fillMaxSize()
-                .padding(innerPadding)
-                .onSizeChanged { viewport = it }
-        ) {
-            if (preview != null) {
-                Image(
-                    bitmap = preview!!.asImageBitmap(),
-                    contentDescription = "Preview"
-                )
-            } else {
-                Text("Loading...")
+        },
+        bottomBar = {
+            if (config.tools.isNotEmpty()) {
+                BottomAppBar {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        config.tools.forEach { tool ->
+                            // Delegate icon rendering to the tool
+                            tool.ToolbarIcon(
+                                selected = tool.id == selectedToolId,
+                                onClick = { selectedToolId = tool.id }
+                            )
+                        }
+                    }
+                }
             }
 
-            // FUTURE: Toolbars/panels using config.tools
+
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .onSizeChanged { viewport = it },
+                contentAlignment = Alignment.Center
+            ) {
+                if (preview != null) {
+                    Image(
+                        bitmap = preview!!.asImageBitmap(),
+                        contentDescription = "Preview"
+                    )
+                } else {
+                    Text("Loading...")
+                }
+
+                // FUTURE: Toolbars/panels using config.tools
+            }
+
+            AnimatedContent(
+                targetState = selectedTool?.id,
+                label = "tool-panel",
+                transitionSpec = {
+                    fadeIn(tween(150))
+                        .togetherWith(fadeOut(tween(150)))
+                }
+            ) { toolId ->
+                val tool = config.tools.firstOrNull { it.id == toolId }
+                if (tool != null && state != null) {
+                    // Panel renders below preview (like your old bottom sheet/panel)
+                    Surface(
+                        tonalElevation = 2.dp
+                    ) {
+                        tool.Panel(state, controller)
+                    }
+                } else {
+                    Spacer(Modifier.height(0.dp))
+                }
+
+            }
+
         }
 
     }

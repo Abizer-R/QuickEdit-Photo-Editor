@@ -24,7 +24,7 @@ class DefaultEditEngine(
 
     private val historyManager = HistoryManager(maxUndo)
 
-    override val historyView: HistoryView = object : HistoryView {
+    override val history: HistoryView = object : HistoryView {
         override val canUndo: Boolean get() = this@DefaultEditEngine.historyManager.canUndo()
         override val canRedo: Boolean get() = this@DefaultEditEngine.historyManager.canRedo()
         override val undoCount: Int get() = this@DefaultEditEngine.historyManager.undoCount()

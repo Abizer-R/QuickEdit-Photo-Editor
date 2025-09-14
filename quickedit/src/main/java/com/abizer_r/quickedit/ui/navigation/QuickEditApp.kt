@@ -10,10 +10,15 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.abizer_r.quickedit.theme.QuickEditTheme
 import io.github.abizerr.quickedit.engine.api.EditImage
 import io.github.abizerr.quickedit.engine.api.SaveFormat
+import io.github.abizerr.quickedit.tool.crop.CropContribution
+import io.github.abizerr.quickedit.tool.draw.DrawContribution
+import io.github.abizerr.quickedit.tool.effects.EffectsContribution
+import io.github.abizerr.quickedit.tool.text.TextContribution
 import io.github.abizerr.quickedit.ui.api.QuickEditConfig
 import io.github.abizerr.quickedit.ui.api.QuickEditEditor
 import io.github.abizerr.quickedit.ui.api.ToolContribution
@@ -44,10 +49,19 @@ fun QuickEditApp(
 
                 val editImage: EditImage? = initialImageUri?.let { EditImage.FromUri(it) }
 
+                val tools = remember {
+                    listOf(
+                        CropContribution(),
+                        DrawContribution(),
+                        TextContribution(),
+                        EffectsContribution()
+                    )
+                }
+
                 QuickEditEditor(
                     image = editImage,
                     config = QuickEditConfig(
-                        tools = emptyList<ToolContribution>(), // TODO (revamp): We'll inject real tools in future
+                        tools = tools,
                         maxUndo = 20,
                         defaultFormat = SaveFormat.Jpeg(90)
                     ),

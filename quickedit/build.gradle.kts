@@ -43,6 +43,10 @@ android {
 
 dependencies {
     implementation(project(":quickedit-ui"))
+    implementation(project(":quickedit-tool-draw"))
+    implementation(project(":quickedit-tool-text"))
+    implementation(project(":quickedit-tool-crop"))
+    implementation(project(":quickedit-tool-effects"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

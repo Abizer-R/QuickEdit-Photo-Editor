@@ -6,6 +6,7 @@ import io.github.abizerr.quickedit.engine.api.EditSnapshot
 
 interface ToolContribution {
     val id: String
+    val label: String get() = id
     @Composable
     fun ToolbarIcon(selected: Boolean, onClick: () -> Unit)
     @Composable

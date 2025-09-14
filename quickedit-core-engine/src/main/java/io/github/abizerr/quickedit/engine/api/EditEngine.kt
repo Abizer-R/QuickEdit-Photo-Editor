@@ -5,7 +5,7 @@ interface EditEngine {
     suspend fun apply(op: EditOp): EditSnapshot
     suspend fun render(snapshot: EditSnapshot, size: Size): RenderResult
     suspend fun save(snapshot: EditSnapshot, format: SaveFormat): Result<EditedImage>
-    val historyView: HistoryView
+    val history: HistoryView
     /**
      * FUTURE-1: Capabilities & queries (non-breaking):
      * fun supports(op: kotlin.reflect.KClass<out EditOp>): Boolean = true
