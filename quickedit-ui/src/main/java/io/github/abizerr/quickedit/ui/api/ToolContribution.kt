@@ -36,6 +36,15 @@ interface ToolContribution {
      * val requiredOps: Set<KClass<out EditOp>> get() = emptySet()
      */
 
+    /** Optional full-screen tool (own top/bottom bars + content). */
+    val supportsFullScreen: Boolean get() = false
+    @Composable
+    fun FullScreenTool(
+        state: QuickEditState,
+        controller: ToolController,
+        onExit: () -> Unit
+    ) { /* default no-op */ }
+
     @Composable
     fun Modifier.selectionModifier(selected: Boolean): Modifier {
         return if (selected.not()) {
