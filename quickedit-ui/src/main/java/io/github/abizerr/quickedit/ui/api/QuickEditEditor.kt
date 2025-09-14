@@ -2,29 +2,19 @@ package io.github.abizerr.quickedit.ui.api
 
 import android.content.ContentResolver
 import android.graphics.Bitmap
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.github.abizerr.quickedit.engine.api.EditEngine
@@ -47,6 +38,11 @@ import io.github.abizerr.quickedit.engine.api.EditedImage
 import io.github.abizerr.quickedit.engine.api.SaveFormat
 import io.github.abizerr.quickedit.engine.api.Size
 import io.github.abizerr.quickedit.engine.impl.DefaultEditEngine
+import io.github.abizerr.quickedit.ui.common.AnimatedToolbarContainer
+import io.github.abizerr.quickedit.ui.common.TOOLBAR_HEIGHT_MEDIUM
+import io.github.abizerr.quickedit.ui.common.TOOLBAR_HEIGHT_SMALL
+import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 data class QuickEditConfig(
@@ -54,6 +50,8 @@ data class QuickEditConfig(
     val maxUndo: Int = 20,
     val defaultFormat: SaveFormat = SaveFormat.Jpeg(90)
 )
+
+private enum class UiMode { Editor, FullScreenTool }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -105,115 +103,176 @@ fun QuickEditEditor(
     }
 
     var selectedToolId: String? by remember(config.tools) {
-        mutableStateOf(config.tools.firstOrNull()?.id)
+        mutableStateOf(null)
     }
     val selectedTool: ToolContribution? = remember(selectedToolId, config.tools) {
         config.tools.firstOrNull { it.id == selectedToolId }
-
     }
 
+    var uiMode by remember { mutableStateOf(UiMode.Editor) }
+    var editorToolbarsVisible by remember { mutableStateOf(true) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("QuickEdit") },
-                actions = {
-                    TextButton(
-                        enabled = engine.history.canUndo,
-                        onClick = { controller.undo() }
-                    ) { Text("Undo") }
+    suspend fun goToTool(toolId: String) {
+        // 1) hide toolbars
+        editorToolbarsVisible = false
+        delay(TOOLBAR_COLLAPSE_ANIM_DURATION_FAST.toLong())
+        // 2) switch to tool
+        selectedToolId = toolId
+        uiMode = UiMode.FullScreenTool
+    }
 
-                    TextButton(
-                        enabled = engine.history.canRedo,
-                        onClick = { controller.redo() }
-                    ) { Text("Redo") }
+    suspend fun exitTool() {
+        // 1) exit tool
+        uiMode = UiMode.Editor
+        // 2) show toolbars
+        editorToolbarsVisible = true
+        selectedToolId = null
+    }
 
-                    TextButton(
-                        enabled = snapshot != null,
-                        onClick = {
-                            val mSnapshot = snapshot ?: return@TextButton
-                            scope.launch {
-                                onSave(engine.save(mSnapshot, config.defaultFormat))
-                            }
-                        }
-                    ) {
-                        Text("Save")
-                    }
-                }
-            )
-        },
-        bottomBar = {
-            if (config.tools.isNotEmpty()) {
-                BottomAppBar {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        config.tools.forEach { tool ->
-                            // Delegate icon rendering to the tool
-                            tool.ToolbarIcon(
-                                selected = tool.id == selectedToolId,
-                                onClick = { selectedToolId = tool.id }
-                            )
-                        }
-                    }
-                }
+    fun saveSnapshot() {
+        snapshot?.let {
+            scope.launch {
+                onSave(engine.save(snapshot!!, config.defaultFormat))
             }
-
-
         }
-    ) { innerPadding ->
-        Column(
+    }
+
+    Box(Modifier.fillMaxSize()) {
+        val topToolbarHeight = TOOLBAR_HEIGHT_SMALL
+        val bottomToolbarHeight = TOOLBAR_HEIGHT_MEDIUM
+
+        TopToolbar(
             modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth(),
+            visible = editorToolbarsVisible,
+            height = topToolbarHeight,
+            engine = engine,
+            controller = controller,
+            saveEnabled = snapshot != null,
+            onSave = { saveSnapshot() }
+        )
+
+        BottomToolbar(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth(),
+            visible = editorToolbarsVisible,
+            height = bottomToolbarHeight,
+            selectedToolId = selectedToolId,
+            tools = config.tools,
+            onToolClicked = { toolId ->
+                scope.launch { goToTool(toolId) }
+            }
+        )
+
+        Box(
+            Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(top = topToolbarHeight, bottom = bottomToolbarHeight)
+                .onSizeChanged { viewport = it },
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .onSizeChanged { viewport = it },
-                contentAlignment = Alignment.Center
-            ) {
-                if (preview != null) {
-                    Image(
-                        bitmap = preview!!.asImageBitmap(),
-                        contentDescription = "Preview"
-                    )
-                } else {
-                    Text("Loading...")
-                }
-
-                // FUTURE: Toolbars/panels using config.tools
+            if (preview != null) {
+                Image(bitmap = preview!!.asImageBitmap(), contentDescription = "Preview")
+            } else {
+                Text("Preparing preview…")
             }
-
-            AnimatedContent(
-                targetState = selectedTool?.id,
-                label = "tool-panel",
-                transitionSpec = {
-                    fadeIn(tween(150))
-                        .togetherWith(fadeOut(tween(150)))
-                }
-            ) { toolId ->
-                val tool = config.tools.firstOrNull { it.id == toolId }
-                if (tool != null && state != null) {
-                    // Panel renders below preview (like your old bottom sheet/panel)
-                    Surface(
-                        tonalElevation = 2.dp
-                    ) {
-                        tool.Panel(state, controller)
-                    }
-                } else {
-                    Spacer(Modifier.height(0.dp))
-                }
-
-            }
-
         }
 
+        // --- Full-screen tool layer (tool owns its own bars & content) ---
+        if (uiMode == UiMode.FullScreenTool && selectedTool != null && state != null) {
+            selectedTool.FullScreenTool(
+                state = state,
+                controller = controller,
+                onExit = { scope.launch { exitTool() } }
+            )
+        }
     }
 }
+
+@Composable
+private fun TopToolbar(
+    modifier: Modifier = Modifier,
+    visible: Boolean,
+    height: Dp,
+    engine: EditEngine,
+    controller: ToolController,
+    saveEnabled: Boolean,
+    onSave: () -> Unit
+) {
+    AnimatedToolbarContainer(
+        toolbarVisible = visible,
+        modifier = modifier
+    ) {
+        Surface(tonalElevation = 2.dp) {
+            Row(
+                modifier = Modifier
+                    .height(height)
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    modifier = Modifier.weight(1f),
+                    text = "QuickEdit",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                TextButton(
+                    enabled = engine.history.canUndo,
+                    onClick = { controller.undo() }
+                ) { Text("Undo") }
+
+                TextButton(
+                    enabled = engine.history.canRedo,
+                    onClick = { controller.redo() }
+                ) { Text("Redo") }
+
+                TextButton(
+                    enabled = saveEnabled,
+                    onClick = onSave
+                ) {
+                    Text("Save")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BottomToolbar(
+    modifier: Modifier = Modifier,
+    visible: Boolean,
+    height: Dp,
+    selectedToolId: String?,
+    tools: List<ToolContribution>,
+    onToolClicked: (toolId: String) -> Unit
+) {
+    AnimatedToolbarContainer(
+        toolbarVisible = visible,
+        modifier = modifier
+    ) {
+        Surface(tonalElevation = 3.dp) {
+            Row(
+                modifier = Modifier
+                    .height(height)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                tools.forEach { tool ->
+                    // Delegate icon rendering to the tool
+                    tool.ToolbarIcon(
+                        selected = tool.id == selectedToolId,
+                        onClick = { onToolClicked(tool.id) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+
 
 @Composable
 private fun rememberEngine(maxUndo: Int): EditEngine {
