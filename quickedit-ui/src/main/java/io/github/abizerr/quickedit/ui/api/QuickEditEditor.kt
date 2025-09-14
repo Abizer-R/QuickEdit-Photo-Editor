@@ -67,13 +67,20 @@ fun QuickEditEditor(
     var preview by remember { mutableStateOf<Bitmap?>(null) }
     val scope = rememberCoroutineScope()
 
+    var uiMode by remember { mutableStateOf(UiMode.Editor) }
+    var editorToolbarsVisible by remember { mutableStateOf(true) }
+
     // Start/replace session when image changes
     LaunchedEffect(image, engine) {
         snapshot = image?.let { engine.newSession(it) }
     }
 
-    // Render when snapshot or viewport changes
-    LaunchedEffect(snapshot, viewport) {
+    // Render when snapshot, viewport or uiMode changes
+    LaunchedEffect(snapshot, viewport, uiMode) {
+        if (uiMode != UiMode.Editor) {
+            preview = null
+            return@LaunchedEffect   // skip preview rendering while a tool is active
+        }
         if (viewport.width <= 0 || viewport.height <= 0) return@LaunchedEffect
         val renderResult = engine.render(
             snapshot = snapshot ?: return@LaunchedEffect,
@@ -108,9 +115,6 @@ fun QuickEditEditor(
     val selectedTool: ToolContribution? = remember(selectedToolId, config.tools) {
         config.tools.firstOrNull { it.id == selectedToolId }
     }
-
-    var uiMode by remember { mutableStateOf(UiMode.Editor) }
-    var editorToolbarsVisible by remember { mutableStateOf(true) }
 
     suspend fun goToTool(toolId: String) {
         // 1) hide toolbars
@@ -173,10 +177,13 @@ fun QuickEditEditor(
                 .onSizeChanged { viewport = it },
             contentAlignment = Alignment.Center
         ) {
-            if (preview != null) {
-                Image(bitmap = preview!!.asImageBitmap(), contentDescription = "Preview")
-            } else {
-                Text("Preparing preview…")
+            // Don’t draw the editor preview when a tool is active
+            if (uiMode == UiMode.Editor) {
+                if (preview != null) {
+                    Image(bitmap = preview!!.asImageBitmap(), contentDescription = "Preview")
+                } else {
+                    Text("Preparing preview…")
+                }
             }
         }
 
