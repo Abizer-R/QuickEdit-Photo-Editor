@@ -25,6 +25,7 @@ import io.github.abizerr.quickedit.tool.effects.EffectsContribution
 import io.github.abizerr.quickedit.tool.text.TextContribution
 import io.github.abizerr.quickedit.ui.api.QuickEditConfig
 import io.github.abizerr.quickedit.ui.api.QuickEditEditor
+import io.github.abizerr.quickedit.ui.utils.getDummyBitmap
 
 /**
  * Legacy entry kept for binary/source compatibility.
@@ -52,9 +53,7 @@ fun QuickEditApp(
 
                 val editImage: EditImage? = initialImageUri?.let {
                     EditImage.FromUri(it)
-                } ?: EditImage.FromBitmap(
-                    ImageBitmap.imageResource(id = R.drawable.placeholder_image_4).asAndroidBitmap()
-                )
+                } ?: EditImage.FromBitmap(getDummyBitmap())
 
                 val tools = remember {
                     listOf(

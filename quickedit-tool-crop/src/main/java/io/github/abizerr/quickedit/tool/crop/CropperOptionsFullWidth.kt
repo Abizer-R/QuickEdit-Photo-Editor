@@ -164,9 +164,9 @@ fun CropperOptionView(
 }
 
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview
 @Composable
-fun Selected_EffectPreviewItem() {
+private fun Selected_EffectPreviewItem() {
     QuickEditTheme {
         CropperOptionView(
             modifier = Modifier.padding(8.dp),
@@ -181,9 +181,9 @@ fun Selected_EffectPreviewItem() {
     }
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview
 @Composable
-fun Unselected_EffectPreviewItem() {
+private fun Unselected_EffectPreviewItem() {
     QuickEditTheme {
         CropperOptionView(
             modifier = Modifier.padding(8.dp),
@@ -199,9 +199,9 @@ fun Unselected_EffectPreviewItem() {
 }
 
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview
 @Composable
-fun Preview_EffectsPreviewList() {
+private fun Preview_EffectsPreviewList() {
     QuickEditTheme {
         CropperOptionsFullWidth(
             modifier = Modifier.background(ToolBarBackgroundColor)

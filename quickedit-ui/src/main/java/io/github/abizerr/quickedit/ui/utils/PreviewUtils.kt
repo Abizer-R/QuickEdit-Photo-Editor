@@ -3,12 +3,20 @@ package io.github.abizerr.quickedit.ui.utils
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
+import io.github.abizerr.quickedit.engine.api.EditImage
 import io.github.abizerr.quickedit.engine.api.EditOp
+import io.github.abizerr.quickedit.engine.api.EditSnapshot
 import io.github.abizerr.quickedit.ui.api.QuickEditState
 import io.github.abizerr.quickedit.ui.api.ToolContribution
 import io.github.abizerr.quickedit.ui.api.ToolController
 
 object PreviewUtils {
+
+    @Composable
+    fun getDummyEditorState(): QuickEditState {
+        val snapShot = EditSnapshot(image = EditImage.FromBitmap(getDummyBitmap()))
+        return QuickEditState(snapShot)
+    }
 
     fun getDummyTools(): List<ToolContribution> {
         val tools = arrayListOf<ToolContribution>()

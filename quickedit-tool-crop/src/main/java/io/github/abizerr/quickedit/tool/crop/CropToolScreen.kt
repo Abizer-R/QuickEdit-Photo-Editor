@@ -40,9 +40,9 @@ import com.canhub.cropper.CropImageView
 import com.canhub.cropper.CropImageView.OnCropImageCompleteListener
 import io.github.abizerr.quickedit.engine.api.EditImage
 import io.github.abizerr.quickedit.engine.api.EditOp
-import io.github.abizerr.quickedit.engine.api.EditSnapshot
 import io.github.abizerr.quickedit.tool.crop.model.CropperOption
 import io.github.abizerr.quickedit.tool.crop.utils.CropModeUtils
+import io.github.abizerr.quickedit.ui.utils.PreviewUtils
 import io.github.abizerr.quickedit.ui.api.QuickEditState
 import io.github.abizerr.quickedit.ui.api.ToolController
 import io.github.abizerr.quickedit.ui.common.AnimatedToolbarContainer
@@ -52,7 +52,6 @@ import io.github.abizerr.quickedit.ui.theme.QuickEditTheme
 import io.github.abizerr.quickedit.ui.theme.ToolBarBackgroundColor
 import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils
 import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST
-import io.github.abizerr.quickedit.ui.utils.getDummyBitmap
 import io.github.abizerr.quickedit.ui.utils.toast
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -338,17 +337,10 @@ private fun PreviewBottomToolbar() {
 
 @Preview @Composable
 private fun PreviewCropToolScreen() {
-    val snapShot = EditSnapshot(image = EditImage.FromBitmap(getDummyBitmap()))
-    val dummyController = object : ToolController {
-        override fun emit(op: EditOp) {}
-        override fun undo() {}
-        override fun redo() {}
-    }
-
     QuickEditTheme {
         CropToolScreen(
-            state = QuickEditState(snapShot),
-            controller = dummyController,
+            state = PreviewUtils.getDummyEditorState(),
+            controller = PreviewUtils.getDummyToolController(),
             onExit = {}
         )
     }

@@ -35,7 +35,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import io.github.abizerr.quickedit.ui.theme.DarkPanel
 import io.github.abizerr.quickedit.ui.theme.QuickEditTheme
-import io.github.abizerr.quickedit.ui.utils.defaultTextColor
 import io.github.abizerr.quickedit.ui.utils.errorToast
 
 const val MIN_RATIO = 0.15f
@@ -60,12 +59,8 @@ fun AspectRatioDialog(
         var aspectX by remember { mutableStateOf("1") }
         var aspectY by remember { mutableStateOf("1") }
 
-        val titleTextStyle = MaterialTheme.typography.titleMedium.copy(
-            color = defaultTextColor()
-        )
-        val bodyTextStyle = MaterialTheme.typography.bodySmall.copy(
-            color = defaultTextColor()
-        )
+        val titleTextStyle = MaterialTheme.typography.titleMedium
+        val bodyTextStyle = MaterialTheme.typography.bodySmall
 
         Box(
             modifier = Modifier.background(
@@ -188,11 +183,6 @@ private fun RatioInputField(
     OutlinedTextField(
         modifier = modifier,
         singleLine = true,
-//        value = TextFieldValue(
-//            text = text,
-//            selection = TextRange(text.length)
-//        ),
-//        onValueChange = onValueChange,
         value = text,
         onValueChange = { newValue ->
             // Allow only digits and empty value
@@ -206,9 +196,9 @@ private fun RatioInputField(
     )
 }
 
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview
 @Composable
-fun PreviewAspectRatioDialog() {
+private fun PreviewAspectRatioDialog() {
     QuickEditTheme {
         AspectRatioDialog(
             onDismiss = {},

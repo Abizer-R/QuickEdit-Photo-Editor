@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -27,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -41,7 +44,10 @@ import io.github.abizerr.quickedit.engine.impl.DefaultEditEngine
 import io.github.abizerr.quickedit.ui.common.AnimatedToolbarContainer
 import io.github.abizerr.quickedit.ui.common.TOOLBAR_HEIGHT_MEDIUM
 import io.github.abizerr.quickedit.ui.common.TOOLBAR_HEIGHT_SMALL
+import io.github.abizerr.quickedit.ui.theme.QuickEditTheme
+import io.github.abizerr.quickedit.ui.utils.PreviewUtils
 import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST
+import io.github.abizerr.quickedit.ui.utils.getDummyBitmap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -52,6 +58,10 @@ data class QuickEditConfig(
 )
 
 private enum class UiMode { Editor, FullScreenTool }
+
+
+private val topToolbarHeight = TOOLBAR_HEIGHT_SMALL
+private val bottomToolbarHeight = TOOLBAR_HEIGHT_MEDIUM
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -142,8 +152,6 @@ fun QuickEditEditor(
     }
 
     Box(Modifier.fillMaxSize()) {
-        val topToolbarHeight = TOOLBAR_HEIGHT_SMALL
-        val bottomToolbarHeight = TOOLBAR_HEIGHT_MEDIUM
 
         TopToolbar(
             modifier = Modifier
@@ -288,6 +296,46 @@ private fun rememberEngine(maxUndo: Int): EditEngine {
         DefaultEditEngine(
             maxUndo = maxUndo,
             resolver = resolver
+        )
+    }
+}
+
+@Preview @Composable
+private fun PreviewTopToolbar() {
+    QuickEditTheme {
+        TopToolbar(
+            visible = true,
+            height = topToolbarHeight,
+            engine = DefaultEditEngine(),
+            controller = PreviewUtils.getDummyToolController(),
+            saveEnabled = true,
+            onSave = {}
+        )
+    }
+}
+
+@Preview @Composable
+private fun PreviewBottomToolbar() {
+    QuickEditTheme {
+        val tools = PreviewUtils.getDummyTools()
+        BottomToolbar(
+            visible = true,
+            height = bottomToolbarHeight,
+            selectedToolId = tools[0].id,
+            tools = tools,
+            onToolClicked = { toolId -> }
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun Preview() {
+    QuickEditTheme {
+        QuickEditEditor(
+            image = EditImage.FromBitmap(getDummyBitmap()),
+            config = QuickEditConfig(tools = PreviewUtils.getDummyTools()),
+            onSave = {}
         )
     }
 }

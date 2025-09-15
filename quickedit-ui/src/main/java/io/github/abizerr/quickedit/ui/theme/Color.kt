@@ -17,8 +17,9 @@ val Black_alpha_30 = Color(0x4D000000)
 val TextInputBackgroundColor = Color(0xB3000000)
 val ToolBarBackgroundColor = DarkerGray
 
+val White = Color.White
 val BackgroundColor_Dark = Color(0xFF141414)
-val ColorOnBackground_Dark = Color.White
+val ColorOnBackground_Dark = White
 
 /**
  * NOTE: While changing Light theme colors, we also need to change static colors, such as "ToolBarBackgroundColor"
