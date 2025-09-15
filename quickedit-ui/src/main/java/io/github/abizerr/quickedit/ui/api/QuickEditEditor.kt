@@ -3,16 +3,30 @@ package io.github.abizerr.quickedit.ui.api
 import android.content.ContentResolver
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Redo
+import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.SaveAlt
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Undo
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,6 +40,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
@@ -45,6 +61,7 @@ import io.github.abizerr.quickedit.ui.common.AnimatedToolbarContainer
 import io.github.abizerr.quickedit.ui.common.TOOLBAR_HEIGHT_MEDIUM
 import io.github.abizerr.quickedit.ui.common.TOOLBAR_HEIGHT_SMALL
 import io.github.abizerr.quickedit.ui.theme.QuickEditTheme
+import io.github.abizerr.quickedit.ui.theme.ToolBarBackgroundColor
 import io.github.abizerr.quickedit.ui.utils.PreviewUtils
 import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST
 import io.github.abizerr.quickedit.ui.utils.getDummyBitmap
@@ -222,33 +239,73 @@ private fun TopToolbar(
     ) {
         Surface(tonalElevation = 2.dp) {
             Row(
-                modifier = Modifier
-                    .height(height)
+                modifier = modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                    .height(height)
+                    .background(ToolBarBackgroundColor),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = "QuickEdit",
-                    style = MaterialTheme.typography.headlineSmall
-                )
-                TextButton(
-                    enabled = engine.history.canUndo,
-                    onClick = { controller.undo() }
-                ) { Text("Undo") }
 
-                TextButton(
-                    enabled = engine.history.canRedo,
-                    onClick = { controller.redo() }
-                ) { Text("Redo") }
-
-                TextButton(
-                    enabled = saveEnabled,
-                    onClick = onSave
+                // TODO (revamp): handle cancel button
+                IconButton(
+                    onClick = { /* onCancel() */ },
+                    enabled = false /* cancelEnabled */
                 ) {
-                    Text("Save")
+                    Icon(
+                        modifier = Modifier.size(32.dp),
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Cancel",
+                    )
                 }
+
+                Row {
+                    IconButton(
+                        onClick = { controller.undo() },
+                        enabled = engine.history.canUndo
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(32.dp),
+                            imageVector = Icons.AutoMirrored.Default.Undo,
+                            contentDescription = "Undo",
+                        )
+                    }
+
+                    IconButton(
+                        onClick = { controller.redo() },
+                        enabled = engine.history.canRedo
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(32.dp),
+                            imageVector = Icons.AutoMirrored.Default.Redo,
+                            contentDescription = "Redo",
+                        )
+                    }
+                }
+
+
+                IconButton(
+                    onClick = { onSave() },
+                    enabled = saveEnabled
+                ) {
+                    Icon(
+                        modifier = Modifier.size(32.dp),
+                        imageVector = Icons.Default.Save,
+                        contentDescription = "Save",
+                    )
+                }
+
+                // TODO (revamp): Implement share button (add a shareEnabled boolean in config)
+//                IconButton(
+//                    onClick = { /* onShare() */ },
+//                    enabled = true
+//                ) {
+//                    Icon(
+//                        modifier = Modifier.size(28.dp),
+//                        imageVector = Icons.Default.Share,
+//                        contentDescription = "Share",
+//                    )
+//                }
             }
         }
     }
@@ -288,7 +345,6 @@ private fun BottomToolbar(
 }
 
 
-
 @Composable
 private fun rememberEngine(maxUndo: Int): EditEngine {
     val resolver: ContentResolver = LocalContext.current.contentResolver
@@ -300,7 +356,8 @@ private fun rememberEngine(maxUndo: Int): EditEngine {
     }
 }
 
-@Preview @Composable
+@Preview
+@Composable
 private fun PreviewTopToolbar() {
     QuickEditTheme {
         TopToolbar(
@@ -314,7 +371,8 @@ private fun PreviewTopToolbar() {
     }
 }
 
-@Preview @Composable
+@Preview
+@Composable
 private fun PreviewBottomToolbar() {
     QuickEditTheme {
         val tools = PreviewUtils.getDummyTools()
