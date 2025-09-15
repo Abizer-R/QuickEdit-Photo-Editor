@@ -15,8 +15,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -224,10 +227,8 @@ private fun TopToolbar(
      *
      *
      *
-     * TODO - 1: Add previews in all new screens
-     * TODO - 2: Replace hardcoded strings with string resources
-     * TODO - 3: Try not to use defaultTextColor() in new screens
-     * TODO - 4: Bring UI of QuickEditEditor closer to EditorScreen
+     * TODO - 1: Replace hardcoded strings with string resources
+     * TODO - 2: Continue with modularization plan
      *
      *
      *
@@ -249,36 +250,30 @@ private fun TopToolbar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Image(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .size(32.dp)
-                        .clickable {
-                            onClose()
-                        },
-                    contentDescription = "Close",
-                    imageVector = Icons.Default.Close,
-                    colorFilter = ColorFilter.tint(
-                        color = MaterialTheme.colorScheme.onBackground
+                IconButton(
+                    onClick = { onClose() },
+                    enabled = true
+                ) {
+                    Icon(
+                        modifier = Modifier.size(32.dp),
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close",
                     )
-                )
+                }
                 Text(
                     text = "Crop",
                     style = MaterialTheme.typography.titleMedium
                 )
-                Image(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .size(32.dp)
-                        .clickable {
-                            onDone()
-                        },
-                    contentDescription = null,
-                    imageVector = Icons.Default.Check,
-                    colorFilter = ColorFilter.tint(
-                        color = MaterialTheme.colorScheme.onBackground
+                IconButton(
+                    onClick = { onDone() },
+                    enabled = true
+                ) {
+                    Icon(
+                        modifier = Modifier.size(32.dp),
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Done",
                     )
-                )
+                }
             }
         }
     }
