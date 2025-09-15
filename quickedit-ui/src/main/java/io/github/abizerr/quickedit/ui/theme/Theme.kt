@@ -44,10 +44,11 @@ fun QuickEditTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    val colorScheme = DarkColorScheme
+//    val colorScheme = when {
+//        darkTheme -> DarkColorScheme
+//        else -> LightColorScheme
+//    }
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
