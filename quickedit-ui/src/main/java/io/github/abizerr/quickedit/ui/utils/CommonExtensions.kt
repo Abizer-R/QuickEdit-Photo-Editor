@@ -10,7 +10,10 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.imageResource
 import io.github.abizerr.quickedit.ui.R
 
 val Any.TAG: String
@@ -74,3 +77,7 @@ fun Context.getOpenAppSettingsIntent(): Intent {
 
 @Composable
 fun defaultTextColor() = MaterialTheme.colorScheme.onBackground
+
+
+@Composable
+fun getDummyBitmap() = ImageBitmap.imageResource(id = R.drawable.dummy_image).asAndroidBitmap()
