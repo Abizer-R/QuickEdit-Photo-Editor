@@ -14,11 +14,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import io.github.abizerr.quickedit.tool.draw.ui.drawingCanvas.DrawingCanvas
-import com.abizer_r.quickedit.ui.drawMode.stateHandling.DrawModeEvent
-import com.abizer_r.quickedit.ui.drawMode.stateHandling.DrawModeState
 import com.abizer_r.quickedit.utils.drawMode.CustomLayerTypeComposable
 import com.abizer_r.quickedit.utils.other.bitmap.ImmutableBitmap
+import io.github.abizerr.quickedit.tool.draw.ui.DrawModeEvent
+import io.github.abizerr.quickedit.tool.draw.ui.DrawModeState
+import io.github.abizerr.quickedit.tool.draw.ui.drawingCanvas.DrawingCanvas
 
 @Composable
 fun DrawingCanvasContainer(

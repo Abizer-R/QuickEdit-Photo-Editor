@@ -44,34 +44,34 @@ fun QuickEditApp(
                     .background(MaterialTheme.colorScheme.background)
             ) {
                 // Old navigation (removed intentionally)
-//                QuickEditNavigation(initialImageUri)
+                QuickEditNavigation(initialImageUri)
 
 
-                val editImage: EditImage? = initialImageUri?.let {
-                    EditImage.FromUri(it)
-                } ?: EditImage.FromBitmap(getDummyBitmap())
-
-                val tools = remember {
-                    listOf(
-                        CropContribution(),
-                        DrawToolContribution(),
-                        TextContribution(),
-                        EffectsContribution()
-                    )
-                }
-
-                QuickEditEditor(
-                    image = editImage,
-                    config = QuickEditConfig(
-                        tools = tools,
-                        maxUndo = 20,
-                        defaultFormat = SaveFormat.Jpeg(90)
-                    ),
-//                    state = QuickEditState(),
-                    onSave = {
-                        // TODO (revamp): map Result<EditedImage> back if needed
-                    }
-                )
+//                val editImage: EditImage? = initialImageUri?.let {
+//                    EditImage.FromUri(it)
+//                } ?: EditImage.FromBitmap(getDummyBitmap())
+//
+//                val tools = remember {
+//                    listOf(
+//                        CropContribution(),
+//                        DrawToolContribution(),
+//                        TextContribution(),
+//                        EffectsContribution()
+//                    )
+//                }
+//
+//                QuickEditEditor(
+//                    image = editImage,
+//                    config = QuickEditConfig(
+//                        tools = tools,
+//                        maxUndo = 20,
+//                        defaultFormat = SaveFormat.Jpeg(90)
+//                    ),
+////                    state = QuickEditState(),
+//                    onSave = {
+//                        // TODO (revamp): map Result<EditedImage> back if needed
+//                    }
+//                )
             }
         }
     }

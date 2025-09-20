@@ -3,15 +3,14 @@ package com.abizer_r.quickedit.ui.drawMode
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.abizer_r.quickedit.ui.drawMode.stateHandling.DrawModeEvent
-import com.abizer_r.quickedit.ui.drawMode.stateHandling.DrawModeState
-import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
-import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
-import io.github.abizerr.quickedit.tool.draw.util.setOpacityIfPossible
-import io.github.abizerr.quickedit.tool.draw.util.setShapeTypeIfPossible
-import io.github.abizerr.quickedit.tool.draw.util.setWidthIfPossible
-import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.abizerr.quickedit.tool.draw.models.DrawToolItem
+import io.github.abizerr.quickedit.tool.draw.models.setOpacityIfPossible
+import io.github.abizerr.quickedit.tool.draw.models.setShapeTypeIfPossible
+import io.github.abizerr.quickedit.tool.draw.models.setWidthIfPossible
+import io.github.abizerr.quickedit.tool.draw.ui.DrawModeEvent
+import io.github.abizerr.quickedit.tool.draw.ui.DrawModeState
+import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -78,43 +77,37 @@ class DrawModeViewModel @Inject constructor(
                     it.copy(recompositionTrigger = it.recompositionTrigger + 1)
                 }
             }
-        }
-    }
 
-    fun onBottomToolbarEvent(event: BottomToolbarEvent) {
-        when (event) {
-            is BottomToolbarEvent.OnItemClicked -> {
-                onBottomToolbarItemClicked(event.toolbarItem)
+            is DrawModeEvent.OnToolbarItemClicked -> {
+                handleToolbarItemClicked(event.toolbarItem)
             }
 
-            is BottomToolbarEvent.UpdateOpacity -> {
+            is DrawModeEvent.UpdateOpacity -> {
                 _state.update { it.copy(
                     selectedTool = it.selectedTool.setOpacityIfPossible(event.newOpacity),
                     recompositionTrigger = it.recompositionTrigger + 1
                 ) }
             }
 
-            is BottomToolbarEvent.UpdateWidth -> {
+            is DrawModeEvent.UpdateWidth -> {
                 _state.update { it.copy(
                     selectedTool = it.selectedTool.setWidthIfPossible(event.newWidth),
                     recompositionTrigger = it.recompositionTrigger + 1
                 ) }
             }
 
-            is BottomToolbarEvent.UpdateShapeType -> {
+            is DrawModeEvent.UpdateShapeType -> {
                 _state.update { it.copy(
                     selectedTool = it.selectedTool.setShapeTypeIfPossible(event.newShapeType),
                     recompositionTrigger = it.recompositionTrigger + 1
                 ) }
             }
-
-            else -> {}
         }
     }
 
-    private fun onBottomToolbarItemClicked(selectedItem: BottomToolbarItem) = viewModelScope.launch {
+    private fun handleToolbarItemClicked(selectedItem: DrawToolItem) = viewModelScope.launch {
         when (selectedItem) {
-            is BottomToolbarItem.ColorItem -> {
+            is DrawToolItem.ColorItem -> {
                 _state.update {
                     it.copy(showColorPicker = it.showColorPicker.not())
                 }
@@ -122,7 +115,7 @@ class DrawModeViewModel @Inject constructor(
 
             // Clicked on already selected item
             state.value.selectedTool -> {
-                if (selectedItem != BottomToolbarItem.PanItem) {
+                if (selectedItem != DrawToolItem.PanItem) {
                     _state.update {
                         it.copy(showBottomToolbarExtension = it.showBottomToolbarExtension.not())
                     }
@@ -137,7 +130,7 @@ class DrawModeViewModel @Inject constructor(
                     delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION.toLong())
                 }
                 _state.update { it.copy(selectedTool = selectedItem) }
-                if (selectedItem != BottomToolbarItem.PanItem) {
+                if (selectedItem != DrawToolItem.PanItem) {
                     // open toolbarExtension for new item
                     _state.update { it.copy(showBottomToolbarExtension = true) }
                 }

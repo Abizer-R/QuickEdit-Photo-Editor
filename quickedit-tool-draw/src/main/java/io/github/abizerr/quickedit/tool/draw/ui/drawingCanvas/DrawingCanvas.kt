@@ -17,11 +17,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInteropFilter
-import com.abizer_r.quickedit.ui.drawMode.stateHandling.DrawModeEvent
 import io.github.abizerr.quickedit.tool.draw.models.shapes.AbstractShape
 import io.github.abizerr.quickedit.tool.draw.models.PathDetails
-import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
-import com.abizer_r.quickedit.utils.drawMode.getShape
+import io.github.abizerr.quickedit.tool.draw.models.DrawToolItem
+import io.github.abizerr.quickedit.tool.draw.models.getShape
+import io.github.abizerr.quickedit.tool.draw.ui.DrawModeEvent
 import java.util.Stack
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -30,7 +30,7 @@ fun DrawingCanvas(
     modifier: Modifier = Modifier,
     pathDetailStack: Stack<PathDetails>,
     selectedColor: Color,
-    currentTool: BottomToolbarItem,
+    currentTool: DrawToolItem,
     scale: Float,
     onDrawingEvent: (DrawModeEvent) -> Unit,
     transformableState: TransformableState,
@@ -53,7 +53,7 @@ fun DrawingCanvas(
             translationY = offset.y
         )
 
-    if (currentTool is BottomToolbarItem.PanItem) {
+    if (currentTool is DrawToolItem.PanItem) {
         canvasModifier = canvasModifier
             .transformable(transformableState)
 
@@ -70,7 +70,7 @@ fun DrawingCanvas(
                             selectedColor = selectedColor,
                             scale = scale,
                         )
-                        currentShape?.initShape(startX = adjustedX, startY = adjustedY)
+                        currentShape.initShape(startX = adjustedX, startY = adjustedY)
                     }
 
                     MotionEvent.ACTION_MOVE -> {
@@ -82,11 +82,11 @@ fun DrawingCanvas(
 
                     MotionEvent.ACTION_CANCEL,
                     MotionEvent.ACTION_UP -> {
-                        if (currentShape != null && currentShape!!.shouldDraw()) {
+                        if (currentShape != null && currentShape.shouldDraw()) {
                             onDrawingEvent(
                                 DrawModeEvent.AddNewPath(
                                     pathDetail = PathDetails(
-                                        drawingShape = currentShape!!,
+                                        drawingShape = currentShape,
                                     )
                                 )
                             )

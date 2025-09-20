@@ -46,9 +46,9 @@ import androidx.compose.ui.unit.toSize
 import androidx.constraintlayout.compose.ConstraintLayout
 import io.github.abizerr.quickedit.ui.theme.QuickEditTheme
 import com.abizer_r.quickedit.ui.transformableViews.TransformableTextBox
-import io.github.abizerr.quickedit.tool.draw.util.DrawModeUtils
-import io.github.abizerr.quickedit.tool.draw.util.pxToDp
-import io.github.abizerr.quickedit.tool.draw.util.toPx
+import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
+import com.abizer_r.quickedit.utils.drawMode.pxToDp
+import com.abizer_r.quickedit.utils.drawMode.toPx
 import com.abizer_r.quickedit.utils.textMode.TextModeUtils.getDefaultEditorTextStyle
 
 @Composable

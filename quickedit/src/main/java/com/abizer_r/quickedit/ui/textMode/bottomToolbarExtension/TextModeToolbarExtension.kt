@@ -24,7 +24,7 @@ import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptio
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.caseOptions.TextCaseOptions
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.styleOptions.TextStyleOptions
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.styleOptions.TextStyleAttr
-import io.github.abizerr.quickedit.tool.draw.util.DrawModeUtils
+import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
 import io.github.abizerr.quickedit.ui.utils.font.FontUtils
 import com.abizer_r.quickedit.utils.textMode.TextModeUtils
 
