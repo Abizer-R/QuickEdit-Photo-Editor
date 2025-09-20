@@ -12,15 +12,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.res.imageResource
-import com.abizer_r.quickedit.R
 import io.github.abizerr.quickedit.ui.theme.QuickEditTheme
 import io.github.abizerr.quickedit.engine.api.EditImage
 import io.github.abizerr.quickedit.engine.api.SaveFormat
 import io.github.abizerr.quickedit.tool.crop.CropContribution
-import io.github.abizerr.quickedit.tool.draw.DrawContribution
+import io.github.abizerr.quickedit.tool.draw.DrawToolContribution
 import io.github.abizerr.quickedit.tool.effects.EffectsContribution
 import io.github.abizerr.quickedit.tool.text.TextContribution
 import io.github.abizerr.quickedit.ui.api.QuickEditConfig
@@ -58,7 +54,7 @@ fun QuickEditApp(
                 val tools = remember {
                     listOf(
                         CropContribution(),
-                        DrawContribution(),
+                        DrawToolContribution(),
                         TextContribution(),
                         EffectsContribution()
                     )

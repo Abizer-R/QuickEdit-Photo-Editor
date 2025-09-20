@@ -6,11 +6,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import io.github.abizerr.quickedit.ui.api.QuickEditState
 import io.github.abizerr.quickedit.ui.api.ToolContribution
+import io.github.abizerr.quickedit.ui.api.ToolContributionWithFactory
 import io.github.abizerr.quickedit.ui.api.ToolController
+import io.github.abizerr.quickedit.ui.api.ToolFactory
 
-class DrawContribution : ToolContribution {
+class DrawToolContribution : ToolContributionWithFactory {
     override val id: String = "draw"
+    override val factory: ToolFactory get() = DrawToolFactory()
     override val label: String = "Draw"
+    override val supportsFullScreen: Boolean get() = true
 
     @Composable
     override fun ToolbarIcon(selected: Boolean, onClick: () -> Unit) {
