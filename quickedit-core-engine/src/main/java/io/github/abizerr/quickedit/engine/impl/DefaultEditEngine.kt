@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
+import android.graphics.Rect
 import android.os.Build
 import io.github.abizerr.quickedit.engine.api.*
 import kotlinx.coroutines.Dispatchers
@@ -37,19 +38,23 @@ class DefaultEditEngine(
         return snap
     }
 
-    override suspend fun apply(op: EditOp): EditSnapshot {
+    override suspend fun apply(op: EditOp): EditSnapshot = withContext(Dispatchers.Default) {
         val current = historyManager.current() ?: error("Call newSession() first")
         val next = when (op) {
             is EditOp.Undo -> historyManager.undo() ?: current
             is EditOp.Redo -> historyManager.redo() ?: current
-            is EditOp.ImageCropped -> current.copy(
-                image = EditImage.FromBitmap(op.croppedBitmap),
-                rev = current.rev + 1
-            )
+            is EditOp.CropImage -> {
+                val baseBitmap = decode(current.image) ?: return@withContext current
+                val croppedBitmap = cropBitmapImageSpace(baseBitmap, op.rect)
+                current.copy(
+                    image = EditImage.FromBitmap(croppedBitmap),
+                    rev = current.rev + 1
+                )
+            }
             else -> current.copy(rev = current.rev + 1) // TODO (revamp): placeholder; real ops later
         }
         if (op !is EditOp.Undo && op !is EditOp.Redo) historyManager.push(next)
-        return next
+        return@withContext next
     }
 
     override suspend fun render(snapshot: EditSnapshot, size: Size): RenderResult {
@@ -126,5 +131,15 @@ class DefaultEditEngine(
         val w = (src.width * scale).toInt().coerceAtLeast(1)
         val h = (src.height * scale).toInt().coerceAtLeast(1)
         return src.scale(w, h)
+    }
+
+    private fun cropBitmapImageSpace(src: Bitmap, rect: Rect): Bitmap {
+        val left = rect.left.coerceIn(0, src.width)
+        val right = rect.right.coerceIn(left, src.width)
+        val top = rect.top.coerceIn(0, src.height)
+        val bottom = rect.bottom.coerceIn(top, src.height)
+        val width = (right - left).coerceAtLeast(1)
+        val height = (bottom - top).coerceAtLeast(1)
+        return Bitmap.createBitmap(src, left, top, width, height)
     }
 }

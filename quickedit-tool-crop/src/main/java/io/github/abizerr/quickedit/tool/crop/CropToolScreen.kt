@@ -1,11 +1,9 @@
 package io.github.abizerr.quickedit.tool.crop
 
-import android.graphics.Bitmap
+import android.graphics.Rect
 import android.view.ViewGroup
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -15,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
@@ -32,7 +29,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -40,12 +36,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.canhub.cropper.CropImageOptions
 import com.canhub.cropper.CropImageView
-import com.canhub.cropper.CropImageView.OnCropImageCompleteListener
 import io.github.abizerr.quickedit.engine.api.EditImage
 import io.github.abizerr.quickedit.engine.api.EditOp
 import io.github.abizerr.quickedit.tool.crop.model.CropperOption
 import io.github.abizerr.quickedit.tool.crop.utils.CropModeUtils
-import io.github.abizerr.quickedit.ui.utils.PreviewUtils
 import io.github.abizerr.quickedit.ui.api.QuickEditState
 import io.github.abizerr.quickedit.ui.api.ToolController
 import io.github.abizerr.quickedit.ui.common.AnimatedToolbarContainer
@@ -53,8 +47,10 @@ import io.github.abizerr.quickedit.ui.common.TOOLBAR_HEIGHT_LARGE
 import io.github.abizerr.quickedit.ui.common.TOOLBAR_HEIGHT_SMALL
 import io.github.abizerr.quickedit.ui.theme.QuickEditTheme
 import io.github.abizerr.quickedit.ui.theme.ToolBarBackgroundColor
+import io.github.abizerr.quickedit.ui.utils.PreviewUtils
 import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils
 import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST
+import io.github.abizerr.quickedit.ui.utils.errorToast
 import io.github.abizerr.quickedit.ui.utils.toast
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -80,21 +76,16 @@ fun CropToolScreen(
     var selectedCropOptionIndex by remember { mutableIntStateOf(0) }
     var showCropRatioDialog by remember { mutableStateOf(false) }
 
-
-    fun handleCropResult(croppedBitmap: Bitmap) {
+    fun emitCropAndExit(rect: Rect?, rotationDeg: Int = 0) {
+        if (rect == null) {
+            context.errorToast()
+            return
+        }
         scope.launch {
-            controller.emit(EditOp.ImageCropped(croppedBitmap))
+            controller.emit(EditOp.CropImage(rect))
             toolbarVisible = false
             delay(AnimUtils.TOOLBAR_COLLAPSE_ANIM_DURATION_FAST.toLong())
             onExit()
-        }
-    }
-
-    val cropCompleteListener = remember {
-        OnCropImageCompleteListener { view, result ->
-            result.bitmap?.let {
-                handleCropResult(it)
-            } // TODO Show Error toast using "?:"
         }
     }
 
@@ -113,7 +104,8 @@ fun CropToolScreen(
                 }
             },
             onDone = {
-                cropView?.croppedImageAsync()
+                val rect = cropView?.cropRect
+                emitCropAndExit(rect)
             }
         )
 
@@ -180,7 +172,6 @@ fun CropToolScreen(
                             is EditImage.FromUri -> setImageUriAsync(img.uri)
                         }
                         setImageCropOptions(cropImageOptions)
-                        setOnCropImageCompleteListener(cropCompleteListener)
                     }
 
                     container.addView(mCropView)
@@ -223,19 +214,6 @@ private fun TopToolbar(
     onClose: () -> Unit,
     onDone: () -> Unit
 ) {
-    /**
-     *
-     *
-     *
-     * TODO - 1: Replace hardcoded strings with string resources
-     * TODO - 2: Continue with modularization plan
-     *
-     *
-     *
-     *
-     *
-     *
-     */
     AnimatedToolbarContainer(
         toolbarVisible = visible,
         modifier = modifier
