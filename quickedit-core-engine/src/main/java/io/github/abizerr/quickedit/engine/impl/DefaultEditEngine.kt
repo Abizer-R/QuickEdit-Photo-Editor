@@ -3,7 +3,9 @@ package io.github.abizerr.quickedit.engine.impl
 import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.ImageDecoder
+import android.graphics.Paint
 import android.graphics.Rect
 import android.os.Build
 import io.github.abizerr.quickedit.engine.api.*
@@ -43,6 +45,7 @@ class DefaultEditEngine(
         val next = when (op) {
             is EditOp.Undo -> historyManager.undo() ?: current
             is EditOp.Redo -> historyManager.redo() ?: current
+
             is EditOp.CropImage -> {
                 val baseBitmap = decode(current.image) ?: return@withContext current
                 val croppedBitmap = cropBitmapImageSpace(baseBitmap, op.rect)
@@ -51,6 +54,14 @@ class DefaultEditEngine(
                     rev = current.rev + 1
                 )
             }
+
+            is EditOp.DrawStroke,
+            is EditOp.DrawLine,
+            is EditOp.DrawRect,
+            is EditOp.DrawOval -> {
+                current.copy(rev = current.rev + 1, operations = current.operations + op)
+            }
+
             else -> current.copy(rev = current.rev + 1) // TODO (revamp): placeholder; real ops later
         }
         if (op !is EditOp.Undo && op !is EditOp.Redo) historyManager.push(next)
@@ -60,7 +71,16 @@ class DefaultEditEngine(
     override suspend fun render(snapshot: EditSnapshot, size: Size): RenderResult {
         val bitmap = withContext(Dispatchers.Default) {
             val baseBitmap = decode(snapshot.image) ?: return@withContext null
-            scaleToFit(baseBitmap, size.width, size.height)
+            val scaledBitmap = scaleToFit(baseBitmap, size.width, size.height)
+
+            // draw operations on top
+            val mutable = scaledBitmap.copy(Bitmap.Config.ARGB_8888, true)
+            val canvas = Canvas(mutable)
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                style = Paint.Style.STROKE
+            }
+
+
         } ?: return RenderResult(ok = false, preview = null)
 
         return RenderResult(ok = true, preview = bitmap)

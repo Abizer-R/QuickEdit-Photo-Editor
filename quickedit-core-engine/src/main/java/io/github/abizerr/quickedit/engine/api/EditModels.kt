@@ -16,7 +16,8 @@ sealed interface EditImage {
 /** Immutable snapshot of the editing graph at a point in time. */
 data class EditSnapshot(
     val image: EditImage,
-    val rev: Long = 0L
+    val rev: Long = 0L,
+    val operations: List<EditOp> = emptyList()
     /**
      * FUTURE: Add graph states without breaking callers:
      * example: Layers, Selection, Metadata
