@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -108,3 +109,31 @@ interface ToolController {
 class QuickEditState internal constructor(
     val snapshot: EditSnapshot
 )
+
+/** A contribution that provides a ToolFactory */
+interface ToolContributionWithFactory: ToolContribution {
+    val factory: ToolFactory
+
+    @Composable
+    override fun FullScreenTool(
+        state: QuickEditState,
+        controller: ToolController,
+        onExit: () -> Unit
+    ) {
+        val host = rememberToolHostFrom(state)
+        val session = remember { factory.create(ToolParams()) }
+        session.Ui(host, controller, onExit)
+    }
+
+}
+
+internal fun rememberToolHostFrom(state: QuickEditState): ToolHost = object : ToolHost {
+    override val snapshot: EditSnapshot
+        get() = state.snapshot
+
+    override fun requestGestureMode(mode: GestureMode) {
+        // Shell toggles its state machine to enforce gesture policy while in tool mode
+        // (editor preview not composed; render paused per design).
+    }
+
+}
