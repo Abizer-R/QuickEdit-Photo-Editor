@@ -38,7 +38,6 @@ android {
 
 dependencies {
     implementation(project(":quickedit-ui"))
-    implementation(project(":quickedit-core-engine"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
