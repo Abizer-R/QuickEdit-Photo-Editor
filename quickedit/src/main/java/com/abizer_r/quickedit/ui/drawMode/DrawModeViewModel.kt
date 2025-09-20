@@ -7,9 +7,9 @@ import com.abizer_r.quickedit.ui.drawMode.stateHandling.DrawModeEvent
 import com.abizer_r.quickedit.ui.drawMode.stateHandling.DrawModeState
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
-import com.abizer_r.quickedit.utils.drawMode.setOpacityIfPossible
-import com.abizer_r.quickedit.utils.drawMode.setShapeTypeIfPossible
-import com.abizer_r.quickedit.utils.drawMode.setWidthIfPossible
+import io.github.abizerr.quickedit.tool.draw.util.setOpacityIfPossible
+import io.github.abizerr.quickedit.tool.draw.util.setShapeTypeIfPossible
+import io.github.abizerr.quickedit.tool.draw.util.setWidthIfPossible
 import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay

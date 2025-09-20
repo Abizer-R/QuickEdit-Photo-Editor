@@ -1,6 +1,6 @@
 package com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state
 
-import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
+import io.github.abizerr.quickedit.tool.draw.models.shapes.ShapeType
 
 sealed class BottomToolbarEvent {
     data class OnItemClicked(val toolbarItem: BottomToolbarItem): BottomToolbarEvent()

@@ -23,9 +23,9 @@ import androidx.compose.ui.unit.dp
 import com.abizer_r.quickedit.R
 import io.github.abizerr.quickedit.ui.theme.QuickEditTheme
 import io.github.abizerr.quickedit.ui.theme.ToolBarBackgroundColor
-import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
+import io.github.abizerr.quickedit.tool.draw.models.shapes.ShapeType
 import io.github.abizerr.quickedit.ui.utils.defaultTextColor
-import com.abizer_r.quickedit.utils.drawMode.DrawingConstants
+import io.github.abizerr.quickedit.tool.draw.util.DrawingConstants
 
 /**
  * Contains additional option for drawMode tools

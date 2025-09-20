@@ -1,7 +1,7 @@
-package com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes
+package io.github.abizerr.quickedit.tool.draw.models.shapes
 
 import androidx.compose.ui.graphics.Color
-import com.abizer_r.quickedit.utils.drawMode.DrawingConstants
+import io.github.abizerr.quickedit.tool.draw.util.DrawingConstants
 
 abstract class AbstractShape: BaseShape {
     var mColor: Color = Color.White

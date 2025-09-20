@@ -1,6 +1,6 @@
-package com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool
+package io.github.abizerr.quickedit.tool.draw.ui.drawingCanvas.drawingTool
 
-import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
+import io.github.abizerr.quickedit.tool.draw.models.shapes.ShapeType
 
 /**
  * TODO: delete this class (this is not used in EditorScreen implementation)

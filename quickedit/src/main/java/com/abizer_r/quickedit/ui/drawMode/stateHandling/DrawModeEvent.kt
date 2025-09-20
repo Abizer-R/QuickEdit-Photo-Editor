@@ -1,7 +1,7 @@
 package com.abizer_r.quickedit.ui.drawMode.stateHandling
 
 import androidx.compose.ui.graphics.Color
-import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.models.PathDetails
+import io.github.abizerr.quickedit.tool.draw.models.PathDetails
 
 
 sealed class DrawModeEvent {

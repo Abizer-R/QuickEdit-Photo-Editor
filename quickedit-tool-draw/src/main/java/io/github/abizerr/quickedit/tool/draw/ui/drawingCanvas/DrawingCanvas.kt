@@ -1,4 +1,4 @@
-package com.abizer_r.quickedit.ui.drawMode.drawingCanvas
+package io.github.abizerr.quickedit.tool.draw.ui.drawingCanvas
 
 import android.util.Log
 import android.view.MotionEvent
@@ -14,22 +14,15 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInteropFilter
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
 import com.abizer_r.quickedit.ui.drawMode.stateHandling.DrawModeEvent
-import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.AbstractShape
-import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.models.PathDetails
+import io.github.abizerr.quickedit.tool.draw.models.shapes.AbstractShape
+import io.github.abizerr.quickedit.tool.draw.models.PathDetails
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.quickedit.utils.drawMode.getShape
-import com.abizer_r.quickedit.utils.drawMode.toPx
 import java.util.Stack
-import kotlin.math.abs
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable

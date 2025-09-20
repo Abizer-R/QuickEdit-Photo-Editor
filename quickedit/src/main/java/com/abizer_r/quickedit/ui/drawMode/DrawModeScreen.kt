@@ -51,7 +51,7 @@ import io.github.abizerr.quickedit.ui.utils.defaultErrorToast
 import io.github.abizerr.quickedit.ui.common.AnimatedToolbarContainer
 import io.github.abizerr.quickedit.ui.common.bottomToolbarModifier
 import io.github.abizerr.quickedit.ui.common.topToolbarModifier
-import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
+import io.github.abizerr.quickedit.tool.draw.models.shapes.ShapeType
 import com.abizer_r.quickedit.ui.drawMode.stateHandling.DrawModeEvent
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.BottomToolBarStatic
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
@@ -59,11 +59,11 @@ import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
 import com.abizer_r.quickedit.ui.drawMode.toptoolbar.DrawModeTopToolBar
 import com.abizer_r.quickedit.utils.AppUtils
-import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
-import com.abizer_r.quickedit.utils.drawMode.getOpacityOrNull
-import com.abizer_r.quickedit.utils.drawMode.getShapeTypeOrNull
-import com.abizer_r.quickedit.utils.drawMode.getWidthOrNull
-import com.abizer_r.quickedit.utils.drawMode.toPx
+import io.github.abizerr.quickedit.tool.draw.util.DrawModeUtils
+import io.github.abizerr.quickedit.tool.draw.util.getOpacityOrNull
+import io.github.abizerr.quickedit.tool.draw.util.getShapeTypeOrNull
+import io.github.abizerr.quickedit.tool.draw.util.getWidthOrNull
+import io.github.abizerr.quickedit.tool.draw.util.toPx
 import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils
 import com.abizer_r.quickedit.utils.other.bitmap.ImmutableBitmap
 import com.smarttoolfactory.screenshot.ImageResult

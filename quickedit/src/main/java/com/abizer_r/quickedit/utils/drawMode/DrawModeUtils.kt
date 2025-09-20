@@ -5,13 +5,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
-import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.BrushShape
-import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.AbstractShape
-import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.LineShape
-import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.OvalShape
-import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.RectangleShape
-import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
+import io.github.abizerr.quickedit.tool.draw.models.shapes.AbstractShape
+import io.github.abizerr.quickedit.tool.draw.models.shapes.BrushShape
+import io.github.abizerr.quickedit.tool.draw.models.shapes.LineShape
+import io.github.abizerr.quickedit.tool.draw.models.shapes.OvalShape
+import io.github.abizerr.quickedit.tool.draw.models.shapes.RectangleShape
+import io.github.abizerr.quickedit.tool.draw.models.shapes.ShapeType
+import io.github.abizerr.quickedit.tool.draw.util.DrawingConstants
 import kotlin.math.cos
 import kotlin.math.sin
 

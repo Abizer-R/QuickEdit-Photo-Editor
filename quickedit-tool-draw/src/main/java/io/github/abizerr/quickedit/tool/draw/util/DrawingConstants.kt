@@ -1,4 +1,4 @@
-package com.abizer_r.quickedit.utils.drawMode
+package io.github.abizerr.quickedit.tool.draw.util
 
 object DrawingConstants {
     const val DEFAULT_STROKE_WIDTH = 12f
