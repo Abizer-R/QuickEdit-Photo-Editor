@@ -1,4 +1,4 @@
-package io.github.abizerr.quickedit.tool.draw
+package io.github.abizerr.quickedit.tool.draw.session
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -28,8 +28,8 @@ internal class DrawToolSession : ToolSession {
         // Ask shell for exclusive gestures while this full-screen tool is active
 
         // Placeholder
-        Surface(modifier = Modifier.fillMaxSize()) {
-            Column(Modifier.fillMaxSize()) {
+        Surface(modifier = Modifier.Companion.fillMaxSize()) {
+            Column(Modifier.Companion.fillMaxSize()) {
                 TopAppBar(
                     title = { Text("Draw (stub)") },
                     actions = {
@@ -37,11 +37,11 @@ internal class DrawToolSession : ToolSession {
                     }
                 )
                 Box(
-                    modifier = Modifier
+                    modifier = Modifier.Companion
                         .fillMaxSize()
                         .padding(16.dp)
                         .background(MaterialTheme.colorScheme.surfaceVariant),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Companion.Center
                 ) {
                     Text("Canvas placeholder — wiring test")
                 }
