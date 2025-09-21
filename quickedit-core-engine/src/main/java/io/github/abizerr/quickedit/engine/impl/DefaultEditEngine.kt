@@ -12,6 +12,9 @@ import io.github.abizerr.quickedit.engine.api.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.core.graphics.scale
+import io.github.abizerr.quickedit.engine.drawspec.toPaintSpec
+import io.github.abizerr.quickedit.engine.util.applySpec
+import io.github.abizerr.quickedit.engine.util.drawOn
 import java.io.ByteArrayOutputStream
 
 /**
@@ -55,11 +58,11 @@ class DefaultEditEngine(
                 )
             }
 
-            is EditOp.DrawStroke,
-            is EditOp.DrawLine,
-            is EditOp.DrawRect,
-            is EditOp.DrawOval -> {
-                current.copy(rev = current.rev + 1, operations = current.operations + op)
+            is EditOp.DrawShape -> {
+                current.copy(
+                    rev = current.rev + 1,
+                    operations = current.operations + op
+                )
             }
 
             else -> current.copy(rev = current.rev + 1) // TODO (revamp): placeholder; real ops later
@@ -76,11 +79,18 @@ class DefaultEditEngine(
             // draw operations on top
             val mutable = scaledBitmap.copy(Bitmap.Config.ARGB_8888, true)
             val canvas = Canvas(mutable)
-            val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                style = Paint.Style.STROKE
+            snapshot.operations.forEach { op ->
+                when (op) {
+                    is EditOp.DrawShape -> {
+                        val paintSpec = op.spec.toPaintSpec()
+                        val paint = Paint().applySpec(paintSpec)
+                        op.spec.drawOn(canvas, paint)
+                    }
+                    else -> Unit
+                }
+
             }
-
-
+            mutable
         } ?: return RenderResult(ok = false, preview = null)
 
         return RenderResult(ok = true, preview = bitmap)
