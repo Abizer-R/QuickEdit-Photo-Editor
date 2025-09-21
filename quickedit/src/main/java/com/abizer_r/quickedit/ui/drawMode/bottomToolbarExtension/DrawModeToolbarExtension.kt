@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.abizer_r.quickedit.R
 import io.github.abizerr.quickedit.ui.theme.QuickEditTheme
 import io.github.abizerr.quickedit.ui.theme.ToolBarBackgroundColor
-import io.github.abizerr.quickedit.tool.draw.models.shapes.ShapeType
+import io.github.abizerr.quickedit.engine.drawspec.ShapeType
 import io.github.abizerr.quickedit.ui.utils.defaultTextColor
 import io.github.abizerr.quickedit.tool.draw.util.DrawingConstants
 

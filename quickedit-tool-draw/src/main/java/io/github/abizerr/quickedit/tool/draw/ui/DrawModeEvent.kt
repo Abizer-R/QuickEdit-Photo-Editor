@@ -3,7 +3,7 @@ package io.github.abizerr.quickedit.tool.draw.ui
 import androidx.compose.ui.graphics.Color
 import io.github.abizerr.quickedit.tool.draw.models.DrawToolItem
 import io.github.abizerr.quickedit.tool.draw.models.PathDetails
-import io.github.abizerr.quickedit.tool.draw.models.shapes.ShapeType
+import io.github.abizerr.quickedit.engine.drawspec.ShapeType
 
 sealed class DrawModeEvent {
     data class AddNewPath(val pathDetail: PathDetails): DrawModeEvent()

@@ -6,7 +6,7 @@ import io.github.abizerr.quickedit.tool.draw.models.shapes.BrushShape
 import io.github.abizerr.quickedit.tool.draw.models.shapes.LineShape
 import io.github.abizerr.quickedit.tool.draw.models.shapes.OvalShape
 import io.github.abizerr.quickedit.tool.draw.models.shapes.RectangleShape
-import io.github.abizerr.quickedit.tool.draw.models.shapes.ShapeType
+import io.github.abizerr.quickedit.engine.drawspec.ShapeType
 import io.github.abizerr.quickedit.tool.draw.util.DrawingConstants
 
 sealed class DrawToolItem {

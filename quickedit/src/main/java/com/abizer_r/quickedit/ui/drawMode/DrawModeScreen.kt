@@ -84,7 +84,7 @@ import io.github.abizerr.quickedit.tool.draw.models.DrawToolItem
 import io.github.abizerr.quickedit.tool.draw.models.getOpacityOrNull
 import io.github.abizerr.quickedit.tool.draw.models.getShapeTypeOrNull
 import io.github.abizerr.quickedit.tool.draw.models.getWidthOrNull
-import io.github.abizerr.quickedit.tool.draw.models.shapes.ShapeType
+import io.github.abizerr.quickedit.engine.drawspec.ShapeType
 import io.github.abizerr.quickedit.tool.draw.ui.DrawModeEvent
 import io.github.abizerr.quickedit.ui.common.AnimatedToolbarContainer
 import io.github.abizerr.quickedit.ui.common.bottomToolbarModifier
