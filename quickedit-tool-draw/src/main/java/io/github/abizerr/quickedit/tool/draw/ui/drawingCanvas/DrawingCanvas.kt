@@ -19,14 +19,10 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInteropFilter
-import io.github.abizerr.quickedit.tool.draw.models.shapes.AbstractShape
-import io.github.abizerr.quickedit.tool.draw.models.PathDetails
 import io.github.abizerr.quickedit.tool.draw.models.DrawToolItem
+import io.github.abizerr.quickedit.tool.draw.models.PathDetails
 import io.github.abizerr.quickedit.tool.draw.models.getShape
-import io.github.abizerr.quickedit.tool.draw.models.shapes.BrushShape
-import io.github.abizerr.quickedit.tool.draw.models.shapes.LineShape
-import io.github.abizerr.quickedit.tool.draw.models.shapes.OvalShape
-import io.github.abizerr.quickedit.tool.draw.models.shapes.RectangleShape
+import io.github.abizerr.quickedit.tool.draw.models.shapes.BaseShape
 import io.github.abizerr.quickedit.tool.draw.ui.DrawModeEvent
 import java.util.Stack
 
@@ -48,7 +44,7 @@ fun DrawingCanvas(
      * And when these are changed, the draw phase is called (compose has 3 phases: composition, layout and draw)
      * SO, Recomposition isn't triggered
      */
-    var currentShape: AbstractShape? = null
+    var currentShape: BaseShape? = null
     var drawPhaseTrigger by remember { mutableDoubleStateOf(0.0) }
 
     var canvasModifier = modifier
@@ -65,10 +61,13 @@ fun DrawingCanvas(
 
     } else {
         canvasModifier = canvasModifier
-            .pointerInteropFilter {
+            .pointerInteropFilter { it ->
                 val adjustedX = it.x / scale
                 val adjustedY = it.y / scale
-                Log.i("TEST_pan", "Drag: scale = $scale, actualPos = (${it.x}, ${it.y}), adjustedPos = ($adjustedX, $adjustedY)", )
+                Log.i(
+                    "TEST_pan",
+                    "Drag: scale = $scale, actualPos = (${it.x}, ${it.y}), adjustedPos = ($adjustedX, $adjustedY)",
+                )
 
                 when (it.action) {
                     MotionEvent.ACTION_DOWN -> {
@@ -76,7 +75,7 @@ fun DrawingCanvas(
                             selectedColor = selectedColor,
                             scale = scale,
                         )
-                        currentShape.initShape(startX = adjustedX, startY = adjustedY)
+                        currentShape?.initShape(startX = adjustedX, startY = adjustedY)
                     }
 
                     MotionEvent.ACTION_MOVE -> {
@@ -88,15 +87,15 @@ fun DrawingCanvas(
 
                     MotionEvent.ACTION_CANCEL,
                     MotionEvent.ACTION_UP -> {
-                        if (currentShape != null && currentShape.shouldDraw()) {
-                            onDrawingEvent(
-                                DrawModeEvent.AddNewPath(
-                                    pathDetail = PathDetails(
-                                        drawingShape = currentShape,
+                        currentShape
+                            ?.takeIf { shape -> shape.shouldDraw() }
+                            ?.let { shape ->
+                                onDrawingEvent(
+                                    DrawModeEvent.AddNewPath(
+                                        pathDetail = PathDetails(drawingShape = shape)
                                     )
                                 )
-                            )
-                        }
+                            }
                     }
                 }
                 true
@@ -108,13 +107,16 @@ fun DrawingCanvas(
         modifier = canvasModifier.clipToBounds()
     ) {
         pathDetailStack.forEach { pathDetails ->
-            Log.e("TEST", "DrawingCanvas: drawing from stack. drawingShape = ${pathDetails.drawingShape}", )
+            Log.e(
+                "TEST",
+                "DrawingCanvas: drawing from stack. drawingShape = ${pathDetails.drawingShape}",
+            )
             drawIntoCanvas { composeCanvas ->
                 pathDetails.drawingShape.drawOnAndroidCanvas(composeCanvas.nativeCanvas)
             }
         }
 
-        Log.e("TEST", "DrawingCanvas: done \n\n\n", )
+        Log.e("TEST", "DrawingCanvas: done \n\n\n")
         if (drawPhaseTrigger > 0) {
             drawIntoCanvas { composeCanvas ->
                 currentShape?.drawOnAndroidCanvas(composeCanvas.nativeCanvas)
