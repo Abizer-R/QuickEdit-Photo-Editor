@@ -1,5 +1,7 @@
 package io.github.abizerr.quickedit.tool.draw.models.shapes
 
+import android.graphics.Canvas
+import android.graphics.Paint
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
@@ -9,6 +11,12 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.toArgb
+import io.github.abizerr.quickedit.engine.drawspec.PaintSpec
+import io.github.abizerr.quickedit.engine.drawspec.ShapeSpec
+import io.github.abizerr.quickedit.engine.drawspec.toPaintSpec
+import io.github.abizerr.quickedit.engine.util.applySpec
+import io.github.abizerr.quickedit.engine.util.drawOn
 
 class BrushShape(
     private val isEraser: Boolean = false,
@@ -24,24 +32,26 @@ class BrushShape(
     private var path = Path()
     private var prevOffSet = Offset.Zero
 
-    override fun draw(drawScope: DrawScope) {
-        drawScope.drawPath(
-            path = path,
-            brush = SolidColor(mColor),
-            style = Stroke(
-                width = mWidth,
-                cap = StrokeCap.Round,
-                join = StrokeJoin.Round
-            ),
+    private val points = arrayListOf<Pair<Float, Float>>()
+
+    override fun drawOnAndroidCanvas(canvas: Canvas) {
+        val shapeSpec = ShapeSpec.Brush(
+            points = points,
+            argb = mColor.toArgb(),
             alpha = mAlpha,
-            blendMode = if (isEraser) BlendMode.Clear else BlendMode.SrcOver
+            widthPx = mWidth,
+            isEraser = isEraser
         )
+        val paintSpec = shapeSpec.toPaintSpec()
+        val paint = Paint().applySpec(paintSpec)
+        shapeSpec.drawOn(canvas, paint)
     }
 
     override fun initShape(startX: Float, startY: Float) {
         path = Path()
         path.moveTo(startX, startY)
         prevOffSet = Offset(startX, startY)
+        points.add(Pair(startX, startY))
     }
 
     override fun moveShape(endX: Float, endY: Float) {
@@ -56,6 +66,7 @@ class BrushShape(
             y2 = (prevOffSet.y + endY) / 2,
         )
         prevOffSet = Offset(endX, endY)
+        points.add(Pair(endX, endY))
     }
 
     override fun shouldDraw(): Boolean {

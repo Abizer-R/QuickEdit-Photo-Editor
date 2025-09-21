@@ -15,12 +15,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import io.github.abizerr.quickedit.tool.draw.models.shapes.AbstractShape
 import io.github.abizerr.quickedit.tool.draw.models.PathDetails
 import io.github.abizerr.quickedit.tool.draw.models.DrawToolItem
 import io.github.abizerr.quickedit.tool.draw.models.getShape
+import io.github.abizerr.quickedit.tool.draw.models.shapes.BrushShape
+import io.github.abizerr.quickedit.tool.draw.models.shapes.LineShape
+import io.github.abizerr.quickedit.tool.draw.models.shapes.OvalShape
+import io.github.abizerr.quickedit.tool.draw.models.shapes.RectangleShape
 import io.github.abizerr.quickedit.tool.draw.ui.DrawModeEvent
 import java.util.Stack
 
@@ -103,14 +109,16 @@ fun DrawingCanvas(
     ) {
         pathDetailStack.forEach { pathDetails ->
             Log.e("TEST", "DrawingCanvas: drawing from stack. drawingShape = ${pathDetails.drawingShape}", )
-            pathDetails.drawingShape.draw(
-                drawScope = this,
-            )
+            drawIntoCanvas { composeCanvas ->
+                pathDetails.drawingShape.drawOnAndroidCanvas(composeCanvas.nativeCanvas)
+            }
         }
 
         Log.e("TEST", "DrawingCanvas: done \n\n\n", )
         if (drawPhaseTrigger > 0) {
-            currentShape?.draw(drawScope = this)
+            drawIntoCanvas { composeCanvas ->
+                currentShape?.drawOnAndroidCanvas(composeCanvas.nativeCanvas)
+            }
         }
     }
 }

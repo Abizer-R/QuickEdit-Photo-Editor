@@ -1,5 +1,7 @@
 package io.github.abizerr.quickedit.tool.draw.models.shapes
 
+import android.graphics.Canvas
+import android.graphics.Paint
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -8,6 +10,12 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.toArgb
+import io.github.abizerr.quickedit.engine.drawspec.ShapeSpec
+import io.github.abizerr.quickedit.engine.drawspec.ShapeType
+import io.github.abizerr.quickedit.engine.drawspec.toPaintSpec
+import io.github.abizerr.quickedit.engine.util.applySpec
+import io.github.abizerr.quickedit.engine.util.drawOn
 
 class RectangleShape(
     color: Color? = null,
@@ -22,21 +30,18 @@ class RectangleShape(
     private var startOffset: Offset = Offset.Unspecified
     private var endOffset: Offset = Offset.Unspecified
 
-    override fun draw(drawScope: DrawScope) {
-        drawScope.drawRect(
-            topLeft = startOffset,
-            size = Size(
-                width = (endOffset.x - startOffset.x),
-                height = (endOffset.y - startOffset.y)
-            ),
-            brush = SolidColor(mColor),
-            style = Stroke(
-                width = mWidth,
-                cap = StrokeCap.Round,
-                join = StrokeJoin.Round
-            ),
-            alpha = mAlpha
+    override fun drawOnAndroidCanvas(canvas: Canvas) {
+        val shapeSpec = ShapeSpec.Shape(
+            shapeType = ShapeType.RECTANGLE,
+            startOffset = Pair(startOffset.x, startOffset.y),
+            endOffset = Pair(endOffset.x, endOffset.y),
+            argb = mColor.toArgb(),
+            alpha = mAlpha,
+            widthPx = mWidth,
         )
+        val paintSpec = shapeSpec.toPaintSpec()
+        val paint = Paint().applySpec(paintSpec)
+        shapeSpec.drawOn(canvas, paint)
     }
 
     override fun initShape(startX: Float, startY: Float) {
