@@ -1,18 +1,17 @@
-# <img src="https://github.com/user-attachments/assets/8ed6acde-46c9-43e0-a68c-905bec182234" align="center" width="60" height="60"> QuickEdit - Photo Editor
-QuickEdit is a user-friendly photo editor for Android, built using **Jetpack Compose**. It offers essential photo editing tools with a clean and smooth interface.
+## ⚠️ Partial Readme (Will be updated after draw tool is completed)
+---
+# <img src="https://github.com/user-attachments/assets/8ed6acde-46c9-43e0-a68c-905bec182234" align="center" width="60" height="60"> QuickEdit - Photo Editor (Compose, Modular, Pluggable)
 
-## Latest Release
+[![Release](https://img.shields.io/github/v/release/Abizer-R/QuickEdit-Photo-Editor)](https://github.com/Abizer-R/QuickEdit-Photo-Editor/releases)
+[![Min SDK](https://img.shields.io/badge/minSdk-24-blue)](#)
+[![Target SDK](https://img.shields.io/badge/targetSdk-35-blue)](#)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green)](#license)
 
-[![Release v1.1.0](https://img.shields.io/github/v/release/Abizer-R/QuickEdit-Photo-Editor)](https://github.com/Abizer-R/QuickEdit-Photo-Editor/releases/tag/v1.1.0-4)
+**QuickEdit** is a modular, pluggable photo editor for Android with a **stable core engine**, a **Compose UI shell**, and **tool plugins** (Crop ✅, Draw/Text/Effects scaffolds).  
+It preserves legacy UX (slide-out editor bars → full-screen tools) while cleaning layering, performance, and testability.
 
-- [Download from the Google Play Store](https://play.google.com/store/apps/details?id=com.abizer_r.quickedit) 
-- [Download Apk (v1.1.0)](https://github.com/Abizer-R/QuickEdit-Photo-Editor/releases/download/v1.1.0-4/app-release.apk) 
-
-
-## [Click Here To Watch Demo Video](https://drive.google.com/file/d/18IipYR_jbUQVFL8U1jNEJd_KTm_Y9ije/view?usp=sharing)
-
-
-
+- 📱 **Play Store:** [Install](https://play.google.com/store/apps/details?id=com.abizer_r.quickedit)  
+- 📦 **Latest APK:** [Releases](https://github.com/Abizer-R/QuickEdit-Photo-Editor/releases)  
 
 <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start;">
   <img src="https://github.com/user-attachments/assets/78217ce9-4771-4db0-9dae-345214eb28f1" alt="1" width="200" />
@@ -35,16 +34,61 @@ QuickEdit is a user-friendly photo editor for Android, built using **Jetpack Com
 - **Add Text**: Add text with option to customize fonts and format (bold, italic and more).
 - **Smooth Animations**: Enjoy a seamless experience thanks to Jetpack Compose.
 
+---
+
+## Architecture (v0.x)
+
+**Goal:** a reusable editor published as Maven artifacts with a stable engine API and pluggable tools.  
+**Status:** engine + shell done; Crop tool delivered; Draw in progress; Effects & Text planned.
+
+## Modules & Dependency Rules
+
+```
+app-sample/                 # Host app; exercises the library
+quickedit/                  # Legacy façade (keeps old entrypoints stable)
+quickedit-core-engine/      # Engine API + default impl (no Compose/UI deps)
+quickedit-compose-ui/       # Shell + tool contracts (Compose UI, no tool logic)
+quickedit-tool-crop/        # Crop tool (full-screen)
+quickedit-tool-draw/        # (ongoing)
+quickedit-tool-text/        # (planned)
+quickedit-tool-effects/     # (planned)
+```
+
+### **Dependency graph (enforced):**
+```
+app-sample ──► quickedit (legacy)
+                ├──► quickedit-compose-ui  ──api──► quickedit-core-engine
+                └──► quickedit-tool-*
+quickedit-tool-* ──► quickedit-compose-ui
+quickedit-core-engine  (Android framework only; no UI)
+```
+
+**Why `api(..)` from UI → Engine?** The UI public API mentions engine types (`EditImage`, `SaveFormat`). Re-exporting via `api(project(":quickedit-core-engine"))` makes those types visible to consumers cleanly.
+
+
+## Tech Stack & Versions (from `libs.versions.toml`)
+
+- **Android:** minSdk 24 · target/compile 35 · JDK 17  
+- **Gradle/AGP:** 8.6.1  
+- **Kotlin:** 2.1.10 (+ Compose plugin)  
+- **Compose BOM:** 2025.05.00  
+- **Compose libs:** Material3, Animation `1.7.0-beta04`, UI/Test/Tooling  
+- **AndroidX:** Activity Compose 1.9.0 · Lifecycle 2.8.2 · Navigation 2.7.7 · AppCompat 1.7.0 · Core-ktx 1.13.1  
+- **DI:** Hilt 2.57.1 (with hilt-navigation-compose 1.2.0)  
+- **Coroutines:** 1.10.1  
+- **Imaging:** GPUImage 2.1.0 · CanHub Cropper 4.5.0 · Compose-Screenshot 1.0.3  
+- **UX Utils:** Cloudy 0.2.7 · ColorPicker 1.0.0  
+- **Testing:** JUnit 4.13.2 · AndroidX JUnit 1.2.0 · Espresso 3.6.0
+
+---
+
 ## Libraries Used
 
 QuickEdit makes use of the following libraries to provide its features:
 
 - **Jetpack Compose**: A modern toolkit for building native Android UI.
 - **Compose Animations**: For smooth and customizable UI animations.
-- **[GPUImage](https://github.com/CyberAgent/android-gpuimage)**: A library for GPU-based image processing by CyberAgent.
-- **[Cloudy](https://github.com/skydoves/cloudy)**: A library by Skydoves for blurring a composable.
 - **[Image Cropper](https://github.com/CanHub/Android-Image-Cropper)**: A cropping library by Canhub that allows users to crop images seamlessly.
-- **[Compose-Screenshot](https://github.com/SmartToolFactory/Compose-Screenshot)**: A library by SmartToolFactory for capturing screenshots of composables in Jetpack Compose.
 
 
 # License
