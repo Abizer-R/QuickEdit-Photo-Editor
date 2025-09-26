@@ -1,0 +1,1 @@
+<p>Lightweight photo editor where you can crop your images, paint over them, add text and even add exciting filters to make it stand out on social media. Save the edited images locally or share them directly to your friends through any other social media app.</p>
