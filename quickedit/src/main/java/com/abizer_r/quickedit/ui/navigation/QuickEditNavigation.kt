@@ -4,17 +4,9 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideIn
-import androidx.compose.animation.slideOut
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -27,18 +19,11 @@ import com.abizer_r.quickedit.ui.editorScreen.EditorScreenState
 import com.abizer_r.quickedit.ui.effectsMode.EffectsModeScreen
 import com.abizer_r.quickedit.ui.mainScreen.MainScreen
 import com.abizer_r.quickedit.ui.textMode.TextModeScreen
-import com.abizer_r.quickedit.utils.other.anim.AnimUtils
-import com.abizer_r.quickedit.utils.other.anim.enterTransition
-import com.abizer_r.quickedit.utils.other.anim.exitTransition
-import com.abizer_r.quickedit.utils.other.anim.popEnterTransition
-import com.abizer_r.quickedit.utils.other.anim.popExitTransition
-import com.abizer_r.quickedit.utils.other.bitmap.BitmapUtils
 import com.abizer_r.quickedit.utils.other.bitmap.ImmutableBitmap
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import io.github.abizerr.quickedit.ui.utils.anim.enterTransition
+import io.github.abizerr.quickedit.ui.utils.anim.exitTransition
+import io.github.abizerr.quickedit.ui.utils.anim.popEnterTransition
+import io.github.abizerr.quickedit.ui.utils.anim.popExitTransition
 
 @Composable
 fun QuickEditNavigation(

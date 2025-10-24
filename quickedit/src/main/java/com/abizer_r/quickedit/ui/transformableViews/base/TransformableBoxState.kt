@@ -8,7 +8,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.caseOptions.TextCaseType
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.styleOptions.TextStyleAttr
-import com.abizer_r.quickedit.utils.textMode.FontUtils
+import io.github.abizerr.quickedit.ui.utils.font.FontUtils
 import com.abizer_r.quickedit.utils.textMode.TextModeUtils
 
 abstract class TransformableBoxState {

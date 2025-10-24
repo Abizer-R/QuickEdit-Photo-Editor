@@ -5,7 +5,7 @@
 .DS_Store
 /build
 /captures
-/app/release
+/app-sample/release
 /keystoreDetails
 .externalNativeBuild
 .cxx

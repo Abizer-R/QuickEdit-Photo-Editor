@@ -1,13 +1,10 @@
 package com.abizer_r.quickedit.ui.mainScreen
 
 import android.Manifest
-import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -16,18 +13,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.abizer_r.quickedit.theme.QuickEditTheme
 import com.abizer_r.quickedit.ui.common.permission.PermissionDialog
 import com.abizer_r.quickedit.ui.common.permission.StoragePermissionTextProvider
 import com.abizer_r.quickedit.utils.FileUtils
 import com.abizer_r.quickedit.utils.PermissionUtils
-import com.abizer_r.quickedit.utils.getActivity
-import com.abizer_r.quickedit.utils.getOpenAppSettingsIntent
+import io.github.abizerr.quickedit.ui.utils.getActivity
+import io.github.abizerr.quickedit.ui.utils.getOpenAppSettingsIntent
 import com.abizer_r.quickedit.utils.other.bitmap.BitmapStatus
 import com.abizer_r.quickedit.utils.other.bitmap.BitmapUtils
 import kotlinx.coroutines.Dispatchers

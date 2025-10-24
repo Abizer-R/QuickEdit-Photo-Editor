@@ -21,7 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.abizer_r.quickedit.R
 import com.abizer_r.quickedit.ui.common.LoadingView
-import com.abizer_r.quickedit.utils.toast
+import io.github.abizerr.quickedit.ui.utils.toast
 
 @Composable
 fun MainScreenButtonsLayout(

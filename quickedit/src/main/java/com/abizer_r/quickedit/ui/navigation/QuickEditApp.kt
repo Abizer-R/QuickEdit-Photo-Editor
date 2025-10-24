@@ -10,9 +10,24 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.abizer_r.quickedit.theme.QuickEditTheme
+import io.github.abizerr.quickedit.ui.theme.QuickEditTheme
+import io.github.abizerr.quickedit.engine.api.EditImage
+import io.github.abizerr.quickedit.engine.api.SaveFormat
+import io.github.abizerr.quickedit.tool.crop.CropContribution
+import io.github.abizerr.quickedit.tool.draw.DrawToolContribution
+import io.github.abizerr.quickedit.tool.effects.EffectsContribution
+import io.github.abizerr.quickedit.tool.text.TextContribution
+import io.github.abizerr.quickedit.ui.api.QuickEditConfig
+import io.github.abizerr.quickedit.ui.api.QuickEditEditor
+import io.github.abizerr.quickedit.ui.utils.getDummyBitmap
 
+/**
+ * Legacy entry kept for binary/source compatibility.
+ * Internally delegates to the new :quickedit-compose-ui editor.
+ *
+ */
 @Composable
 fun QuickEditApp(
     initialImageUri: Uri? = null
@@ -28,7 +43,35 @@ fun QuickEditApp(
                     .padding(innerPadding)
                     .background(MaterialTheme.colorScheme.background)
             ) {
+                // Old navigation (removed intentionally)
                 QuickEditNavigation(initialImageUri)
+
+
+//                val editImage: EditImage? = initialImageUri?.let {
+//                    EditImage.FromUri(it)
+//                } ?: EditImage.FromBitmap(getDummyBitmap())
+//
+//                val tools = remember {
+//                    listOf(
+//                        CropContribution(),
+//                        DrawToolContribution(),
+//                        TextContribution(),
+//                        EffectsContribution()
+//                    )
+//                }
+//
+//                QuickEditEditor(
+//                    image = editImage,
+//                    config = QuickEditConfig(
+//                        tools = tools,
+//                        maxUndo = 20,
+//                        defaultFormat = SaveFormat.Jpeg(90)
+//                    ),
+////                    state = QuickEditState(),
+//                    onSave = {
+//                        // TODO (revamp): map Result<EditedImage> back if needed
+//                    }
+//                )
             }
         }
     }

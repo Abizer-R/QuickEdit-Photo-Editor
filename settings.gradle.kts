@@ -15,5 +15,11 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "QuickEdit"
-include(":app")
+include(":app-sample")
 include(":quickedit")
+include(":quickedit-core-engine")
+include(":quickedit-ui")
+include(":quickedit-tool-draw")
+include(":quickedit-tool-text")
+include(":quickedit-tool-crop")
+include(":quickedit-tool-effects")

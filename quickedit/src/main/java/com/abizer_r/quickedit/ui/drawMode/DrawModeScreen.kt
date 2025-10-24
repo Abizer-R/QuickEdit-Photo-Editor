@@ -1,6 +1,5 @@
 package com.abizer_r.quickedit.ui.drawMode
 
-import com.abizer_r.quickedit.ui.drawMode.bottomToolbarExtension.DrawModeToolbarExtension
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.activity.compose.BackHandler
@@ -13,13 +12,27 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircleOutline
+import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.outlined.Brush
+import androidx.compose.material.icons.outlined.Category
+import androidx.compose.material.icons.outlined.Crop
+import androidx.compose.material.icons.outlined.PanTool
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -28,47 +41,58 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import com.abizer_r.quickedit.utils.ImmutableList
-import com.abizer_r.quickedit.utils.defaultErrorToast
-import com.abizer_r.quickedit.ui.common.AnimatedToolbarContainer
-import com.abizer_r.quickedit.ui.common.bottomToolbarModifier
-import com.abizer_r.quickedit.ui.common.topToolbarModifier
-import com.abizer_r.quickedit.ui.drawMode.drawingCanvas.drawingTool.shapes.ShapeType
-import com.abizer_r.quickedit.ui.drawMode.stateHandling.DrawModeEvent
-import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.BottomToolBarStatic
+import com.abizer_r.quickedit.R
+import com.abizer_r.quickedit.ui.drawMode.bottomToolbarExtension.DrawModeToolbarExtension
+import com.abizer_r.quickedit.ui.drawMode.toptoolbar.DrawModeTopToolBar
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_MEDIUM
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.TOOLBAR_HEIGHT_SMALL
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarEvent
-import com.abizer_r.quickedit.ui.drawMode.toptoolbar.DrawModeTopToolBar
 import com.abizer_r.quickedit.utils.AppUtils
+import com.abizer_r.quickedit.utils.ImmutableList
 import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
-import com.abizer_r.quickedit.utils.drawMode.getOpacityOrNull
-import com.abizer_r.quickedit.utils.drawMode.getShapeTypeOrNull
-import com.abizer_r.quickedit.utils.drawMode.getWidthOrNull
 import com.abizer_r.quickedit.utils.drawMode.toPx
-import com.abizer_r.quickedit.utils.other.anim.AnimUtils
 import com.abizer_r.quickedit.utils.other.bitmap.ImmutableBitmap
 import com.smarttoolfactory.screenshot.ImageResult
 import com.smarttoolfactory.screenshot.ScreenshotBox
 import com.smarttoolfactory.screenshot.rememberScreenshotState
+import io.github.abizerr.quickedit.tool.draw.models.DrawToolItem
+import io.github.abizerr.quickedit.tool.draw.models.getOpacityOrNull
+import io.github.abizerr.quickedit.tool.draw.models.getShapeTypeOrNull
+import io.github.abizerr.quickedit.tool.draw.models.getWidthOrNull
+import io.github.abizerr.quickedit.engine.drawspec.ShapeType
+import io.github.abizerr.quickedit.tool.draw.ui.DrawModeEvent
+import io.github.abizerr.quickedit.ui.common.AnimatedToolbarContainer
+import io.github.abizerr.quickedit.ui.common.bottomToolbarModifier
+import io.github.abizerr.quickedit.ui.common.topToolbarModifier
+import io.github.abizerr.quickedit.ui.theme.ToolBarBackgroundColor
+import io.github.abizerr.quickedit.ui.utils.anim.AnimUtils
+import io.github.abizerr.quickedit.ui.utils.defaultErrorToast
+import io.github.abizerr.quickedit.ui.utils.defaultTextColor
 import io.mhssn.colorpicker.ColorPickerDialog
 import io.mhssn.colorpicker.ColorPickerType
 import kotlinx.coroutines.Dispatchers
@@ -95,7 +119,7 @@ fun DrawModeScreen(
     val backgroundColor = MaterialTheme.colorScheme.background
 
     val bottomToolbarItems = remember {
-        ImmutableList(DrawModeUtils.getDefaultBottomToolbarItemsList())
+        ImmutableList(DrawModeUtils.getDefaultDrawToolItemsList())
     }
 
     val topToolbarHeight =  TOOLBAR_HEIGHT_SMALL
@@ -139,8 +163,8 @@ fun DrawModeScreen(
     LaunchedEffect(key1 = Unit) {
         toolbarVisible = true
         delay(AnimUtils.TOOLBAR_EXPAND_ANIM_DURATION_FAST.toLong())
-        viewModel.onBottomToolbarEvent(
-            BottomToolbarEvent.OnItemClicked(
+        viewModel.onEvent(
+            DrawModeEvent.OnToolbarItemClicked(
                 bottomToolbarItems.items[DrawModeUtils.DEFAULT_SELECTED_INDEX]
             )
         )
@@ -218,8 +242,8 @@ fun DrawModeScreen(
     val onRedoLambda = remember<() -> Unit> {{
         viewModel.onEvent(DrawModeEvent.OnRedo)
     }}
-    val onBottomToolbarEventLambda = remember<(BottomToolbarEvent) -> Unit> {{
-        viewModel.onBottomToolbarEvent(it)
+    val onBottomToolbarEventLambda = remember<(DrawModeEvent) -> Unit> {{
+        viewModel.onEvent(it)
     }}
 
     ConstraintLayout(
@@ -291,7 +315,7 @@ fun DrawModeScreen(
                 showColorPickerIcon = viewModel.showColorPickerIconInToolbar,
                 toolbarHeight = bottomToolbarHeight,
                 selectedColor = state.selectedColor,
-                selectedItem = state.selectedTool,
+                selectedItem = state.selectedTool,    // comment to support latest changes
                 onEvent = onBottomToolbarEventLambda
             )
         }
@@ -332,18 +356,18 @@ fun DrawModeScreen(
         val emptyLambda = remember<() -> Unit> {{
         }}
         val onWidthChangeLambda = remember<(Float) -> Unit> {{ mWidth ->
-            viewModel.onBottomToolbarEvent(
-                BottomToolbarEvent.UpdateWidth(mWidth)
+            viewModel.onEvent(
+                DrawModeEvent.UpdateWidth(mWidth)
             )
         }}
         val onOpacityChangeLambda = remember<(Float) -> Unit> {{ mOpacity ->
-            viewModel.onBottomToolbarEvent(
-                BottomToolbarEvent.UpdateOpacity(mOpacity)
+            viewModel.onEvent(
+                DrawModeEvent.UpdateOpacity(mOpacity)
             )
         }}
         val onShapeTypeChangeLambda = remember<(ShapeType) -> Unit> {{ mShapeType ->
-            viewModel.onBottomToolbarEvent(
-                BottomToolbarEvent.UpdateShapeType(mShapeType)
+            viewModel.onEvent(
+                DrawModeEvent.UpdateShapeType(mShapeType)
             )
         }}
 
@@ -386,5 +410,193 @@ fun DrawModeScreen(
             onPickedColor = onPickedColorLambda
         )
 
+    }
+}
+
+val TOOLBAR_HEIGHT_SMALL = 48.dp
+val TOOLBAR_HEIGHT_MEDIUM = 64.dp
+val TOOLBAR_HEIGHT_LARGE = 88.dp
+val TOOLBAR_HEIGHT_EXTRA_LARGE = 104.dp
+
+@Composable
+private fun BottomToolBarStatic(
+    modifier: Modifier,
+    toolbarItems: ImmutableList<DrawToolItem>,
+    toolbarHeight: Dp = TOOLBAR_HEIGHT_MEDIUM,
+    selectedItem: DrawToolItem = DrawToolItem.NONE,
+    showColorPickerIcon: Boolean = true,
+    selectedColor: Color = Color.White,
+    onEvent: (DrawModeEvent) -> Unit
+) {
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(toolbarHeight)
+            .background(ToolBarBackgroundColor),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        toolbarItems.items.forEachIndexed { index, mToolbarItem ->
+            ToolbarItem(
+                toolbarItem = mToolbarItem,
+                selectedColor = selectedColor,
+                showColorPickerIcon = showColorPickerIcon,
+                isSelected = mToolbarItem == selectedItem,
+                onEvent = onEvent
+            )
+        }
+    }
+}
+
+
+@Composable
+private fun ToolbarItem(
+    modifier: Modifier = Modifier,
+    selectedColor: Color,
+    showColorPickerIcon: Boolean,
+    toolbarItem: DrawToolItem,
+    isSelected: Boolean,
+    onEvent: (DrawModeEvent) -> Unit
+) {
+    val labelTextStyle = MaterialTheme.typography.bodySmall.copy(color = defaultTextColor())
+
+    val commonPaddingModifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+
+    if (toolbarItem is DrawToolItem.ColorItem) {
+        ColorToolbarItem(
+            modifier = modifier.then(commonPaddingModifier),
+            selectedColor = selectedColor,
+            showColorPickerIcon = showColorPickerIcon,
+            colorItem = toolbarItem,
+            labelTextStyle = labelTextStyle,
+            onEvent = onEvent
+        )
+        return
+    }
+    var columnModifier = modifier.clickable {
+        onEvent(DrawModeEvent.OnToolbarItemClicked(toolbarItem))
+    }
+    if (isSelected) {
+        columnModifier = columnModifier
+            .clip(RoundedCornerShape(3.dp))
+            .background(MaterialTheme.colorScheme.onBackground)
+            .padding((0.5).dp)
+            .clip(RoundedCornerShape(3.dp))
+            .background(Color.DarkGray)
+//            .padding(start = 8.dp, end = 8.dp, bottom = 4.dp)
+    }
+    columnModifier = columnModifier.then(commonPaddingModifier)
+
+
+    val (imageVector, labelText) = when (toolbarItem) {
+
+        is DrawToolItem.EraserTool -> Pair(
+            ImageVector.vectorResource(id = R.drawable.ic_eraser),
+            stringResource(id = R.string.eraser)
+        )
+
+        is DrawToolItem.ShapeTool -> Pair(
+            Icons.Outlined.Category,
+            stringResource(id = R.string.shape)
+        )
+
+        is DrawToolItem.BrushTool -> Pair(
+            ImageVector.vectorResource(id = R.drawable.ic_stylus_note),
+            stringResource(id = R.string.brush)
+        )
+
+        is DrawToolItem.PanItem -> Pair(
+            Icons.Outlined.PanTool,
+            stringResource(id = R.string.zoom)
+        )
+
+        // We won't reach here
+        else -> Pair(
+            Icons.Default.AddCircleOutline,
+            ""
+        )
+    }
+
+
+    Column(
+        modifier = columnModifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+
+        val verticalPaddingBeforeSize = if (labelText.isBlank()) 4.dp else 0.dp
+        val imageSize = if (labelText.isBlank()) 32.dp else 28.dp
+        Image(
+            modifier = Modifier
+                .padding(vertical = verticalPaddingBeforeSize)
+                .size(imageSize),
+            contentDescription = null,
+            imageVector = imageVector,
+            colorFilter = ColorFilter.tint(
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        )
+        Spacer(modifier = Modifier.size(
+            if (labelText.isNotBlank()) 4.dp else 0.dp
+        ))
+
+        if (labelText.isNotBlank()) {
+            Text(
+                style = labelTextStyle,
+                text = labelText
+            )
+        }
+    }
+}
+
+@Composable
+private fun ColorToolbarItem(
+    modifier: Modifier = Modifier,
+    selectedColor: Color,
+    showColorPickerIcon: Boolean,
+    colorItem: DrawToolItem.ColorItem,
+    labelTextStyle: TextStyle,
+    onEvent: (DrawModeEvent) -> Unit
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+
+        if (showColorPickerIcon) {
+            Image(
+                bitmap = ImageBitmap.imageResource(id = R.drawable.ic_color_picker),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(26.dp)
+                    .clickable {
+                        onEvent(DrawModeEvent.OnToolbarItemClicked(colorItem))
+                    }
+            )
+        } else {
+            Image(
+                painter = ColorPainter(selectedColor),
+                contentDescription = null,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(color = MaterialTheme.colorScheme.onBackground)
+                    .padding(1.dp)
+                    .clip(CircleShape)
+                    .size(26.dp)
+                    .clickable {
+                        onEvent(DrawModeEvent.OnToolbarItemClicked(colorItem))
+                    }
+            )
+        }
+
+
+        Spacer(modifier = Modifier.size(4.dp))
+
+        Text(
+            style = labelTextStyle,
+            text = stringResource(id = R.string.color)
+        )
     }
 }

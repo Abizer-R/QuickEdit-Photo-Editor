@@ -14,8 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.abizer_r.quickedit.theme.QuickEditTheme
-import com.abizer_r.quickedit.theme.ToolBarBackgroundColor
+import io.github.abizerr.quickedit.ui.theme.QuickEditTheme
+import io.github.abizerr.quickedit.ui.theme.ToolBarBackgroundColor
 import com.abizer_r.quickedit.ui.editorScreen.bottomToolbar.state.BottomToolbarItem
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.TextModeToolbarExtensionEvent.*
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.fontFamilyOptions.FontFamilyOptions
@@ -25,7 +25,7 @@ import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptio
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.styleOptions.TextStyleOptions
 import com.abizer_r.quickedit.ui.textMode.bottomToolbarExtension.textFormatOptions.styleOptions.TextStyleAttr
 import com.abizer_r.quickedit.utils.drawMode.DrawModeUtils
-import com.abizer_r.quickedit.utils.textMode.FontUtils
+import io.github.abizerr.quickedit.ui.utils.font.FontUtils
 import com.abizer_r.quickedit.utils.textMode.TextModeUtils
 
 /**

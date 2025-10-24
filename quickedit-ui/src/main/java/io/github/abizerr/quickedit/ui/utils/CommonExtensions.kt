@@ -1,0 +1,83 @@
+package io.github.abizerr.quickedit.ui.utils
+
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.annotation.StringRes
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.imageResource
+import io.github.abizerr.quickedit.ui.R
+
+val Any.TAG: String
+    get() {
+        val tag = javaClass.simpleName
+        return if (tag.length <= 23) tag else tag.substring(0, 23)
+    }
+
+//@OptIn(ExperimentalSharedTransitionApi::class)
+//@Composable
+//fun SharedTransitionPreviewExtension(
+//    content: @Composable SharedTransitionScope.(AnimatedVisibilityScope) -> Unit
+//) {
+//    SharedTransitionLayout {
+//        AnimatedVisibility(visible = true) {
+//            content(this)
+//        }
+//    }
+//}
+
+fun Context.toast(message: String) {
+    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+}
+
+fun Context.toast(@StringRes stringRes: Int) {
+    Toast.makeText(this, getString(stringRes), Toast.LENGTH_SHORT).show()
+}
+
+
+@Composable
+fun toast(message: String) {
+    LocalContext.current.toast(message)
+}
+
+@Composable
+fun toast(@StringRes stringRes: Int) {
+    LocalContext.current.toast(stringRes)
+}
+
+fun Context.errorToast(@StringRes resId: Int? = null) {
+    if (resId == null)  defaultErrorToast()
+    else toast(resId)
+}
+
+fun Context.defaultErrorToast() {
+    Toast.makeText(this, this.getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show()
+}
+
+fun Context.getActivity(): ComponentActivity? = when (this) {
+    is ComponentActivity -> this
+    is ContextWrapper -> baseContext.getActivity()
+    else -> null
+}
+
+fun Context.getOpenAppSettingsIntent(): Intent {
+    return Intent(
+        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+        Uri.fromParts("package", packageName, null)
+    )
+}
+
+@Composable
+fun defaultTextColor() = MaterialTheme.colorScheme.onBackground
+
+
+@Composable
+fun getDummyBitmap() = ImageBitmap.imageResource(id = R.drawable.dummy_image).asAndroidBitmap()
